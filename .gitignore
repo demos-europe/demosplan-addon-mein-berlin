@@ -1,0 +1,18 @@
+# Composer
+/vendor/
+composer.lock
+
+# Yarn
+node_modules/
+yarn-error.log
+.yarn/install-state.gz
+
+# Build/Compile Output
+/dist/
+
+# PHPUnit/PHPStan
+.phpunit.result.cache
+phpstan-baseline.neon
+
+# IDE/Editor
+.idea/

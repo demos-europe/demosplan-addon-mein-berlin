@@ -1,0 +1,34 @@
+includes:
+    - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/phpstan/phpstan-webmozart-assert/extension.neon
+
+rules:
+    # kept from vendor/ergebnis/phpstan-rules/rules.neon version ^1.0, the others are considered as too restricting
+    - Ergebnis\PHPStan\Rules\Expressions\NoCompactRule
+    - Ergebnis\PHPStan\Rules\Expressions\NoErrorSuppressionRule
+    - Ergebnis\PHPStan\Rules\Expressions\NoEvalRule
+    - Ergebnis\PHPStan\Rules\Files\DeclareStrictTypesRule
+    - Ergebnis\PHPStan\Rules\Methods\PrivateInFinalClassRule
+
+parameters:
+    typeAliases:
+        # These three aliases are returned by EDT, but as phpstan does not consider aliases from composer dependencies,
+        # we need to define them directly in this project again.
+        simple_primitive: 'bool|float|int|string'
+        JsonApiRelationship: 'array{type: non-empty-string, id: non-empty-string}'
+        JsonApiRelationships: 'array<non-empty-string, array{data: list<JsonApiRelationship>|JsonApiRelationship|null}>'
+    level: 6
+    treatPhpDocTypesAsCertain: false
+    checkGenericClassInNonGenericObjectType: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    checkUninitializedProperties: true
+    rememberPossiblyImpureFunctionValues: false
+    checkBenevolentUnionTypes: true
+    checkMissingCallableSignature: true
+
+    paths:
+        - src
+    excludePaths:
+        - tests/*

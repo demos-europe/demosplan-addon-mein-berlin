@@ -1,0 +1,7 @@
+demosplan_addon:
+  humanName: mein.berlin Integration
+  vendor: DEMOS plan GmbH
+  description: |
+    Integrates the mein.berlin API into the DEMOS plan platform.
+  entry: DemosEurope\DemosplanAddon\DemosMeinBerlin\MeinBerlinAddon
+  permissionInitializer: DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\PermissionInitializer
