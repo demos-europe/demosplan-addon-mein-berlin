@@ -13,3 +13,6 @@ services:
     exclude:
       - '../src/Entity'
       - '../src/*/Test'
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener\MeinBerlinPostProcedureUpdatedEventSubscriber:
+    tags: [ kernel.event_subscriber ]

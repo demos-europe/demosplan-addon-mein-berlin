@@ -13,6 +13,6 @@ class PermissionInitializer implements PermissionInitializerInterface
 
     public function configurePermissions(ResolvablePermissionCollectionInterface $permissionCollection): void
     {
-        throw new \Exception('Method not yet implemented.');
+        // todo ('Method not yet implemented.');
     }
 }
