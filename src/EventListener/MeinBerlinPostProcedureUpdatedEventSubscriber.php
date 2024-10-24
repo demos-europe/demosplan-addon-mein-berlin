@@ -41,6 +41,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $pPhase = $oldProcedure->getPhase();
         $npPhase = $newProcedure->getPublicParticipationPhase();
 
+        $changeSet = $postProcedureUpdatedEvent->getModifiedValues();
+
         $test = 5;
     }
 }
