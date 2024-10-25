@@ -14,7 +14,7 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseInterface;
 use DemosEurope\DemosplanAddon\Contracts\Repositories\ProcedurePhaseRepositoryInterface;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantPropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
@@ -69,7 +69,7 @@ class MeinBerlinProcedureChangedEventListener
             function (ProcedureInterface $procedure): bool {
                 $entityChangeSet = $this->unitOfWork->getEntityChangeSet($procedure);
 
-                return RelevantPropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($entityChangeSet);
+                return RelevantProcedurePropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($entityChangeSet);
             }
         );
     }
@@ -85,7 +85,7 @@ class MeinBerlinProcedureChangedEventListener
             function (ProcedurePhaseInterface $procedurePhase): bool {
                 $entityChangeSet = $this->unitOfWork->getEntityChangeSet($procedurePhase);
 
-                return RelevantPropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($entityChangeSet);
+                return RelevantProcedurePropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($entityChangeSet);
             }
         );
 
