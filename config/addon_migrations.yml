@@ -1,0 +1,5 @@
+migrations_paths:
+  Application\Migrations: "../src/DoctrineMigrations"
+table_storage:
+  table_name: addon_migration_versions
+organize_migrations: "year_and_month"
