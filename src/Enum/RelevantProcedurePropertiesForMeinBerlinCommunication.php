@@ -19,4 +19,5 @@ enum RelevantProcedurePropertiesForMeinBerlinCommunication: string
     case office_worker_email = 'agencyMainEmailAddress';
     case PARTICIPATIONPHASE = 'publicParticipationPhase';
     case SETTINGS = 'settings';
+    case CURRENTSLUG = 'currentSlug';
 }
