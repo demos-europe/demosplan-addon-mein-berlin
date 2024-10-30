@@ -16,3 +16,7 @@ services:
 
   DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener\MeinBerlinPostProcedureUpdatedEventSubscriber:
     tags: [ kernel.event_subscriber ]
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository:
+    arguments:
+      $entityClass: 'DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity'

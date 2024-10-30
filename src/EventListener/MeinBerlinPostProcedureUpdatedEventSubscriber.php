@@ -15,10 +15,12 @@ use DateTime;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\Events\PostProcedureUpdatedEventInterface;
 use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -36,6 +38,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         private readonly LoggerInterface $logger,
         private readonly FileServiceInterface $fileService,
         private readonly RouterInterface $router,
+        private readonly MeinBerlinAddonEntityRepository $addonEntityRepository,
     ) {
     }
 
@@ -51,9 +54,10 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         // check if procedure is listed to be communicated at all and figure out what kind POST || PATCH
         // by checking for an organization-id as well as a publicly visible phase and dplan-id
         $newProcedure = $postProcedureUpdatedEvent->getProcedureAfterUpdate();
+        $correspondingAddonEntity = $this->addonEntityRepository->getByProceduerId($newProcedure->getId());
         $isPublishedVal = $this->checkProcedurePublicPhasePermissionsetIsHidden($newProcedure);
-        $organisationIdIsPresent = true; // todo get correct value
-        $dplanIdIsPresent = false; // todo get correct value
+        $organisationIdIsPresent = $this->hasOrganisationIdSet($correspondingAddonEntity);
+        $dplanIdIsPresent = $this->hasDplanIdSet($correspondingAddonEntity);
         if ($isPublishedVal && $organisationIdIsPresent && !$dplanIdIsPresent) {
             // todo implement create POST
             return;
@@ -403,5 +407,15 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $newPermissionSet = $newProcedure->getPublicParticipationPhasePermissionset();
 
         return 'hidden' === $newPermissionSet ? false : true;
+    }
+
+    private function hasOrganisationIdSet(?MeinBerlinAddonEntity $addonEntity): bool
+    {
+        return null !== $addonEntity && '' !== $addonEntity->getOrganisationId();
+    }
+
+    private function hasDplanIdSet(?MeinBerlinAddonEntity $addonEntity): bool
+    {
+        return null !== $addonEntity && '' !== $addonEntity->getDplanId();
     }
 }

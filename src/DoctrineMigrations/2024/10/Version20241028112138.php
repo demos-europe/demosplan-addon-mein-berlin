@@ -22,15 +22,13 @@ final class Version20241028112138 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->abortIfNotMysql();
-        $this->addSql('DROP TABLE IF EXISTS mein_berlin_addon');
-        $this->addSql('CREATE TABLE mein_berlin_addon (id CHAR(36) NOT NULL, procedure_id VARCHAR(36) NOT NULL, organisation_id VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE IF NOT EXISTS mein_berlin_addon_entity (id CHAR(36) NOT NULL, procedure_id CHAR(36) NOT NULL, organisation_id VARCHAR(255) NOT NULL, dplan_id VARCHAR(255) NOT NULL, procedure_short_name VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
     }
 
     public function down(Schema $schema): void
     {
         $this->abortIfNotMysql();
-
-        $this->addSql('DROP TABLE mein_berlin_addon');
+        $this->addSql('DROP TABLE IF EXISTS mein_berlin_addon_entity');
     }
 
     /**
