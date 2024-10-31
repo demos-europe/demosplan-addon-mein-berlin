@@ -70,6 +70,9 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $this->updateProcedureData($changeSet, $isPublishedVal);
     }
 
+    /**
+     * @param array<string, mixed> $changeSet
+     */
     private function updateProcedureData(array $changeSet, ?bool $isPublishedValToAppend = null): void
     {
         if (RelevantProcedurePropertiesForMeinBerlinCommunication::
@@ -89,6 +92,10 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         }
     }
 
+    /**
+     * @param array<string, mixed> $changeSet
+     * @return array<string, string|bool>
+     */
     private function collectRelevantFields(array $changeSet): array
     {
         $importantChanges = [];
