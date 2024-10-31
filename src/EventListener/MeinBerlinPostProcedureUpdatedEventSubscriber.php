@@ -20,6 +20,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlug
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -39,6 +40,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         private readonly FileServiceInterface $fileService,
         private readonly RouterInterface $router,
         private readonly MeinBerlinAddonEntityRepository $addonEntityRepository,
+        private readonly MeinBerlinCreateProcedureService $createProcedureService,
     ) {
     }
 
@@ -59,7 +61,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $organisationIdIsPresent = $this->hasOrganisationIdSet($correspondingAddonEntity);
         $dplanIdIsPresent = $this->hasDplanIdSet($correspondingAddonEntity);
         if ($isPublishedVal && $organisationIdIsPresent && !$dplanIdIsPresent) {
-            // todo implement create POST
+            $this->createProcedureService->createMeinBerlinProcedure($newProcedure, $correspondingAddonEntity);
+
             return;
         }
 
