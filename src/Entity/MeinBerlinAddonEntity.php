@@ -28,9 +28,6 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     #[ORM\Column(name: 'procedure_id', length: 36, type: 'string', nullable: false, options:['fixed' => true])]
     private string $procedureId;
 
-    #[ORM\Column(name: 'organisation_id', length: 255, type: 'string', nullable: false)]
-    private string $organisationId = '';
-
     #[ORM\Column(name: 'dplan_id', length: 255, type: 'string', nullable: false)]
     private string $dplanId = '';
 
@@ -55,16 +52,6 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     public function setProcedureId(string $procedureId): void
     {
         $this->procedureId = $procedureId;
-    }
-
-    public function getOrganisationId(): string
-    {
-        return $this->organisationId;
-    }
-
-    public function setOrganisationId(string $organisationId): void
-    {
-        $this->organisationId = $organisationId;
     }
 
     public function getDplanId(): string

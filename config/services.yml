@@ -20,3 +20,7 @@ services:
   DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository:
     arguments:
       $entityClass: 'DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity'
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository:
+      arguments:
+          $entityClass: 'DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation'

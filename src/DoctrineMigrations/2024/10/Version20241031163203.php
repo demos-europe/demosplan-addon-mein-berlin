@@ -12,23 +12,23 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20241028112138 extends AbstractMigration
+final class Version20241031163203 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'ref BEAA2-10: create mein berlin addon entity table';
+        return 'ref BEAA2-10: create mein berlin addon orga relation table';
     }
 
     public function up(Schema $schema): void
     {
         $this->abortIfNotMysql();
-        $this->addSql('CREATE TABLE IF NOT EXISTS mein_berlin_addon_entity (id CHAR(36) NOT NULL, procedure_id CHAR(36) NOT NULL, dplan_id VARCHAR(255) NOT NULL, procedure_short_name VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE IF NOT EXISTS mein_berlin_addon_orga_relation (id CHAR(36) NOT NULL, orga_id CHAR(36) NOT NULL, mein_berlin_organisation_id VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
     }
 
     public function down(Schema $schema): void
     {
         $this->abortIfNotMysql();
-        $this->addSql('DROP TABLE IF EXISTS mein_berlin_addon_entity');
+        $this->addSql('DROP TABLE IF EXISTS mein_berlin_addon_orga_relation');
     }
 
     /**

@@ -1,24 +1,42 @@
 <?php
+declare(strict_types=1);
+
+/**
+ * This file is part of the package demosplan.
+ *
+ * (c) 2010-present DEMOS plan GmbH, for more information see the license file.
+ *
+ * All rights reserved
+ */
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+use function array_key_exists;
+use function substr;
+use function is_file;
+use function base64_encode;
+use function file_get_contents;
 
 class MeinBerlinCreateProcedureService
 {
     public function __construct(
         private readonly FileServiceInterface $fileService,
         private readonly LoggerInterface $logger,
+        private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
     ){
 
@@ -26,25 +44,38 @@ class MeinBerlinCreateProcedureService
 
     public function createMeinBerlinProcedure(
         ProcedureInterface $procedure,
-        MeinBerlinAddonEntity $correspondingAddonEntity
+        MeinBerlinAddonEntity $correspondingAddonEntity,
+        MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation
     ): void {
-        $procedureCreateRequestData = $this->getRelevantProcedureCreateData($procedure, $correspondingAddonEntity);
+        $this->logger->info(
+            'demosplan-mein-berlin-addon discovered a procedure update for a new not yet communicated procedure.
+             This procedure is now relevant for MeinBerlin as it is:
+             publicly visible and its organisation has a MeinBerlin identifier assigned.
+             => gathering all needed data to POST this procedure to MeinBerlin',
+            [$correspondingAddonEntity, $correspondingAddonOrgaRelation, $procedure]
+        );
+
+        $procedureCreateRequestData = $this->getRelevantProcedureCreateData(
+            $procedure,
+            $correspondingAddonEntity,
+            $correspondingAddonOrgaRelation
+        );
         // todo send POST request
     }
 
+    /**
+     * @return array<string, string|bool>
+     */
     private function getRelevantProcedureCreateData(
         ProcedureInterface $procedure,
-        MeinBerlinAddonEntity $correspondingAddonEntity
+        MeinBerlinAddonEntity $correspondingAddonEntity,
+        MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation
     ): array {
-        return [
+        $data = [
             RelevantProcedurePropertiesForMeinBerlinCommunication::name->name => $procedure->getExternalName(),
             RelevantProcedurePropertiesForMeinBerlinCommunication::description->name => $procedure->getExternalDesc(),
-            RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication::url->name => $this->router->
-            generate(
-                'core_procedure_slug',
-                ['slug' => $procedure->getCurrentSlug()->getName()],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            ),
+            RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication::url->name =>
+                $this->generateProcedurePublicRoute($procedure->getCurrentSlug()->getName()),
             RelevantProcedurePropertiesForMeinBerlinCommunication::office_worker_email->name =>
                 $procedure->getAgencyMainEmailAddress(),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name =>
@@ -61,9 +92,12 @@ class MeinBerlinCreateProcedureService
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name =>
                 $procedure->getSettings()->getPictogramAltText(),
             'bplan_id' => $correspondingAddonEntity->getProcedureShortName(),
-            'organisation_id' => $correspondingAddonEntity->getOrganisationId(),
+            'organisation_id' => $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
             'is_published' => true,
         ];
+        $this->logProcedureCreateData($data);
+
+        return $data;
     }
 
     private function getBase64PictogramFileString(ProcedureInterface $procedure): string
@@ -86,11 +120,77 @@ class MeinBerlinCreateProcedureService
                     'demosplan-mein-berlin-addon failed to load/convert the pictogram to base64 string',
                     [$e]
                 );
-
             }
         }
 
         return $base64FileString;
+    }
+
+    private function generateProcedurePublicRoute(string $slug): string
+    {
+        try {
+            $routeName = $this->getParameter('public_procedure_route');
+            $route = $this->router->generate(
+                $routeName,
+                ['slug' => $slug],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+        } catch (Exception $e) {
+            $this->logger->error(
+                'failed generating the public procedure link for MeinBerlin',
+                [$e]
+            );
+            $route = 'Not Available';
+        }
+
+        return $route;
+    }
+
+    /**
+     * Gets a parameter by its name.
+     * @throws ParameterNotFoundException
+     * @return array<int|string, mixed>|bool|string|int|float|\UnitEnum|null
+     */
+    private function getParameter(string $name): array|bool|string|int|float|\UnitEnum|null
+    {
+        return $this->parameterBag->get($name);
+    }
+
+    /**
+     * @param array<string, string|bool> $procedureCreateData
+     */
+    private function logProcedureCreateData(array $procedureCreateData): void
+    {
+        $procedureCreateData = $this->truncateBase64FileStringBeforeLogging($procedureCreateData);
+        $this->logger->info(
+            'demosplan-mein-berlin-addon prepared data for a procedure create POST:',
+            [$procedureCreateData]
+        );
+    }
+
+    /**
+     * @param array<string, string|bool> $mappedProcedureData
+     * @return array<string, string>
+     */
+    private function truncateBase64FileStringBeforeLogging(array $mappedProcedureData): array
+    {
+        // cut base64 content for logging purpose
+        if(array_key_exists(
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name,
+            $mappedProcedureData)
+        ) {
+            $mappedProcedureData[
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name
+            ] = substr(
+                $mappedProcedureData[
+                RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name
+                ],
+                0,
+                64
+            );
+        }
+
+        return $mappedProcedureData;
     }
 
 }
