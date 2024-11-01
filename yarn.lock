@@ -1782,7 +1782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/eslint-scope@npm:^3.7.3":
+"@types/eslint-scope@npm:^3.7.7":
   version: 3.7.7
   resolution: "@types/eslint-scope@npm:3.7.7"
   dependencies:
@@ -1802,7 +1802,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:*, @types/estree@npm:^1.0.0, @types/estree@npm:^1.0.5":
+"@types/estree@npm:*, @types/estree@npm:^1.0.5, @types/estree@npm:^1.0.6":
   version: 1.0.6
   resolution: "@types/estree@npm:1.0.6"
   checksum: 10c0/cdfd751f6f9065442cd40957c07fd80361c962869aa853c1c2fd03e101af8b9389d8ff4955a43a6fcfa223dd387a089937f95be0f3eec21ca527039fd2d9859a
@@ -1974,7 +1974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webassemblyjs/ast@npm:1.12.1, @webassemblyjs/ast@npm:^1.11.5, @webassemblyjs/ast@npm:^1.12.1":
+"@webassemblyjs/ast@npm:1.12.1, @webassemblyjs/ast@npm:^1.12.1":
   version: 1.12.1
   resolution: "@webassemblyjs/ast@npm:1.12.1"
   dependencies:
@@ -2060,7 +2060,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webassemblyjs/wasm-edit@npm:^1.11.5, @webassemblyjs/wasm-edit@npm:^1.12.1":
+"@webassemblyjs/wasm-edit@npm:^1.12.1":
   version: 1.12.1
   resolution: "@webassemblyjs/wasm-edit@npm:1.12.1"
   dependencies:
@@ -2101,7 +2101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webassemblyjs/wasm-parser@npm:1.12.1, @webassemblyjs/wasm-parser@npm:^1.11.5, @webassemblyjs/wasm-parser@npm:^1.12.1":
+"@webassemblyjs/wasm-parser@npm:1.12.1, @webassemblyjs/wasm-parser@npm:^1.12.1":
   version: 1.12.1
   resolution: "@webassemblyjs/wasm-parser@npm:1.12.1"
   dependencies:
@@ -2186,21 +2186,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"acorn-import-assertions@npm:^1.9.0":
-  version: 1.9.0
-  resolution: "acorn-import-assertions@npm:1.9.0"
-  peerDependencies:
-    acorn: ^8
-  checksum: 10c0/3b4a194e128efdc9b86c2b1544f623aba4c1aa70d638f8ab7dc3971a5b4aa4c57bd62f99af6e5325bb5973c55863b4112e708a6f408bad7a138647ca72283afe
-  languageName: node
-  linkType: hard
-
 "acorn-import-attributes@npm:^1.9.5":
   version: 1.9.5
   resolution: "acorn-import-attributes@npm:1.9.5"
   peerDependencies:
     acorn: ^8
   checksum: 10c0/5926eaaead2326d5a86f322ff1b617b0f698aa61dc719a5baa0e9d955c9885cc71febac3fb5bacff71bbf2c4f9c12db2056883c68c53eb962c048b952e1e013d
+  languageName: node
+  linkType: hard
+
+"acorn@npm:^8.14.0":
+  version: 8.14.0
+  resolution: "acorn@npm:8.14.0"
+  bin:
+    acorn: bin/acorn
+  checksum: 10c0/6d4ee461a7734b2f48836ee0fbb752903606e576cc100eb49340295129ca0b452f3ba91ddd4424a1d4406a98adfb2ebb6bd0ff4c49d7a0930c10e462719bbfd7
   languageName: node
   linkType: hard
 
@@ -2442,7 +2442,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserslist@npm:^4.14.5, browserslist@npm:^4.21.10, browserslist@npm:^4.23.3, browserslist@npm:^4.24.0":
+"browserslist@npm:^4.21.10, browserslist@npm:^4.23.3, browserslist@npm:^4.24.0":
   version: 4.24.0
   resolution: "browserslist@npm:4.24.0"
   dependencies:
@@ -2806,7 +2806,7 @@ __metadata:
   dependencies:
     "@demos-europe/demosplan-addon-client-builder": "npm:^0.0.9"
     "@demos-europe/demosplan-ui": "npm:0.3.23"
-    webpack: "npm:5.88.2"
+    webpack: "npm:5.96.1"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
   linkType: soft
@@ -2871,7 +2871,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.15.0, enhanced-resolve@npm:^5.17.1":
+"enhanced-resolve@npm:^5.17.1":
   version: 5.17.1
   resolution: "enhanced-resolve@npm:5.17.1"
   dependencies:
@@ -3202,7 +3202,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graceful-fs@npm:^4.1.2, graceful-fs@npm:^4.2.11, graceful-fs@npm:^4.2.4, graceful-fs@npm:^4.2.6, graceful-fs@npm:^4.2.9":
+"graceful-fs@npm:^4.1.2, graceful-fs@npm:^4.2.11, graceful-fs@npm:^4.2.4, graceful-fs@npm:^4.2.6":
   version: 4.2.11
   resolution: "graceful-fs@npm:4.2.11"
   checksum: 10c0/386d011a553e02bc594ac2ca0bd6d9e4c22d7fa8cfbfc448a6d148c59ea881b092db9dbe3547ae4b88e55f1b01f7c4a2ecc53b310c042793e63aa44cf6c257f2
@@ -5241,7 +5241,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser-webpack-plugin@npm:^5.3.10, terser-webpack-plugin@npm:^5.3.7":
+"terser-webpack-plugin@npm:^5.3.10":
   version: 5.3.10
   resolution: "terser-webpack-plugin@npm:5.3.10"
   dependencies:
@@ -5591,7 +5591,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"watchpack@npm:^2.4.0, watchpack@npm:^2.4.1":
+"watchpack@npm:^2.4.1":
   version: 2.4.2
   resolution: "watchpack@npm:2.4.2"
   dependencies:
@@ -5668,40 +5668,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.88.2":
-  version: 5.88.2
-  resolution: "webpack@npm:5.88.2"
+"webpack@npm:5.96.1":
+  version: 5.96.1
+  resolution: "webpack@npm:5.96.1"
   dependencies:
-    "@types/eslint-scope": "npm:^3.7.3"
-    "@types/estree": "npm:^1.0.0"
-    "@webassemblyjs/ast": "npm:^1.11.5"
-    "@webassemblyjs/wasm-edit": "npm:^1.11.5"
-    "@webassemblyjs/wasm-parser": "npm:^1.11.5"
-    acorn: "npm:^8.7.1"
-    acorn-import-assertions: "npm:^1.9.0"
-    browserslist: "npm:^4.14.5"
+    "@types/eslint-scope": "npm:^3.7.7"
+    "@types/estree": "npm:^1.0.6"
+    "@webassemblyjs/ast": "npm:^1.12.1"
+    "@webassemblyjs/wasm-edit": "npm:^1.12.1"
+    "@webassemblyjs/wasm-parser": "npm:^1.12.1"
+    acorn: "npm:^8.14.0"
+    browserslist: "npm:^4.24.0"
     chrome-trace-event: "npm:^1.0.2"
-    enhanced-resolve: "npm:^5.15.0"
+    enhanced-resolve: "npm:^5.17.1"
     es-module-lexer: "npm:^1.2.1"
     eslint-scope: "npm:5.1.1"
     events: "npm:^3.2.0"
     glob-to-regexp: "npm:^0.4.1"
-    graceful-fs: "npm:^4.2.9"
+    graceful-fs: "npm:^4.2.11"
     json-parse-even-better-errors: "npm:^2.3.1"
     loader-runner: "npm:^4.2.0"
     mime-types: "npm:^2.1.27"
     neo-async: "npm:^2.6.2"
     schema-utils: "npm:^3.2.0"
     tapable: "npm:^2.1.1"
-    terser-webpack-plugin: "npm:^5.3.7"
-    watchpack: "npm:^2.4.0"
+    terser-webpack-plugin: "npm:^5.3.10"
+    watchpack: "npm:^2.4.1"
     webpack-sources: "npm:^3.2.3"
   peerDependenciesMeta:
     webpack-cli:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 10c0/743acf04cdb7f73ec059761d3921798014139005c88e136ab99fe158f544695eee2caf4be775cc06e7f481d84725d443df2c1c8e00ec24a130e8b8fd514ff7b9
+  checksum: 10c0/ae6052fde9a546f79f14987b65823ba4024c6642a8489339ecfee7a351dff93325842aad453295bbdc6b65fb1690e4ef07529db63aa84ece55c7869e991a0039
   languageName: node
   linkType: hard
 
