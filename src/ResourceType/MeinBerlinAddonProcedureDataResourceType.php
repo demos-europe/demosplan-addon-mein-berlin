@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
-
 /**
  * This file is part of the package demosplan.
  *
@@ -10,7 +8,6 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
  *
  * All rights reserved
  */
-
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType;
 
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;

@@ -1,4 +1,12 @@
 <?php
+declare(strict_types=1);
+/**
+ * This file is part of the package demosplan.
+ *
+ * (c) 2010-present DEMOS E-Partizipation GmbH, for more information see the license file.
+ *
+ * All rights reserved
+ */
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository;
 
@@ -21,5 +29,10 @@ class MeinBerlinAddonOrgaRelationRepository extends ServiceEntityRepository
     public function getByOrgaId(string $orgaId): ?MeinBerlinAddonOrgaRelation
     {
         return $this->findOneBy(['orgaId' => $orgaId]);
+    }
+
+    public function persistMeinBerlinAddonOrgaRelation(MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation): void
+    {
+        $this->getEntityManager()->persist($meinBerlinAddonOrgaRelation);
     }
 }

@@ -11,10 +11,19 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType;
 
+use DemosEurope\DemosplanAddon\Contracts\CurrentUserInterface;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
+use DemosEurope\DemosplanAddon\Contracts\ResourceType\OrgaResourceTypeInterface;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
+use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
+use EDT\JsonApi\ApiDocumentation\OptionalField;
 use EDT\JsonApi\ResourceConfig\Builder\ResourceConfigBuilderInterface;
+use EDT\Wrapping\EntityDataInterface;
+use EDT\Wrapping\PropertyBehavior\Attribute\Factory\CallbackAttributeSetBehaviorFactory;
+use EDT\Wrapping\PropertyBehavior\FixedSetBehavior;
 
 /**
  * @template-extends AddonResourceType<MeinBerlinAddonOrgaRelation>
@@ -23,57 +32,109 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
 {
     public function __construct(
         private readonly ConditionFactoryInterface $conditionFactory,
+        private readonly PermissionEvaluatorInterface $permissionEvaluator,
+        private readonly OrgaResourceTypeInterface $orgaResourceType,
+        private readonly MeinBerlinAddonOrgaRelationRepository $meinBerlinAddonOrgaRelationRepository,
+        private readonly CurrentUserInterface $currentUser,
     ) {
 
     }
 
     protected function getAccessConditions(): array
     {
-        // TODO: Implement getAccessConditions() method.
+        $conditions = [];
+
+        if (!$this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id())) {
+            $ownOrgaId = $this->currentUser->getUser()->getOrga()?->getId();
+            $conditions[] = $this->conditionFactory->propertyHasValue($ownOrgaId, ['orga', 'id']);
+        }
+
+        return $conditions;
     }
 
     public function isCreateAllowed(): bool
     {
-        // TODO: Implement isCreateAllowed() method.
+        return $this->isAvailable();
     }
 
     public function isDeleteAllowed(): bool
     {
-        // TODO: Implement isDeleteAllowed() method.
+        return $this->isAvailable();
     }
 
     protected function getProperties(): array|ResourceConfigBuilderInterface
     {
-        // TODO: Implement getProperties() method.
+        $configBuilder = new MeinBerlinAddonOrganisationResourceConfigBuilder(
+            $this->getEntityClass(),
+            $this->getPropertyBuilderFactory()
+        );
+
+        $configBuilder->id->setReadableByPath()->setSortable()->setFilterable();
+        $configBuilder->meinBerlinOrganisationId->setReadableByPath()->setSortable()->setFilterable()
+            ->addUpdateBehavior(
+                new CallbackAttributeSetBehaviorFactory(
+                    [],
+                    function (
+                        MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
+                        ?string $meinBerlinOrganisationId
+                    ): array {
+                        // todo what todo with allready sent entries
+                        $meinBerlinAddonOrgaRelation->setMeinBerlinOrganisationId($meinBerlinOrganisationId);
+
+                        return [];
+                    },
+                    OptionalField::NO,
+                )
+            );
+        $configBuilder->orga->setRelationshipType($this->orgaResourceType)
+            ->setReadableByPath()
+            ->setFilterable()
+            ->setSortable()
+            ->initializable();
+
+        $configBuilder->addPostConstructorBehavior(
+            new FixedSetBehavior(
+                function (
+                    MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
+                    EntityDataInterface $entityData): array {
+                        $this->meinBerlinAddonOrgaRelationRepository
+                            ->persistMeinBerlinAddonOrgaRelation($meinBerlinAddonOrgaRelation);
+                        // todo trigger create if everything else is set
+                        return [];
+                }
+            )
+        );
+
+        return $configBuilder;
     }
 
     public function getEntityClass(): string
     {
-        // TODO: Implement getEntityClass() method.
+        return MeinBerlinAddonOrgaRelation::class;
     }
 
     public function isGetAllowed(): bool
     {
-        // TODO: Implement isGetAllowed() method.
+        return $this->isAvailable();
     }
 
     public function isAvailable(): bool
     {
-        // TODO: Implement isAvailable() method.
+        return $this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id());
     }
 
     public function isListAllowed(): bool
     {
-        // TODO: Implement isListAllowed() method.
+        return $this->isAvailable();
     }
 
     public function getTypeName(): string
     {
-        // TODO: Implement getTypeName() method.
+        return 'MeinBerlinAddonOrgaRelation';
     }
 
     public function isUpdateAllowed(): bool
     {
-        // TODO: Implement isUpdateAllowed() method.
+        return $this->isAvailable();
     }
 }

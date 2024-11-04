@@ -11,22 +11,24 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity;
 
+use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Doctrine\Generator\UuidV4Generator;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MeinBerlinAddonOrgaRelationRepository::class)]
 class MeinBerlinAddonOrgaRelation
 {
-    #[ORM\Column(type: 'string', length: 36, nullable: false, options:['fixed' => true])]
+    #[ORM\Column(type: 'string', length: 36, nullable: false, options: ['fixed' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UuidV4Generator::class)]
     private ?string $id = null;
 
-    #[ORM\Column(name: 'orga_id', type: 'string', length: 36, nullable: false, options:['fixed' => true])]
-    private string $orgaId = '';
+    #[ORM\OneToOne(targetEntity: OrgaInterface::class)]
+    #[ORM\JoinColumn(name: '_orga_id', referencedColumnName: '_o_id', nullable: false)]
+    private ?OrgaInterface $orga = null;
 
-    #[ORM\Column(name: 'mein_berlin_organisation_id', length: 255, type: 'string', nullable: false)]
+    #[ORM\Column(name: 'mein_berlin_organisation_id', type: 'string', length: 255, nullable: false)]
     private string $meinBerlinOrganisationId = '';
 
     public function getId(): ?string
@@ -38,14 +40,14 @@ class MeinBerlinAddonOrgaRelation
     {
         $this->id = $id;
     }
-    public function getOrgaId(): string
+    public function getOrga(): ?OrgaInterface
     {
-        return $this->orgaId;
+        return $this->orga;
     }
 
-    public function setOrgaId(string $orgaId): void
+    public function setOrga(OrgaInterface $orga): void
     {
-        $this->orgaId = $orgaId;
+        $this->orga = $orga;
     }
     public function getMeinBerlinOrganisationId(): string
     {

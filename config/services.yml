@@ -31,7 +31,7 @@ services:
         $conditionFactory: '@EDT\DqlQuerying\ConditionFactories\DqlConditionFactory'
       tags: [ 'dplan.resourceType' ]
 
-  DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonOrganisationResourceTypee:
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonOrganisationResourceType:
       autowire: true
       arguments:
         $conditionFactory: '@EDT\DqlQuerying\ConditionFactories\DqlConditionFactory'

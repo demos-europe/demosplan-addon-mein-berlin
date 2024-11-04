@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity;
 
+use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\UuidEntityInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Doctrine\Generator\UuidV4Generator;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
@@ -25,8 +26,9 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     #[ORM\CustomIdGenerator(class: UuidV4Generator::class)]
     private ?string $id = null;
 
-    #[ORM\Column(name: 'procedure_id', length: 36, type: 'string', nullable: false, options:['fixed' => true])]
-    private string $procedureId;
+    #[ORM\OneToOne(targetEntity: ProcedureInterface::class)]
+    #[ORM\JoinColumn(name: 'procedure_id', referencedColumnName: '_p_id', nullable: false)]
+    private ?ProcedureInterface $procedure = null;
 
     #[ORM\Column(name: 'dplan_id', length: 255, type: 'string', nullable: false)]
     private string $dplanId = '';
@@ -44,14 +46,14 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
         $this->id = $id;
     }
 
-    public function getProcedureId(): string
+    public function getProcedure(): ?ProcedureInterface
     {
-        return $this->procedureId;
+        return $this->procedure;
     }
 
-    public function setProcedureId(string $procedureId): void
+    public function setProcedure(ProcedureInterface $procedure): void
     {
-        $this->procedureId = $procedureId;
+        $this->procedure = $procedure;
     }
 
     public function getDplanId(): string

@@ -1,6 +1,13 @@
 <?php
-
 declare(strict_types=1);
+
+/**
+ * This file is part of the package demosplan.
+ *
+ * (c) 2010-present DEMOS E-Partizipation GmbH, for more information see the license file.
+ *
+ * All rights reserved
+ */
 
 namespace Application\Migrations;
 
@@ -22,12 +29,23 @@ final class Version20241028112138 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->abortIfNotMysql();
-        $this->addSql('CREATE TABLE IF NOT EXISTS mein_berlin_addon_entity (id CHAR(36) NOT NULL, procedure_id CHAR(36) NOT NULL, dplan_id VARCHAR(255) NOT NULL, procedure_short_name VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE IF NOT EXISTS mein_berlin_addon_entity (id CHAR(36) NOT NULL, procedure_id CHAR(36) NOT NULL, dplan_id VARCHAR(255) NOT NULL, procedure_short_name VARCHAR(255) NOT NULL, UNIQUE INDEX UNIQ_E03005D71624BCD2 (procedure_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
     }
 
     public function down(Schema $schema): void
     {
         $this->abortIfNotMysql();
+        // check if table exists
+        $tableExists = $this->connection->fetchOne("
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.TABLES
+                WHERE TABLE_NAME = 'mein_berlin_addon_entity'
+            "
+        );
+        if (0 !== $tableExists || false !== $tableExists) {
+                // if it does - drop the foreign key(s) first
+            $this->addSql('ALTER TABLE mein_berlin_addon_orga_relation DROP FOREIGN KEY FK_E03005D71624BCD2');
+    }
         $this->addSql('DROP TABLE IF EXISTS mein_berlin_addon_entity');
     }
 
