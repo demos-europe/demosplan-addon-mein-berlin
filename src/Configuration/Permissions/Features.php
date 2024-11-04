@@ -32,4 +32,22 @@ class Features extends AbstractPermissionMeta
     {
         return new self('feature_set_mein_berlin_organisation_id');
     }
+
+    /**
+     * Allows to set a custom organisation id related to our organisation id.
+     * This is a necessary parameter of an update url for meinBerlin
+     */
+    public static function feature_get_mein_berlin_organisation_id(): self
+    {
+        return new self('feature_get_mein_berlin_organisation_id');
+    }
+
+    /**
+     * Allows to set a procedure related name used at meinBerlin to
+     * locate the procedure by mapping these names to linked districts
+     */
+    public static function feature_set_mein_berlin_procedure_short_name(): self
+    {
+        return new self('feature_set_mein_berlin_procedure_short_name');
+    }
 }

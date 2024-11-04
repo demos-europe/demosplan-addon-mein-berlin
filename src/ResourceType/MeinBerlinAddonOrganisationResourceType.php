@@ -42,11 +42,16 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
 
     protected function getAccessConditions(): array
     {
-        $conditions = [];
+        $ownOrgaId = $this->currentUser->getUser()->getOrga()?->getId();
 
-        if (!$this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id())) {
-            $ownOrgaId = $this->currentUser->getUser()->getOrga()?->getId();
-            $conditions[] = $this->conditionFactory->propertyHasValue($ownOrgaId, ['orga', 'id']);
+        $conditions = [$this->conditionFactory->false()];
+        if ($this->permissionEvaluator->isPermissionEnabled(
+            Features::feature_get_mein_berlin_organisation_id()
+        )) {
+            $conditions = [$this->conditionFactory->propertyHasValue($ownOrgaId, ['orga', 'id'])];
+        }
+        if ($this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id())) {
+            $conditions = [$this->conditionFactory->true()];
         }
 
         return $conditions;
@@ -54,12 +59,12 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
 
     public function isCreateAllowed(): bool
     {
-        return $this->isAvailable();
+        return $this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id());
     }
 
     public function isDeleteAllowed(): bool
     {
-        return $this->isAvailable();
+        return $this->isCreateAllowed();
     }
 
     protected function getProperties(): array|ResourceConfigBuilderInterface
@@ -91,7 +96,6 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
             ->setFilterable()
             ->setSortable()
             ->initializable();
-
         $configBuilder->addPostConstructorBehavior(
             new FixedSetBehavior(
                 function (
@@ -120,12 +124,13 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
 
     public function isAvailable(): bool
     {
-        return $this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id());
+        return $this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id())
+            || $this->permissionEvaluator->isPermissionEnabled(Features::feature_get_mein_berlin_organisation_id());
     }
 
     public function isListAllowed(): bool
     {
-        return $this->isAvailable();
+        return $this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id());
     }
 
     public function getTypeName(): string
@@ -135,6 +140,6 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
 
     public function isUpdateAllowed(): bool
     {
-        return $this->isAvailable();
+        return $this->isCreateAllowed();
     }
 }
