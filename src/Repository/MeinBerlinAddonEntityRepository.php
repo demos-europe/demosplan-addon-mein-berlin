@@ -13,19 +13,30 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository;
 
 
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use DemosEurope\DemosplanAddon\Logic\ApiRequest\FluentRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
+use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
+use EDT\DqlQuerying\Contracts\OrderBySortMethodInterface;
+use EDT\DqlQuerying\SortMethodFactories\SortMethodFactory;
+use EDT\Querying\Utilities\Reindexer;
 
 /**
- * @template-extends ServiceEntityRepository<MeinBerlinAddonEntity>
+ * @template-extends FluentRepository<MeinBerlinAddonEntity>
  */
-class MeinBerlinAddonEntityRepository extends ServiceEntityRepository
+class MeinBerlinAddonEntityRepository extends FluentRepository
 {
+    /**
+     * @param Reindexer<ClauseFunctionInterface<bool>, OrderBySortMethodInterface> $reindexer
+     */
     public function __construct(
+        DqlConditionFactory $conditionFactory,
         ManagerRegistry $registry,
+        SortMethodFactory $sortMethodFactory,
         string $entityClass,
-    ){
-        parent::__construct($registry, $entityClass);
+        Reindexer $reindexer
+    ) {
+        parent::__construct($conditionFactory, $registry, $reindexer, $sortMethodFactory, $entityClass);
     }
 
     public function getByProceduerId(string $procedureId): ?MeinBerlinAddonEntity

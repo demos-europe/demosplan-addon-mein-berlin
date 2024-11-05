@@ -19,6 +19,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelatio
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
+use EDT\JsonApi\ApiDocumentation\DefaultField;
 use EDT\JsonApi\ApiDocumentation\OptionalField;
 use EDT\JsonApi\ResourceConfig\Builder\ResourceConfigBuilderInterface;
 use EDT\Wrapping\EntityDataInterface;
@@ -75,7 +76,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
         );
 
         $configBuilder->id->setReadableByPath()->setSortable()->setFilterable();
-        $configBuilder->meinBerlinOrganisationId->setReadableByPath()->setSortable()->setFilterable()
+        $configBuilder->meinBerlinOrganisationId->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
             ->addUpdateBehavior(
                 new CallbackAttributeSetBehaviorFactory(
                     [],
@@ -95,13 +96,14 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                     },
                     OptionalField::NO,
                 )
-            );
+            )
+            ->addPathCreationBehavior();
         $configBuilder->orga->setRelationshipType($this->orgaResourceType)
             ->setReadableByPath()
             ->setFilterable()
             ->setSortable()
-            ->initializable();
-        $configBuilder->addPostConstructorBehavior(
+            ->addPathCreationBehavior();
+        $configBuilder->addCreationBehavior(
             new FixedSetBehavior(
                 function (
                     MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
@@ -146,7 +148,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
 
     public function getTypeName(): string
     {
-        return 'MeinBerlinAddonOrgaRelation';
+        return 'MeinBerlinAddonOrganisation';
     }
 
     public function isUpdateAllowed(): bool

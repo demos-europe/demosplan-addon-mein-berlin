@@ -12,11 +12,12 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
+use DemosEurope\DemosplanAddon\Contracts\Entities\UuidEntityInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Doctrine\Generator\UuidV4Generator;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MeinBerlinAddonOrgaRelationRepository::class)]
-class MeinBerlinAddonOrgaRelation
+class MeinBerlinAddonOrgaRelation implements UuidEntityInterface
 {
     #[ORM\Column(type: 'string', length: 36, nullable: false, options: ['fixed' => true])]
     #[ORM\Id]

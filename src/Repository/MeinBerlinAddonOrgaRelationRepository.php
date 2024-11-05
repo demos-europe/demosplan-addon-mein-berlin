@@ -11,19 +11,30 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository;
 
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use DemosEurope\DemosplanAddon\Logic\ApiRequest\FluentRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
+use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
+use EDT\DqlQuerying\Contracts\OrderBySortMethodInterface;
+use EDT\DqlQuerying\SortMethodFactories\SortMethodFactory;
+use EDT\Querying\Utilities\Reindexer;
 
 /**
- * @template-extends ServiceEntityRepository<MeinBerlinAddonOrgaRelation>
+ * @template-extends FluentRepository<MeinBerlinAddonOrgaRelation>
  */
-class MeinBerlinAddonOrgaRelationRepository extends ServiceEntityRepository
+class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
 {
+    /**
+     * @param Reindexer<ClauseFunctionInterface<bool>, OrderBySortMethodInterface> $reindexer
+     */
     public function __construct(
+        DqlConditionFactory $conditionFactory,
         ManagerRegistry $registry,
+        SortMethodFactory $sortMethodFactory,
         string $entityClass,
-    ){
-        parent::__construct($registry, $entityClass);
+        Reindexer $reindexer
+    ) {
+        parent::__construct($conditionFactory, $registry, $reindexer, $sortMethodFactory, $entityClass);
     }
 
     public function getByOrgaId(string $orgaId): ?MeinBerlinAddonOrgaRelation

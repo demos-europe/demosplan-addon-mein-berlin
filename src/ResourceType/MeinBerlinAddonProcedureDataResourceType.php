@@ -88,20 +88,18 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                     },
                     OptionalField::NO
                 )
-            );
+            )
+            ->addPathCreationBehavior();
         $configBuilder->procedure->setRelationshipType($this->procedureResourceType)
             ->setReadableByPath()
             ->setFilterable()
             ->setSortable()
-            ->initializable(
-                false,
-                null,
-                false,
-                null,
+            ->addPathCreationBehavior(
+                OptionalField::NO,
+                [],
                 [$currentProcedureCondition]
             );
-
-        $configBuilder->addPostConstructorBehavior(
+        $configBuilder->addCreationBehavior(
             new FixedSetBehavior(
                 function (MeinBerlinAddonEntity $meinBerlinAddonEntity, EntityDataInterface $entityData): array {
                     $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
