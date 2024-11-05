@@ -28,7 +28,7 @@ class MeinBerlinAddonOrgaRelationRepository extends ServiceEntityRepository
 
     public function getByOrgaId(string $orgaId): ?MeinBerlinAddonOrgaRelation
     {
-        return $this->findOneBy(['orgaId' => $orgaId]);
+        return $this->findOneBy(['orga' => $orgaId]);
     }
 
     public function persistMeinBerlinAddonOrgaRelation(MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation): void

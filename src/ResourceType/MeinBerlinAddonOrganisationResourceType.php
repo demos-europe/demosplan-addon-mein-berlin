@@ -103,7 +103,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                     EntityDataInterface $entityData): array {
                         $this->meinBerlinAddonOrgaRelationRepository
                             ->persistMeinBerlinAddonOrgaRelation($meinBerlinAddonOrgaRelation);
-                        // todo trigger create if everything else is set
+                        // todo trigger create if everything else is set and conditions are met
                         return [];
                 }
             )

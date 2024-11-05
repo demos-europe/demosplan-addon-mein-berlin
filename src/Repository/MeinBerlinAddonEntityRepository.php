@@ -30,6 +30,11 @@ class MeinBerlinAddonEntityRepository extends ServiceEntityRepository
 
     public function getByProceduerId(string $procedureId): ?MeinBerlinAddonEntity
     {
-        return $this->findOneBy(['procedureId' => $procedureId]);
+        return $this->findOneBy(['procedure' => $procedureId]);
+    }
+
+    public function persistMeinBerlinAddonEntity(MeinBerlinAddonEntity $meinBerlinAddonEntity): void
+    {
+        $this->getEntityManager()->persist($meinBerlinAddonEntity);
     }
 }

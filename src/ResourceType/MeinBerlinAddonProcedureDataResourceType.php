@@ -10,9 +10,19 @@ declare(strict_types=1);
  */
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType;
 
+use DemosEurope\DemosplanAddon\Contracts\CurrentContextProviderInterface;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
+use DemosEurope\DemosplanAddon\Contracts\ResourceType\ProcedureResourceTypeInterface;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
+use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
+use EDT\JsonApi\ApiDocumentation\OptionalField;
 use EDT\JsonApi\ResourceConfig\Builder\ResourceConfigBuilderInterface;
+use EDT\Wrapping\EntityDataInterface;
+use EDT\Wrapping\PropertyBehavior\Attribute\Factory\CallbackAttributeSetBehaviorFactory;
+use EDT\Wrapping\PropertyBehavior\FixedSetBehavior;
 
 /**
  * @template-extends AddonResourceType<MeinBerlinAddonEntity>
@@ -21,56 +31,103 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
 {
     public function __construct(
         private readonly ConditionFactoryInterface $conditionFactory,
+        private readonly CurrentContextProviderInterface $currentContextProviderInterface,
+        private readonly PermissionEvaluatorInterface $permissionEvaluator,
+        private readonly ProcedureResourceTypeInterface $procedureResourceType,
+        private readonly MeinBerlinAddonEntityRepository $meinBerlinAddonEntityRepository,
     ) {
 
     }
     protected function getAccessConditions(): array
     {
-        // TODO: Implement getAccessConditions() method.
+        $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
+
+        return $this->conditionFactory->propertyHasValue(
+            $currentProcedure?->getId(),
+            ['procedure']
+        );
     }
 
     public function isCreateAllowed(): bool
     {
-        // TODO: Implement isCreateAllowed() method.
+        return $this->permissionEvaluator
+            ->isPermissionEnabled(Features::feature_set_mein_berlin_procedure_short_name());
     }
 
     public function isDeleteAllowed(): bool
     {
-        // TODO: Implement isDeleteAllowed() method.
+        return $this->isCreateAllowed();
     }
 
     protected function getProperties(): array|ResourceConfigBuilderInterface
     {
-        // TODO: Implement getProperties() method.
+        $configBuilder = new MeinBerlinAddonProcedureDataResourceConfigBuilder(
+            $this->getEntityClass(),
+            $this->getPropertyBuilderFactory()
+        );
+
+        $configBuilder->id->setReadableByPath()->setSortable()->setFilterable();
+        $configBuilder->procedureShortName->setReadableByPath()->setSortable()->setFilterable()
+            ->addUpdateBehavior(
+                new CallbackAttributeSetBehaviorFactory(
+                    [],
+                    function (MeinBerlinAddonEntity $meinBerlinAddonEntity, ?string $procedureShortName): array {
+                        // todo check if update needs to be sent
+                        $meinBerlinAddonEntity->setProcedureShortName($procedureShortName);
+
+                        return [];
+                    },
+                    OptionalField::NO
+                )
+            );
+        $configBuilder->procedure->setRelationshipType($this->procedureResourceType)
+            ->setReadableByPath()
+            ->setFilterable()
+            ->setSortable()
+            ->initializable(); // todo check if currentProcedure condition needs to be applied here
+
+        $configBuilder->addPostConstructorBehavior(
+            new FixedSetBehavior(
+                function (MeinBerlinAddonEntity $meinBerlinAddonEntity, EntityDataInterface $entityData): array {
+                    $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
+                    // todo trigger create if everything else is set - and conditions are met
+
+                    return [];
+                }
+            )
+        );
+
+        return $configBuilder;
     }
 
     public function getEntityClass(): string
     {
-        // TODO: Implement getEntityClass() method.
+        return MeinBerlinAddonEntity::class;
     }
 
     public function isGetAllowed(): bool
     {
-        // TODO: Implement isGetAllowed() method.
+        return $this->isAvailable();
     }
 
     public function isAvailable(): bool
     {
-        // TODO: Implement isAvailable() method.
+        return $this->permissionEvaluator
+            ->isPermissionEnabled(Features::feature_set_mein_berlin_procedure_short_name());
     }
 
     public function isListAllowed(): bool
     {
-        // TODO: Implement isListAllowed() method.
+        return false;
     }
 
     public function getTypeName(): string
     {
-        // TODO: Implement getTypeName() method.
+        return 'MeinBerlinAddonProcedureData';
     }
 
     public function isUpdateAllowed(): bool
     {
-        // TODO: Implement isUpdateAllowed() method.
+        return $this->isCreateAllowed();
     }
 }
