@@ -61,6 +61,11 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
 
     protected function getProperties(): array|ResourceConfigBuilderInterface
     {
+        $currentProcedureCondition = $this->conditionFactory->propertyHasValue(
+            $this->currentContextProviderInterface->getCurrentProcedure()?->getId(),
+            ['id']
+        );
+
         $configBuilder = new MeinBerlinAddonProcedureDataResourceConfigBuilder(
             $this->getEntityClass(),
             $this->getPropertyBuilderFactory()
@@ -72,6 +77,10 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 new CallbackAttributeSetBehaviorFactory(
                     [],
                     function (MeinBerlinAddonEntity $meinBerlinAddonEntity, ?string $procedureShortName): array {
+                        $this->logger->info('demosplan-mein-berlin-addon registered a procedureShortName update
+                         - check if this change needs to be communicated to meinBerlin',
+                            [$procedureShortName, $meinBerlinAddonEntity]
+                        );
                         // todo check if update needs to be sent
                         $meinBerlinAddonEntity->setProcedureShortName($procedureShortName);
 
@@ -84,12 +93,22 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             ->setReadableByPath()
             ->setFilterable()
             ->setSortable()
-            ->initializable(); // todo check if currentProcedure condition needs to be applied here
+            ->initializable(
+                false,
+                null,
+                false,
+                null,
+                [$currentProcedureCondition]
+            );
 
         $configBuilder->addPostConstructorBehavior(
             new FixedSetBehavior(
                 function (MeinBerlinAddonEntity $meinBerlinAddonEntity, EntityDataInterface $entityData): array {
                     $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
+                    $this->logger->info('demosplan-mein-berlin-addon registered a new procedureShortName
+                         - check if all conditions for a create procedure entry at MeinBerlin are met.',
+                        [$meinBerlinAddonEntity, $entityData]
+                    );
                     // todo trigger create if everything else is set - and conditions are met
 
                     return [];

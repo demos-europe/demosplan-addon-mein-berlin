@@ -83,6 +83,11 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                         MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
                         ?string $meinBerlinOrganisationId
                     ): array {
+                        $this->logger->info('demosplan-mein-berlin-addon registered an
+                        MeinBerlinOrganisationId update - check if any Procedures were live already at MeinBerlin and
+                        attempt to update all of them',
+                            [$meinBerlinAddonOrgaRelation, ['newMeinBerlinOrganisationId' => $meinBerlinOrganisationId]]
+                        );
                         // todo what todo with allready sent entries
                         $meinBerlinAddonOrgaRelation->setMeinBerlinOrganisationId($meinBerlinOrganisationId);
 
@@ -100,11 +105,17 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
             new FixedSetBehavior(
                 function (
                     MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
-                    EntityDataInterface $entityData): array {
-                        $this->meinBerlinAddonOrgaRelationRepository
-                            ->persistMeinBerlinAddonOrgaRelation($meinBerlinAddonOrgaRelation);
-                        // todo trigger create if everything else is set and conditions are met
-                        return [];
+                    EntityDataInterface $entityData
+                ): array {
+                    $this->meinBerlinAddonOrgaRelationRepository
+                        ->persistMeinBerlinAddonOrgaRelation($meinBerlinAddonOrgaRelation);
+                    $this->logger->info('demosplan-mein-berlin-addon registered a new
+                            MeinBerlinOrganisationId relation
+                            - check if any Procedures meet all conditions to be made public at MeinBerlin.',
+                        [$meinBerlinAddonOrgaRelation]
+                    );
+                    // todo trigger create if everything else is set and conditions are met
+                    return [];
                 }
             )
         );
