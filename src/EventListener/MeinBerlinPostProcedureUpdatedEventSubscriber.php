@@ -11,20 +11,18 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener;
 
-use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
+
 use DemosEurope\DemosplanAddon\Contracts\Events\PostProcedureUpdatedEventInterface;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Webmozart\Assert\Assert;
 
 class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private readonly MeinBerlinAddonEntityRepository $addonEntityRepository,
-        private readonly MeinBerlinAddonOrgaRelationRepository $orgaRelationRepository,
+        private readonly MeinBerlinCommunicationHelper $communicationHelper,
         private readonly MeinBerlinCreateProcedureService $createProcedureService,
         private readonly MeinBerlinUpdateProcedureService $updateProcedureService,
     ) {
@@ -42,20 +40,23 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         // check if procedure is listed to be communicated at all and figure out what kind POST || PATCH
         // by checking for an organization-id as well as a publicly visible phase and dplan-id
         $newProcedure = $postProcedureUpdatedEvent->getProcedureAfterUpdate();
-        if (false === $this->hasOrganisationIdSet($newProcedure)) {
+        if (false === $this->communicationHelper->hasOrganisationIdSet($newProcedure)) {
             // for this procedure is no MeinBerlin organisationId set (dplan name: procedureShortName)
             // - it will not be published
             return;
         }
-
-        $correspondingAddonEntity = $this->addonEntityRepository->getByProceduerId($newProcedure->getId());
-        $correspondingAddonOrgaRelation = $this->orgaRelationRepository->getByOrgaId($newProcedure->getOrga()?->getId());
-
-        $isPublishedVal = $this->checkProcedurePublicPhasePermissionsetIsHidden($newProcedure);
-        $dplanIdIsPresent = $this->hasDplanIdSet($correspondingAddonEntity);
-        if ($isPublishedVal && !$dplanIdIsPresent) {
+        $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetIsHidden($newProcedure);
+        $hasProcedureShortNameSet = $this->communicationHelper->hasProcedureShortNameSet($newProcedure);
+        $dplanIdIsPresent = $this->communicationHelper->hasDplanIdSet($newProcedure);
+        if ($isPublishedVal && $hasProcedureShortNameSet && !$dplanIdIsPresent) {
             // create new Procedure entry at MeinBerlin if procedure is publicly visible, has an procedureShortName set
             // but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
+            $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
+            $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
+            // those can not be null as indirectly checked by metods beforehand
+            Assert::notNull($correspondingAddonOrgaRelation);
+            Assert::notNull($correspondingAddonEntity);
+
             $this->createProcedureService->createMeinBerlinProcedure(
                 $newProcedure,
                 $correspondingAddonEntity,
@@ -63,6 +64,11 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             );
         }
         if ($dplanIdIsPresent) {
+            $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
+            $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
+            // those can not be null as indirectly checked by metods beforehand
+            Assert::notNull($correspondingAddonOrgaRelation);
+            Assert::notNull($correspondingAddonEntity);
             // update all fields for previously at MeinBerlin created Procedures
             $changeSet = $postProcedureUpdatedEvent->getModifiedValues();
             // check if publicPhase permission set visibility changed from hidden to something else or vice versa
@@ -92,34 +98,5 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         }
 
         return null;
-    }
-
-    private function checkProcedurePublicPhasePermissionsetIsHidden(ProcedureInterface $newProcedure): bool
-    {
-        $newPermissionSet = $newProcedure->getPublicParticipationPhasePermissionset();
-
-        return 'hidden' === $newPermissionSet ? false : true;
-    }
-
-    private function hasOrganisationIdSet(ProcedureInterface $procedure): bool
-    {
-        $orga = $procedure->getOrga();
-        if (null !== $orga) {
-            $orgaRelation = $this->orgaRelationRepository->getByOrgaId($orga->getId());
-
-            return null !== $orgaRelation && '' !== $orgaRelation->getMeinBerlinOrganisationId();
-        }
-
-        return false;
-    }
-
-    private function hasDplanIdSet(?MeinBerlinAddonEntity $addonEntity): bool
-    {
-        return null !== $addonEntity && '' !== $addonEntity->getDplanId();
-    }
-
-    private function hasProcedureShortNameSet(?MeinBerlinAddonEntity $addonEntity): bool
-    {
-        return null !== $addonEntity && '' !== $addonEntity->getProcedureShortName();
     }
 }

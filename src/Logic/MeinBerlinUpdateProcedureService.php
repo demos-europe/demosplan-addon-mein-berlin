@@ -13,10 +13,12 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DateTime;
 use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonProcedureDataResourceType;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
@@ -42,7 +44,10 @@ class MeinBerlinUpdateProcedureService
 
     }
 
-    /**
+    /** This Method will not include the { @link MeinBerlinAddonEntity::$procedureShortName }
+     * as those changes will be sent in a separate PATCH request triggert by the corresponding
+     * { @link MeinBerlinAddonProcedureDataResourceType }
+     *
      * @param array<string, mixed> $changeSet
      */
     public function updateMeinBerlinProcedureEntry(
