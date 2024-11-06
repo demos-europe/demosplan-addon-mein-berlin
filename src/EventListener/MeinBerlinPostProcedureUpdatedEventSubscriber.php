@@ -45,7 +45,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             // - it will not be published
             return;
         }
-        $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetIsHidden($newProcedure);
+        $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($newProcedure);
         $hasProcedureShortNameSet = $this->communicationHelper->hasProcedureShortNameSet($newProcedure);
         $dplanIdIsPresent = $this->communicationHelper->hasDplanIdSet($newProcedure);
         if ($isPublishedVal && $hasProcedureShortNameSet && !$dplanIdIsPresent) {

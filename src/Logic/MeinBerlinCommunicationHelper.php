@@ -17,7 +17,7 @@ class MeinBerlinCommunicationHelper
 
     }
 
-    public function checkProcedurePublicPhasePermissionsetIsHidden(ProcedureInterface $procedure): bool
+    public function checkProcedurePublicPhasePermissionsetNotHidden(ProcedureInterface $procedure): bool
     {
         $permissionSet = $procedure->getPublicParticipationPhasePermissionset();
 

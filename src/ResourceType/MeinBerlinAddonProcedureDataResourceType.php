@@ -11,10 +11,13 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType;
 
 use DemosEurope\DemosplanAddon\Contracts\CurrentContextProviderInterface;
+use DemosEurope\DemosplanAddon\Contracts\Exceptions\AddonResourceNotFoundException;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\ProcedureResourceTypeInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
 use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
@@ -24,6 +27,8 @@ use EDT\JsonApi\ResourceConfig\Builder\ResourceConfigBuilderInterface;
 use EDT\Wrapping\EntityDataInterface;
 use EDT\Wrapping\PropertyBehavior\Attribute\Factory\CallbackAttributeSetBehaviorFactory;
 use EDT\Wrapping\PropertyBehavior\FixedSetBehavior;
+use InvalidArgumentException;
+use Webmozart\Assert\Assert;
 
 /**
  * @template-extends AddonResourceType<MeinBerlinAddonEntity>
@@ -36,6 +41,8 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         private readonly PermissionEvaluatorInterface $permissionEvaluator,
         private readonly ProcedureResourceTypeInterface $procedureResourceType,
         private readonly MeinBerlinAddonEntityRepository $meinBerlinAddonEntityRepository,
+        private readonly MeinBerlinCommunicationHelper $meinBerlinCommunicationHelper,
+        private readonly MeinBerlinCreateProcedureService $createProcedureService,
     ) {
 
     }
@@ -103,12 +110,12 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         $configBuilder->addCreationBehavior(
             new FixedSetBehavior(
                 function (MeinBerlinAddonEntity $meinBerlinAddonEntity, EntityDataInterface $entityData): array {
-                    $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
                     $this->logger->info('demosplan-mein-berlin-addon registered a new procedureShortName
-                         - check if all conditions for a create procedure entry at MeinBerlin are met.',
+                         - check if a necessary MeinBerlin OrganisationId to allow this create ist set
+                          and if all conditions for a create procedure entry at MeinBerlin are met.',
                         [$meinBerlinAddonEntity, $entityData]
                     );
-                    // todo trigger create if everything else is set - and conditions are met
+                    $this->handleProcedureShortNameCreateAttempt($meinBerlinAddonEntity);
 
                     return [];
                 }
@@ -147,5 +154,51 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
     public function isUpdateAllowed(): bool
     {
         return $this->isCreateAllowed();
+    }
+
+    /**
+     * @throws AddonResourceNotFoundException
+     * @throws InvalidArgumentException
+     */
+    private function handleProcedureShortNameCreateAttempt(
+        MeinBerlinAddonEntity $meinBerlinAddonEntity
+    ): void {
+        // check if create is allowed by checking the presence of a corresponding MeinBerlin OrganisationId
+        $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
+        Assert::notNull($currentProcedure);
+        if (!$this->meinBerlinCommunicationHelper->hasOrganisationIdSet($currentProcedure)) {
+            $this->logger->info('FP-A tried to set a procedureShortName, but his organisation has not
+            MeinBerlinOrganisationId set yet - therefore this action is not allowed');
+            throw new AddonResourceNotFoundException(
+                'Can not create a MeinBerlinAddonEntity as no MeinBerlinAddonOrgaRelation has been set yet'
+            );
+        }
+        // creation is allowed from here on.
+        $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
+        // check if create message should be sent by checking the procedurePhase
+        // lastly check if a dplanId (communicationId) is already set - this would be an error here - log potential case
+        if (null !== $currentProcedure &&
+            '' !== $meinBerlinAddonEntity->getDplanId() &&
+            $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
+        ) {
+            if ($this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure)) {
+                $this->logger->error(
+                    'demosplan-mein-berlin-addon attempts to create a second procedure related entity
+                    but it is set up as OneToOne',
+                    [self::class, MeinBerlinAddonEntity::class]
+                );
+                throw new InvalidArgumentException(
+                    'demosplan-mein-berlin-addon attempts to create a second procedure related entity
+                    but it is set up as OneToOne');
+            }
+            $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper
+                ->getCorrespondingOrgaRelation($currentProcedure);
+            Assert::notNull($correspondingAddonOrgaRelation);
+            $this->createProcedureService->createMeinBerlinProcedure(
+                $currentProcedure,
+                $meinBerlinAddonEntity,
+                $correspondingAddonOrgaRelation
+            );
+        }
     }
 }
