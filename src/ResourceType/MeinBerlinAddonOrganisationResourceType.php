@@ -143,7 +143,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
 
     public function isListAllowed(): bool
     {
-        return $this->permissionEvaluator->isPermissionEnabled(Features::feature_set_mein_berlin_organisation_id());
+        return $this->isGetAllowed();
     }
 
     public function getTypeName(): string

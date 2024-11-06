@@ -18,6 +18,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
 use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
+use EDT\JsonApi\ApiDocumentation\DefaultField;
 use EDT\JsonApi\ApiDocumentation\OptionalField;
 use EDT\JsonApi\ResourceConfig\Builder\ResourceConfigBuilderInterface;
 use EDT\Wrapping\EntityDataInterface;
@@ -42,10 +43,10 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
     {
         $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
 
-        return $this->conditionFactory->propertyHasValue(
+        return [$this->conditionFactory->propertyHasValue(
             $currentProcedure?->getId(),
             ['procedure']
-        );
+        )];
     }
 
     public function isCreateAllowed(): bool
@@ -72,7 +73,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         );
 
         $configBuilder->id->setReadableByPath()->setSortable()->setFilterable();
-        $configBuilder->procedureShortName->setReadableByPath()->setSortable()->setFilterable()
+        $configBuilder->procedureShortName->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
             ->addUpdateBehavior(
                 new CallbackAttributeSetBehaviorFactory(
                     [],
@@ -135,7 +136,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
 
     public function isListAllowed(): bool
     {
-        return false;
+        return $this->isGetAllowed();
     }
 
     public function getTypeName(): string
