@@ -21,7 +21,8 @@
     "demos-europe/demosplan-addon": "^0",
     "doctrine/doctrine-bundle": "^2",
     "doctrine/doctrine-migrations-bundle": "^3.2",
-    "gedmo/doctrine-extensions": "^3"
+    "gedmo/doctrine-extensions": "^3",
+    "symfony/http-client": "^6.2"
   },
   "config": {
     "allow-plugins": {

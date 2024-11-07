@@ -181,6 +181,15 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 'Can not create a MeinBerlinAddonEntity as no MeinBerlinAddonOrgaRelation has been set yet'
             );
         }
+        if ('' === $meinBerlinAddonEntity->getProcedureShortName()) {
+            $this->logger->info('FP-A tried saving an empty meinBerlin procedureShortName');
+            $this->messageBag->add(
+                'error',
+                'mein.berlin.error.create.empty.procedure.short.name'
+            );
+
+            throw new InvalidArgumentException('create with empty procedureShortName is invalid');
+        }
         // creation is allowed from here on.
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
         // check if create message should be sent by checking the procedurePhase
@@ -216,16 +225,22 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         // you can only create this entity in the first place with an existing id
         Assert::notNull($organisationId);
         // check if update message should be sent by checking an existent communicationId
-        if ('' !== $meinBerlinAddonEntity->getDplanId()) {
+        if ('' === $meinBerlinAddonEntity->getDplanId()) {
             $this->logger->info(
-                'meinBerlin procedureShortName update is relevant to communicate as
-                this procedure is known to / has been transferred to -meinBerlin',
-                ['newShortName' => $procedureShortName, 'assignedCommunicationId' => $meinBerlinAddonEntity->getDplanId()]
+                'this procedure has not been transmitted to meinBerlin yet.
+                No update message will be sent to meinBerlin'
             );
-            $this->updateProcedureService->updateProcedureShortNameByResourceType(
-                $meinBerlinAddonEntity,
-                $organisationId
-            );
+
+            return;
         }
+        $this->logger->info(
+            'meinBerlin procedureShortName update is relevant to communicate as
+                this procedure is known to / has been transferred to -meinBerlin',
+            ['newShortName' => $procedureShortName, 'assignedCommunicationId' => $meinBerlinAddonEntity->getDplanId()]
+        );
+        $this->updateProcedureService->updateProcedureShortNameByResourceType(
+            $meinBerlinAddonEntity,
+            $organisationId
+        );
     }
 }
