@@ -12,6 +12,7 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType;
 
 use DemosEurope\DemosplanAddon\Contracts\CurrentContextProviderInterface;
 use DemosEurope\DemosplanAddon\Contracts\Exceptions\AddonResourceNotFoundException;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\ProcedureResourceTypeInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
@@ -43,6 +44,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         private readonly MeinBerlinAddonEntityRepository $meinBerlinAddonEntityRepository,
         private readonly MeinBerlinCommunicationHelper $meinBerlinCommunicationHelper,
         private readonly MeinBerlinCreateProcedureService $createProcedureService,
+        private readonly MessageBagInterface $messageBag,
     ) {
 
     }
@@ -169,6 +171,11 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         if (!$this->meinBerlinCommunicationHelper->hasOrganisationIdSet($currentProcedure)) {
             $this->logger->info('FP-A tried to set a procedureShortName, but his organisation has not
             MeinBerlinOrganisationId set yet - therefore this action is not allowed');
+            $this->messageBag->add(
+                'error',
+                'mein.berlin.organisation.id.missing'
+            );
+
             throw new AddonResourceNotFoundException(
                 'Can not create a MeinBerlinAddonEntity as no MeinBerlinAddonOrgaRelation has been set yet'
             );
@@ -181,16 +188,6 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             '' !== $meinBerlinAddonEntity->getDplanId() &&
             $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
         ) {
-            if ($this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure)) {
-                $this->logger->error(
-                    'demosplan-mein-berlin-addon attempts to create a second procedure related entity
-                    but it is set up as OneToOne',
-                    [self::class, MeinBerlinAddonEntity::class]
-                );
-                throw new InvalidArgumentException(
-                    'demosplan-mein-berlin-addon attempts to create a second procedure related entity
-                    but it is set up as OneToOne');
-            }
             $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper
                 ->getCorrespondingOrgaRelation($currentProcedure);
             Assert::notNull($correspondingAddonOrgaRelation);
