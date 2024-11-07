@@ -116,7 +116,9 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                             - check if any Procedures meet all conditions to be made public at MeinBerlin.',
                         [$meinBerlinAddonOrgaRelation]
                     );
-                    // todo trigger create if everything else is set and conditions are met
+                    // The Mandanten-Administration has to set up this organisationId relation before the
+                    // meinBerlinProcedureShortName is creatable,
+                    // Therefore no necessary communication can be triggert by this step.
                     return [];
                 }
             )
