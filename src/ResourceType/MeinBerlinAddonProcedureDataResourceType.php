@@ -19,6 +19,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Feature
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
 use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
@@ -44,6 +45,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         private readonly MeinBerlinAddonEntityRepository $meinBerlinAddonEntityRepository,
         private readonly MeinBerlinCommunicationHelper $meinBerlinCommunicationHelper,
         private readonly MeinBerlinCreateProcedureService $createProcedureService,
+        private readonly MeinBerlinUpdateProcedureService $updateProcedureService,
         private readonly MessageBagInterface $messageBag,
     ) {
 
@@ -91,8 +93,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                          - check if this change needs to be communicated to meinBerlin',
                             [$procedureShortName, $meinBerlinAddonEntity]
                         );
-                        // todo check if update needs to be sent
-                        $meinBerlinAddonEntity->setProcedureShortName($procedureShortName);
+                        $this->handleProcedureShortNameUpdateAttempt($meinBerlinAddonEntity, $procedureShortName);
 
                         return [];
                     },
@@ -195,6 +196,35 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 $currentProcedure,
                 $meinBerlinAddonEntity,
                 $correspondingAddonOrgaRelation
+            );
+        }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function handleProcedureShortNameUpdateAttempt(
+        MeinBerlinAddonEntity $meinBerlinAddonEntity,
+        ?string $procedureShortName
+    ): void {
+        $meinBerlinAddonEntity->setProcedureShortName($procedureShortName);
+        $organisationId = $this->meinBerlinCommunicationHelper
+            ->getCorrespondingOrgaRelation(
+                $this->currentContextProviderInterface->getCurrentProcedure()
+            )?->getMeinBerlinOrganisationId();
+        // the organisationId can not be null as in theory
+        // you can only create this entity in the first place with an existing id
+        Assert::notNull($organisationId);
+        // check if update message should be sent by checking an existent communicationId
+        if ('' !== $meinBerlinAddonEntity->getDplanId()) {
+            $this->logger->info(
+                'meinBerlin procedureShortName update is relevant to communicate as
+                this procedure is known to / has been transferred to -meinBerlin',
+                ['newShortName' => $procedureShortName, 'assignedCommunicationId' => $meinBerlinAddonEntity->getDplanId()]
+            );
+            $this->updateProcedureService->updateProcedureShortNameByResourceType(
+                $meinBerlinAddonEntity,
+                $organisationId
             );
         }
     }

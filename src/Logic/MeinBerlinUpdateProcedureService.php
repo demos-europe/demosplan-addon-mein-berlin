@@ -44,6 +44,14 @@ class MeinBerlinUpdateProcedureService
 
     }
 
+    public function updateProcedureShortNameByResourceType(
+        MeinBerlinAddonEntity $changedEntity,
+        string $meinBerlinOrganisationId
+    ): void
+    {
+        $fieldsToUpdate['bplan_id'] = $changedEntity->getProcedureShortName();
+    }
+
     /** This Method will not include the { @link MeinBerlinAddonEntity::$procedureShortName }
      * as those changes will be sent in a separate PATCH request triggert by the corresponding
      * { @link MeinBerlinAddonProcedureDataResourceType }
