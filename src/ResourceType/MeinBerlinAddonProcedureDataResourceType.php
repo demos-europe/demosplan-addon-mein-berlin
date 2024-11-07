@@ -204,7 +204,8 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             $this->createProcedureService->createMeinBerlinProcedure(
                 $currentProcedure,
                 $meinBerlinAddonEntity,
-                $correspondingAddonOrgaRelation
+                $correspondingAddonOrgaRelation,
+                true
             );
         }
     }

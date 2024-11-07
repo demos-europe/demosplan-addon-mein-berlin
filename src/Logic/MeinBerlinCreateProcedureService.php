@@ -38,6 +38,7 @@ class MeinBerlinCreateProcedureService
         private readonly LoggerInterface $logger,
         private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
+        private readonly MeinBerlinProcedureCommunicator $meinBerlinProcedureCommunicator,
     ){
 
     }
@@ -45,7 +46,8 @@ class MeinBerlinCreateProcedureService
     public function createMeinBerlinProcedure(
         ProcedureInterface $procedure,
         MeinBerlinAddonEntity $correspondingAddonEntity,
-        MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation
+        MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation,
+        bool $calledViaResourceTypeFlushIsQueued = false
     ): void {
         $this->logger->info(
             'demosplan-mein-berlin-addon discovered a procedure update for a new not yet communicated procedure.
@@ -60,7 +62,12 @@ class MeinBerlinCreateProcedureService
             $correspondingAddonEntity,
             $correspondingAddonOrgaRelation
         );
-        // todo send POST request
+        $this->meinBerlinProcedureCommunicator->createProcedure(
+            $procedureCreateRequestData,
+            $correspondingAddonEntity,
+            $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
+            $calledViaResourceTypeFlushIsQueued
+        );
     }
 
     /**

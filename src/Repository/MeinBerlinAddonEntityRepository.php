@@ -48,4 +48,9 @@ class MeinBerlinAddonEntityRepository extends FluentRepository
     {
         $this->getEntityManager()->persist($meinBerlinAddonEntity);
     }
+
+    public function flushEverything(): void
+    {
+        $this->getEntityManager()->flush();
+    }
 }
