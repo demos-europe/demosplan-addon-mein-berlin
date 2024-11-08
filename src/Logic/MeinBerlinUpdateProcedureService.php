@@ -34,9 +34,7 @@ use function is_array;
 use function array_key_exists;
 use function array_merge;
 use function substr;
-use function is_file;
 use function base64_encode;
-use function file_get_contents;
 
 class MeinBerlinUpdateProcedureService
 {

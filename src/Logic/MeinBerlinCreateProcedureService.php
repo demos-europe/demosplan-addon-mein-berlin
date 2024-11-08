@@ -32,9 +32,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use function array_key_exists;
 use function substr;
-use function is_file;
 use function base64_encode;
-use function file_get_contents;
 
 class MeinBerlinCreateProcedureService
 {
