@@ -1,2 +1,6 @@
 mein.berlin.organisation.id.missing: "Ihrer Organisation wurde von der Mandanten-Administration noch keine Id zugeteilt."
 mein.berlin.error.create.empty.procedure.short.name: "Es kann kein leeres Feld gespeichert werden."
+mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-berlin übermittelt werden."
+mein.berlin.communication.create.error: "Beim Versuch Informationen zu diesem Verfahren an mein-berlin zu übermitteln ist ein Fehler aufgetreten."
+mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
+mein.berlin.communication.create.success: "Dieses Verfahrens wurden soeben erfolgreich an mein-berlin übertragen."

@@ -13,11 +13,13 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DateTime;
 use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonProcedureDataResourceType;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -40,16 +42,40 @@ class MeinBerlinUpdateProcedureService
         private readonly LoggerInterface $logger,
         private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
+        private readonly MeinBerlinProcedureCommunicator $procedureCommunicator,
+        private readonly MessageBagInterface $messageBag,
     ){
 
     }
 
+    /**
+     * @throws MeinBerlinCommunicationException
+     */
     public function updateProcedureShortNameByResourceType(
         MeinBerlinAddonEntity $changedEntity,
-        string $meinBerlinOrganisationId
+        string $meinBerlinOrganisationId,
+        string $dplanId,
+        string $procedureId
     ): void
     {
+        $fieldsToUpdate = [];
         $fieldsToUpdate['bplan_id'] = $changedEntity->getProcedureShortName();
+
+        try {
+            $this->procedureCommunicator->updateProcedure(
+                $fieldsToUpdate,
+                $meinBerlinOrganisationId,
+                $dplanId,
+                $procedureId
+            );
+            $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');
+        } catch (MeinBerlinCommunicationException $e) {
+            // logs have been written
+            $this->messageBag->add('error', 'mein.berlin.communication.update.error');
+            // rethrow here to prevent the flushing the change on our side
+            throw $e;
+        }
+
     }
 
     /** This Method will not include the { @link MeinBerlinAddonEntity::$procedureShortName }
@@ -62,7 +88,8 @@ class MeinBerlinUpdateProcedureService
         array $changeSet,
         ?bool $isPublished,
         string $meinBerlinOrganisationId,
-        string $dplanId
+        string $dplanId,
+        string $procedureId
     ): void
     {
         if (RelevantProcedurePropertiesForMeinBerlinCommunication::
@@ -78,7 +105,19 @@ class MeinBerlinUpdateProcedureService
                 $fieldsToUpdate['is_published '] = $isPublished;
             }
 
-            // todo send update PATCH
+            try {
+                $this->procedureCommunicator->updateProcedure(
+                    $fieldsToUpdate,
+                    $meinBerlinOrganisationId,
+                    $dplanId,
+                    $procedureId
+                );
+                $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');
+            } catch (MeinBerlinCommunicationException $e) {
+                // logs have been written already
+                $this->messageBag->add('error', 'mein.berlin.communication.update.error');
+                // do not rethrow this Exception as the procedure updates are flushed anyhow and information is lost
+            }
         }
     }
 

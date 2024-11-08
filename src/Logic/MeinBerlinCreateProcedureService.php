@@ -13,12 +13,14 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
@@ -39,10 +41,14 @@ class MeinBerlinCreateProcedureService
         private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $meinBerlinProcedureCommunicator,
+        private readonly MessageBagInterface $messageBag,
     ){
 
     }
 
+    /**
+     * @throws MeinBerlinCommunicationException
+     */
     public function createMeinBerlinProcedure(
         ProcedureInterface $procedure,
         MeinBerlinAddonEntity $correspondingAddonEntity,
@@ -57,17 +63,26 @@ class MeinBerlinCreateProcedureService
             [$correspondingAddonEntity, $correspondingAddonOrgaRelation, $procedure]
         );
 
-        $procedureCreateRequestData = $this->getRelevantProcedureCreateData(
-            $procedure,
-            $correspondingAddonEntity,
-            $correspondingAddonOrgaRelation
-        );
-        $this->meinBerlinProcedureCommunicator->createProcedure(
-            $procedureCreateRequestData,
-            $correspondingAddonEntity,
-            $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
-            $calledViaResourceTypeFlushIsQueued
-        );
+        try {
+            $procedureCreateRequestData = $this->getRelevantProcedureCreateData(
+                $procedure,
+                $correspondingAddonEntity,
+                $correspondingAddonOrgaRelation
+            );
+            $this->meinBerlinProcedureCommunicator->createProcedure(
+                $procedureCreateRequestData,
+                $correspondingAddonEntity,
+                $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
+                $calledViaResourceTypeFlushIsQueued
+            );
+            $this->messageBag->add('confirm', 'mein.berlin.communication.create.success');
+        } catch (MeinBerlinCommunicationException $e) {
+            $this->messageBag->add('error', 'mein.berlin.communication.create.error');
+            // propagate only if flush is still in queue - otherwise nothing can be done.
+            if ($calledViaResourceTypeFlushIsQueued) {
+                throw $e;
+            }
+        }
     }
 
     /**

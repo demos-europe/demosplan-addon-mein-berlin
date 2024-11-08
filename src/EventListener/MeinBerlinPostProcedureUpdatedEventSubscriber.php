@@ -13,9 +13,11 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener;
 
 
 use DemosEurope\DemosplanAddon\Contracts\Events\PostProcedureUpdatedEventInterface;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
+use InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Webmozart\Assert\Assert;
 
@@ -35,6 +37,12 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         ];
     }
 
+    /**
+     * Those Exceptions can not really occur as they are handled beforehand when called
+     * after the flush with updates on the procedure happened anyhow - messagebag/logs have been filled.
+     * @throws MeinBerlinCommunicationException
+     * @throws InvalidArgumentException
+     */
     public function onProcedureUpdate(PostProcedureUpdatedEventInterface $postProcedureUpdatedEvent): void
     {
         // check if procedure is listed to be communicated at all and figure out what kind POST || PATCH
@@ -78,7 +86,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $changeSet,
                 $isPublishedVal,
                 $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
-                $correspondingAddonEntity->getDplanId()
+                $correspondingAddonEntity->getDplanId(),
+                $newProcedure->getId()
             );
         }
     }
