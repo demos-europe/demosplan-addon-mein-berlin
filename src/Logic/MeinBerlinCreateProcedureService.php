@@ -22,6 +22,9 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPro
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use Exception;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\FilesystemOperator;
+use League\Flysystem\UnableToReadFile;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -42,6 +45,7 @@ class MeinBerlinCreateProcedureService
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $meinBerlinProcedureCommunicator,
         private readonly MessageBagInterface $messageBag,
+        private readonly FilesystemOperator $fileSystemOperator,
     ){
 
     }
@@ -134,10 +138,12 @@ class MeinBerlinCreateProcedureService
                     'demosplan-mein-berlin-addon found Pictogram on create - converting file contents to base64',
                     [$pictogram->getFileName(), $pictogram->getPath()]
                 );
-                if (is_file($pictogram->getPath())) {
-                    $base64FileString = base64_encode(file_get_contents($pictogram->getPath()));
+                if ($this->fileSystemOperator->fileExists($pictogram->getPath())) {
+                    $base64FileString = base64_encode(
+                        $this->fileSystemOperator->read($pictogram->getPath())
+                    );
                 }
-            } catch (Exception $e) {
+            } catch (FilesystemException|UnableToReadFile|Exception $e) {
                 $this->logger->error(
                     'demosplan-mein-berlin-addon failed to load/convert the pictogram to base64 string',
                     [$e]

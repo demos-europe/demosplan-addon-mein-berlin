@@ -22,6 +22,9 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhaseProp
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonProcedureDataResourceType;
 use Exception;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\FilesystemOperator;
+use League\Flysystem\UnableToReadFile;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -44,6 +47,7 @@ class MeinBerlinUpdateProcedureService
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $procedureCommunicator,
         private readonly MessageBagInterface $messageBag,
+        private readonly FilesystemOperator $filesystemOperator,
     ){
 
     }
@@ -258,19 +262,21 @@ class MeinBerlinUpdateProcedureService
                         'demosplan-mein-berlin-addon found changed Pictogram - converting file contents to base64',
                         [$pictogram->getFileName(), $pictogram->getPath()]
                     );
-                    if (is_file($pictogram->getPath())) {
+                    if ($this->filesystemOperator->fileExists($pictogram->getPath())) {
                         $relevantProcedurePublicPhaseChanges[
                         RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
-                        ] = base64_encode(file_get_contents($pictogram->getPath()));
+                        ] = base64_encode(
+                            $this->filesystemOperator->read($pictogram->getPath())
+                        );
                     }
-                } catch (Exception $e) {
+                } catch (FilesystemException|UnableToReadFile|Exception $e) {
                     $this->logger->error(
                         'demosplan-mein-berlin-addon failed to load/convert the pictogram to base64 string',
                         [$e]
                     );
 
                     $relevantProcedurePublicPhaseChanges[
-                    RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
+                        RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
                     ] = '';
                 }
             }

@@ -22,7 +22,10 @@
     "doctrine/doctrine-bundle": "^2",
     "doctrine/doctrine-migrations-bundle": "^3.2",
     "gedmo/doctrine-extensions": "^3",
-    "symfony/http-client": "^6.2"
+    "symfony/http-client": "^6.2",
+    "league/flysystem-aws-s3-v3": "^3.28",
+    "league/flysystem-bundle": "^3.3",
+    "league/flysystem-memory": "^3.28"
   },
   "config": {
     "allow-plugins": {
