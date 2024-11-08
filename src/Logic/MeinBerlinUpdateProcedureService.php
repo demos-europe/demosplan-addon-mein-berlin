@@ -47,7 +47,7 @@ class MeinBerlinUpdateProcedureService
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $procedureCommunicator,
         private readonly MessageBagInterface $messageBag,
-        private readonly FilesystemOperator $filesystemOperator,
+        private readonly FilesystemOperator $defaultStorage,
     ){
 
     }
@@ -262,11 +262,11 @@ class MeinBerlinUpdateProcedureService
                         'demosplan-mein-berlin-addon found changed Pictogram - converting file contents to base64',
                         [$pictogram->getFileName(), $pictogram->getPath()]
                     );
-                    if ($this->filesystemOperator->fileExists($pictogram->getPath())) {
+                    if ($this->defaultStorage->fileExists($pictogram->getPath())) {
                         $relevantProcedurePublicPhaseChanges[
                         RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
                         ] = base64_encode(
-                            $this->filesystemOperator->read($pictogram->getPath())
+                            $this->defaultStorage->read($pictogram->getPath())
                         );
                     }
                 } catch (FilesystemException|UnableToReadFile|Exception $e) {

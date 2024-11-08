@@ -45,7 +45,7 @@ class MeinBerlinCreateProcedureService
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $meinBerlinProcedureCommunicator,
         private readonly MessageBagInterface $messageBag,
-        private readonly FilesystemOperator $fileSystemOperator,
+        private readonly FilesystemOperator $defaultStorage,
     ){
 
     }
@@ -138,9 +138,9 @@ class MeinBerlinCreateProcedureService
                     'demosplan-mein-berlin-addon found Pictogram on create - converting file contents to base64',
                     [$pictogram->getFileName(), $pictogram->getPath()]
                 );
-                if ($this->fileSystemOperator->fileExists($pictogram->getPath())) {
+                if ($this->defaultStorage->fileExists($pictogram->getPath())) {
                     $base64FileString = base64_encode(
-                        $this->fileSystemOperator->read($pictogram->getPath())
+                        $this->defaultStorage->read($pictogram->getPath())
                     );
                 }
             } catch (FilesystemException|UnableToReadFile|Exception $e) {
