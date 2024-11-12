@@ -18,6 +18,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityR
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MeinBerlinAddonEntityRepository::class)]
+#[ORM\Table(name: 'addon_mein_berlin_entity')]
 class MeinBerlinAddonEntity implements UuidEntityInterface
 {
     #[ORM\Column(type: 'string', length: 36, nullable: false, options:['fixed' => true])]

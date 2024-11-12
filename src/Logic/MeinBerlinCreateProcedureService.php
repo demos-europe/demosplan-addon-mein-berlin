@@ -137,6 +137,20 @@ class MeinBerlinCreateProcedureService
                     [$pictogram->getFileName(), $pictogram->getPath()]
                 );
                 if ($this->defaultStorage->fileExists($pictogram->getPath())) {
+                    $fileSize = $this->defaultStorage->fileSize($pictogram->getPath());
+                    if ((int) $this->parameterBag->get('pictogram_max_file_size') <= $fileSize) {
+                        $this->logger->error(
+                            'demosplan-mein-berlin-addon could not append pictogram base64 file
+                             to the procedure create message as the allowed max size was exceeded',
+                            [
+                                'Max-allowed' => $this->parameterBag->get('pictogram_max_file_size'),
+                                'Got-size' => $fileSize
+                            ]
+                        );
+                        $this->messageBag->add('error', 'mein.berlin.pictogram.file.to.large');
+
+                        return $base64FileString;
+                    }
                     $base64FileString = base64_encode(
                         $this->defaultStorage->read($pictogram->getPath())
                     );
@@ -155,7 +169,7 @@ class MeinBerlinCreateProcedureService
     private function generateProcedurePublicRoute(string $slug): string
     {
         try {
-            $routeName = $this->getParameter('public_procedure_route');
+            $routeName = $this->parameterBag->get('public_procedure_route');
             $route = $this->router->generate(
                 $routeName,
                 ['slug' => $slug],
@@ -170,16 +184,6 @@ class MeinBerlinCreateProcedureService
         }
 
         return $route;
-    }
-
-    /**
-     * Gets a parameter by its name.
-     * @throws ParameterNotFoundException
-     * @return array<int|string, mixed>|bool|string|int|float|\UnitEnum|null
-     */
-    private function getParameter(string $name): array|bool|string|int|float|\UnitEnum|null
-    {
-        return $this->parameterBag->get($name);
     }
 
     /**

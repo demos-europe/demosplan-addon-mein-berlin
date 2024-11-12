@@ -1,4 +1,13 @@
 <?php
+declare(strict_types=1);
+
+/**
+ * This file is part of the package demosplan.
+ *
+ * (c) 2010-present DEMOS plan GmbH, for more information see the license file.
+ *
+ * All rights reserved
+ */
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
@@ -45,7 +54,7 @@ class MeinBerlinProcedureCommunicator
             $url = str_replace(
                 ['<organisation-id>', '<bplan-id>'],
                 [$organisationId, $dplanId],
-                $this->getParameter('procedure_update_url')
+                $this->parameterBag->get('procedure_update_url')
             );
             $json = json_encode($preparedProcedureData, JSON_THROW_ON_ERROR);
             $this->logger->info('demosplan-mein-berlin-addon sends PATCH to update Procedure now!', [$url]);
@@ -75,7 +84,7 @@ class MeinBerlinProcedureCommunicator
             }
             $this->logger->info(
                 'demosplan-mein-berlin-addon successfully transmitted updated procedure data',
-                ['procedureId' => $procedureId, 'PATCH url' => $url, 'josn' => $json]
+                ['procedureId' => $procedureId, 'PATCH url' => $url, 'json' => $json]
             );
         } catch (ParameterNotFoundException $e) {
             $this->logger->error(
@@ -131,7 +140,7 @@ class MeinBerlinProcedureCommunicator
             $url = str_replace(
                 '<organisation-id>',
                 $organisationId,
-                $this->getParameter('procedure_create_url')
+                $this->parameterBag->get('procedure_create_url')
             );
             $json = json_encode($preparedProcedureData, JSON_THROW_ON_ERROR);
 
@@ -223,23 +232,13 @@ class MeinBerlinProcedureCommunicator
     }
 
     /**
-     * Gets a parameter by its name.
-     * @throws ParameterNotFoundException
-     * @return array<int|string, mixed>|bool|string|int|float|\UnitEnum|null
-     */
-    private function getParameter(string $name): array|bool|string|int|float|\UnitEnum|null
-    {
-        return $this->parameterBag->get($name);
-    }
-
-    /**
      * @return array{Accept: 'application/json', Content-Type: 'application/json', Authorization: non-empty-string}
      * @throws ParameterNotFoundException
      * @throws InvalidArgumentException
      */
     private function getMeinBerlinHeader(): array
     {
-        $bearerAuth = $this->getParameter('meinBerlinAuthorization');
+        $bearerAuth = $this->parameterBag->get('meinBerlinAuthorization');
         Assert::stringNotEmpty($bearerAuth);
 
         return [
