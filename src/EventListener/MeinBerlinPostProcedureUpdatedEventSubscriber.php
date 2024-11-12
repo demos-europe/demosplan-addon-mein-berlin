@@ -61,7 +61,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             // but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
             $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
-            // those can not be null as indirectly checked by metods beforehand
+            // those can not be null as indirectly checked by methods beforehand
             Assert::notNull($correspondingAddonOrgaRelation);
             Assert::notNull($correspondingAddonEntity);
 
@@ -70,6 +70,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $correspondingAddonEntity,
                 $correspondingAddonOrgaRelation
             );
+
+            return;
         }
         if ($dplanIdIsPresent) {
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
@@ -89,6 +91,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $correspondingAddonEntity->getDplanId(),
                 $newProcedure->getId()
             );
+
+            return;
         }
     }
 
@@ -98,8 +102,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $newPermissionSet = $event->getProcedureAfterUpdate()->getPublicParticipationPhasePermissionset();
 
         if ($oldPermissionSet !== $newPermissionSet) {
-            $oldIsPublishedVal = 'hidden' === $oldPermissionSet ? false : true;
-            $newIsPublishedVal = 'hidden' === $newPermissionSet ? false : true;
+            $oldIsPublishedVal = 'hidden' !== $oldPermissionSet;
+            $newIsPublishedVal = 'hidden' !== $newPermissionSet;
 
             if ($oldIsPublishedVal !== $newIsPublishedVal) {
                 return $newIsPublishedVal;
