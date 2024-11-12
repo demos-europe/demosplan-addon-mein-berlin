@@ -28,7 +28,7 @@ class MeinBerlinAddonOrgaRelation implements UuidEntityInterface
     private ?string $id = null;
 
     #[ORM\OneToOne(targetEntity: OrgaInterface::class)]
-    #[ORM\JoinColumn(name: '_orga_id', referencedColumnName: '_o_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'orga_id', referencedColumnName: '_o_id', nullable: false)]
     private ?OrgaInterface $orga = null;
 
     #[ORM\Column(name: 'mein_berlin_organisation_id', type: 'string', length: 255, nullable: false)]

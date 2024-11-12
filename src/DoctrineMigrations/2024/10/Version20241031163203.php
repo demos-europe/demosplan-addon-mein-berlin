@@ -29,7 +29,8 @@ final class Version20241031163203 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->abortIfNotMysql();
-        $this->addSql('CREATE TABLE IF NOT EXISTS addon_mein_berlin_orga_relation (id CHAR(36) NOT NULL, _orga_id CHAR(36) NOT NULL, mein_berlin_organisation_id VARCHAR(255) NOT NULL, UNIQUE INDEX UNIQ_42D619E2E3B889DC (_orga_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE IF NOT EXISTS addon_mein_berlin_orga_relation (id CHAR(36) NOT NULL, orga_id CHAR(36) NOT NULL, mein_berlin_organisation_id VARCHAR(255) NOT NULL, UNIQUE INDEX UNIQ_42D619E2E3B889DC (orga_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('ALTER TABLE addon_mein_berlin_orga_relation ADD CONSTRAINT FK_42D619E2E3B889DC FOREIGN KEY (orga_id) REFERENCES _orga (_o_id)');
     }
 
     public function down(Schema $schema): void
@@ -45,6 +46,7 @@ final class Version20241031163203 extends AbstractMigration
         );
         if (0 !== $tableExists || false !== $tableExists) {
             // if it does - drop the foreign key(s) first
+            $this->addSql('ALTER TABLE addon_mein_berlin_orga_relation DROP FOREIGN KEY FK_42D619E2E3B889DC');
             $this->addSql('ALTER TABLE addon_mein_berlin_orga_relation DROP INDEX UNIQ_42D619E2E3B889DC');
         }
 
