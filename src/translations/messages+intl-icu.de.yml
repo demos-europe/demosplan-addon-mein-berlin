@@ -4,3 +4,6 @@ mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-b
 mein.berlin.communication.create.error: "Beim Versuch Informationen zu diesem Verfahren an mein-berlin zu übermitteln ist ein Fehler aufgetreten."
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
 mein.berlin.communication.create.success: "Dieses Verfahrens wurden soeben erfolgreich an mein-berlin übertragen."
+mein.berlin.rss.feed.title: "Beteiligung Sie sich an unseren aktuellen Bebauungsplanverfahren!"
+mein.berlin.building.plan.number: "Bebauungsplan Nr."
+mein.berlin.more.informations: "Weitere Informationen"

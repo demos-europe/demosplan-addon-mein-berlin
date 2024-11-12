@@ -4,4 +4,6 @@ parameters:
     public_procedure_route: 'core_procedure_slug'
     procedure_create_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/'
     procedure_update_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/<bplan-id>/'
+    mein_berlin_api_baseurl: "https://mein.berlin.de/"
+    rss_feed_url: 'https://mein.berlin.de/api/<organisation-id>/rss-feed/'
     meinBerlinAuthorization: ''

@@ -26,7 +26,8 @@
     "symfony/http-client": "^6.2",
     "league/flysystem-aws-s3-v3": "^3.28",
     "league/flysystem-bundle": "^3.3",
-    "league/flysystem-memory": "^3.28"
+    "league/flysystem-memory": "^3.28",
+    "laminas/laminas-feed": "^2.23"
   },
   "config": {
     "allow-plugins": {
