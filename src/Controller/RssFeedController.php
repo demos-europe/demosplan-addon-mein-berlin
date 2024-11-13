@@ -31,12 +31,12 @@ class RssFeedController extends AbstractController
      */
     public function generateRssFeed(
         MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation,
-        MeinBerlinAddonRelationSerivce $procedureService
+        MeinBerlinAddonRelationSerivce $orgaRelationService
     ): Response
     {
         $externalWritePhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('write');
         // Fetch procedures from the service
-        $procedures = $procedureService->getProceduresWithEndedParticipation($externalWritePhaseKeys);
+        $procedures = $orgaRelationService->getProceduresWithEndedParticipation($externalWritePhaseKeys);
         //base url : https://mein.berlin.de
         $url = $this->meinBerlinRouter->rssFeed($correspondingAddonOrgaRelation->getMeinBerlinOrganisationId());
         // Create the RSS feed
