@@ -6,26 +6,19 @@
       :label="{
         text: Translator.trans('organisation.mein.berlin.id')
       }"
-      @input="$emit('addonEvent:emit', { name: 'input', payload: currentValue })"
+      @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
       required />
-    <div class="w-1/2 self-end ml-2">
-      <dp-button
-        data-cy=""
-        :text="Translator.trans('save')"
-        @click="save" />
-    </div>
   </div>
 </template>
 
 <script>
-import { checkResponse, dpApi, DpButton, DpInput } from '@demos-europe/demosplan-ui'
-import { mapState, mapActions } from 'vuex'
+import { dpApi, DpInput} from '@demos-europe/demosplan-ui'
+
 export default {
   name: 'MeinBerlinAddonOrganisationId',
 
   components: {
-    DpInput,
-    DpButton
+    DpInput
   },
 
   props: {
@@ -40,66 +33,52 @@ export default {
     return {
       currentValue: '',
       meinBerlinOrganisation: null,
+      meinBerlinOrganisations: null,
       meinBerlinOrganisationId: ''
     }
   },
 
   computed: {
-    ...mapState('MeinBerlinAddonOrganisation', {
-      meinBerlinAddonOrganisation: 'items'
-    })
-  },
-  methods: {
-    ...mapActions('MeinBerlinAddonOrganisation', {
-      meinBerlinAddonOrganisationList: 'list'
-    }),
-
-    save () {
-      const payload = this.createPayload()
-
-      const apiCall = this.meinBerlinOrganisation
-        ? dpApi.patch(Routing.generate('api_resource_update', { resourceType: 'MeinBerlinAddonOrganisation', resourceId: this.meinBerlinOrganisationId }), {}, { data: payload })
-        : dpApi.post(Routing.generate('api_resource_create', { resourceType: 'MeinBerlinAddonOrganisation' }), {}, { data: payload })
-
-      apiCall
-        .then(checkResponse)
-        .then(() => {
-          dplan.notify.notify('confirm', Translator.trans('confirm.saved'))
-        })
-        .catch(() => {
-          dplan.notify.error(Translator.trans('error.changes.not.saved'))
-        })
-    },
-
-    createPayload () {
+    addonPayload () {
       return {
-        type: 'MeinBerlinAddonOrganisation',
+        id: this.meinBerlinOrganisationId,
+        resourceType: 'MeinBerlinAddonOrganisation',
         attributes: {
           meinBerlinOrganisationId: this.currentValue
         },
-        relationships: this.meinBerlinOrganisation ? undefined : {
-          orga: {
-            data: {
-              type: 'Orga',
-              id: this.orgaId
-            }
-          }
-        },
-        ...(this.meinBerlinOrganisation ? { id: this.meinBerlinOrganisation.id } : {}),
+        request: this.meinBerlinOrganisation ? 'PATCH' : 'POST'
       }
     }
   },
 
+  methods: {
+    fetchMeinBerlinOrganisations () {
+      const url = Routing.generate('api_resource_list', { resourceType: 'MeinBerlinAddonOrganisation' })
+
+      return dpApi.get(url, { include: ['orga'].join() })
+        .then(response => {
+          this.meinBerlinOrganisations = response.data.data.map(organisation => {
+            return {
+              id: organisation.id,
+              attributes: organisation.attributes,
+              relationships: organisation.relationships
+            }
+          })
+        })
+        .catch(err => console.error(err))
+    },
+  },
+
   mounted () {
-    this.meinBerlinAddonOrganisationList({ include: ['orga'].join() }) // // TODO: get it outside this field (too many requests)
-      .then(response => {
-        this.meinBerlinOrganisation = Object.values(response.data?.MeinBerlinAddonOrganisation).find(el => el.relationships.orga.data.id === this.orgaId) || null
+    this.fetchMeinBerlinOrganisations()
+      .then(() => {
+        this.meinBerlinOrganisation = Object.values(this.meinBerlinOrganisations).find(el => el.relationships.orga.data.id === this.orgaId) || null
 
         if (this.meinBerlinOrganisation) {
           this.meinBerlinOrganisationId = this.meinBerlinOrganisation.id
           this.currentValue = this.meinBerlinOrganisation.attributes.meinBerlinOrganisationId
         }
-    })
+      })
   }
 }
 </script>
