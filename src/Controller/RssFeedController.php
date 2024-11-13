@@ -6,7 +6,6 @@ use DemosEurope\DemosplanAddon\Contracts\Config\GlobalConfigInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinRouter;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationSerivce;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
