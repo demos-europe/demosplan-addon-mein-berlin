@@ -13,13 +13,18 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DateTime;
 use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonProcedureDataResourceType;
 use Exception;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\FilesystemOperator;
+use League\Flysystem\UnableToReadFile;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -29,9 +34,7 @@ use function is_array;
 use function array_key_exists;
 use function array_merge;
 use function substr;
-use function is_file;
 use function base64_encode;
-use function file_get_contents;
 
 class MeinBerlinUpdateProcedureService
 {
@@ -40,16 +43,41 @@ class MeinBerlinUpdateProcedureService
         private readonly LoggerInterface $logger,
         private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
+        private readonly MeinBerlinProcedureCommunicator $procedureCommunicator,
+        private readonly MessageBagInterface $messageBag,
+        private readonly FilesystemOperator $defaultStorage,
     ){
 
     }
 
+    /**
+     * @throws MeinBerlinCommunicationException
+     */
     public function updateProcedureShortNameByResourceType(
         MeinBerlinAddonEntity $changedEntity,
-        string $meinBerlinOrganisationId
+        string $meinBerlinOrganisationId,
+        string $dplanId,
+        string $procedureId
     ): void
     {
+        $fieldsToUpdate = [];
         $fieldsToUpdate['bplan_id'] = $changedEntity->getProcedureShortName();
+
+        try {
+            $this->procedureCommunicator->updateProcedure(
+                $fieldsToUpdate,
+                $meinBerlinOrganisationId,
+                $dplanId,
+                $procedureId
+            );
+            $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');
+        } catch (MeinBerlinCommunicationException $e) {
+            // logs have been written
+            $this->messageBag->add('error', 'mein.berlin.communication.update.error');
+            // rethrow here to prevent the flushing the change on our side
+            throw $e;
+        }
+
     }
 
     /** This Method will not include the { @link MeinBerlinAddonEntity::$procedureShortName }
@@ -62,7 +90,8 @@ class MeinBerlinUpdateProcedureService
         array $changeSet,
         ?bool $isPublished,
         string $meinBerlinOrganisationId,
-        string $dplanId
+        string $dplanId,
+        string $procedureId
     ): void
     {
         if (RelevantProcedurePropertiesForMeinBerlinCommunication::
@@ -78,7 +107,19 @@ class MeinBerlinUpdateProcedureService
                 $fieldsToUpdate['is_published '] = $isPublished;
             }
 
-            // todo send update PATCH
+            try {
+                $this->procedureCommunicator->updateProcedure(
+                    $fieldsToUpdate,
+                    $meinBerlinOrganisationId,
+                    $dplanId,
+                    $procedureId
+                );
+                $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');
+            } catch (MeinBerlinCommunicationException $e) {
+                // logs have been written already
+                $this->messageBag->add('error', 'mein.berlin.communication.update.error');
+                // do not rethrow this Exception as the procedure updates are flushed anyhow and information is lost
+            }
         }
     }
 
@@ -219,19 +260,35 @@ class MeinBerlinUpdateProcedureService
                         'demosplan-mein-berlin-addon found changed Pictogram - converting file contents to base64',
                         [$pictogram->getFileName(), $pictogram->getPath()]
                     );
-                    if (is_file($pictogram->getPath())) {
+                    if ($this->defaultStorage->fileExists($pictogram->getPath())) {
+                        $fileSize = $this->defaultStorage->fileSize($pictogram->getPath());
+                        if ((int) $this->parameterBag->get('pictogram_max_file_size') <= $fileSize) {
+                            $this->logger->error(
+                                'demosplan-mein-berlin-addon could not append pictogram base64 file
+                             to procedure update message as the allowed max size was exceeded',
+                                [
+                                    'Max-allowed' => $this->parameterBag->get('pictogram_max_file_size'),
+                                    'Got-size' => $fileSize
+                                ]
+                            );
+                            $this->messageBag->add('error', 'mein.berlin.pictogram.file.to.large');
+
+                            throw new Exception('FileSize to large');
+                        }
                         $relevantProcedurePublicPhaseChanges[
                         RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
-                        ] = base64_encode(file_get_contents($pictogram->getPath()));
+                        ] = base64_encode(
+                            $this->defaultStorage->read($pictogram->getPath())
+                        );
                     }
-                } catch (Exception $e) {
+                } catch (FilesystemException|UnableToReadFile|Exception $e) {
                     $this->logger->error(
                         'demosplan-mein-berlin-addon failed to load/convert the pictogram to base64 string',
                         [$e]
                     );
 
                     $relevantProcedurePublicPhaseChanges[
-                    RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
+                        RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
                     ] = '';
                 }
             }

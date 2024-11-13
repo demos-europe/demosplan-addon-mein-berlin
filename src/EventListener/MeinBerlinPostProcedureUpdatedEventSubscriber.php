@@ -13,9 +13,11 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener;
 
 
 use DemosEurope\DemosplanAddon\Contracts\Events\PostProcedureUpdatedEventInterface;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
+use InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Webmozart\Assert\Assert;
 
@@ -35,6 +37,12 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         ];
     }
 
+    /**
+     * Those Exceptions can not really occur as they are handled beforehand when called
+     * after the flush with updates on the procedure happened anyhow - messagebag/logs have been filled.
+     * @throws MeinBerlinCommunicationException
+     * @throws InvalidArgumentException
+     */
     public function onProcedureUpdate(PostProcedureUpdatedEventInterface $postProcedureUpdatedEvent): void
     {
         // check if procedure is listed to be communicated at all and figure out what kind POST || PATCH
@@ -53,7 +61,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             // but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
             $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
-            // those can not be null as indirectly checked by metods beforehand
+            // those can not be null as indirectly checked by methods beforehand
             Assert::notNull($correspondingAddonOrgaRelation);
             Assert::notNull($correspondingAddonEntity);
 
@@ -62,6 +70,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $correspondingAddonEntity,
                 $correspondingAddonOrgaRelation
             );
+
+            return;
         }
         if ($dplanIdIsPresent) {
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
@@ -78,8 +88,11 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $changeSet,
                 $isPublishedVal,
                 $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
-                $correspondingAddonEntity->getDplanId()
+                $correspondingAddonEntity->getDplanId(),
+                $newProcedure->getId()
             );
+
+            return;
         }
     }
 
@@ -89,8 +102,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $newPermissionSet = $event->getProcedureAfterUpdate()->getPublicParticipationPhasePermissionset();
 
         if ($oldPermissionSet !== $newPermissionSet) {
-            $oldIsPublishedVal = 'hidden' === $oldPermissionSet ? false : true;
-            $newIsPublishedVal = 'hidden' === $newPermissionSet ? false : true;
+            $oldIsPublishedVal = 'hidden' !== $oldPermissionSet;
+            $newIsPublishedVal = 'hidden' !== $newPermissionSet;
 
             if ($oldIsPublishedVal !== $newIsPublishedVal) {
                 return $newIsPublishedVal;

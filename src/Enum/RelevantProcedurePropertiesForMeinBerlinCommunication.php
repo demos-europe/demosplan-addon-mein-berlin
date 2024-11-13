@@ -14,6 +14,7 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum;
 enum RelevantProcedurePropertiesForMeinBerlinCommunication: string
 {
     use CommonEnumMethods;
+
     case name = 'externalName';
     case description = 'externalDesc';
     case office_worker_email = 'agencyMainEmailAddress';

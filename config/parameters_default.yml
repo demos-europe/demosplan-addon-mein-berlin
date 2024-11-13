@@ -2,6 +2,10 @@
 # by enclosing the key with % (like %database_user%)
 parameters:
     public_procedure_route: 'core_procedure_slug'
-    procedure_creat_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/'
+    procedure_create_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/'
     procedure_update_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/<bplan-id>/'
+    mein_berlin_api_baseurl: "https://mein.berlin.de/"
+    rss_feed_url: 'https://mein.berlin.de/api/<organisation-id>/rss-feed/'
     meinBerlinAuthorization: ''
+    # maximal file size allowed to base64 encode procedure-pictogram - 5MB
+    pictogram_max_file_size: 5242880

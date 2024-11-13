@@ -16,7 +16,9 @@ use DemosEurope\DemosplanAddon\Contracts\Entities\UuidEntityInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Doctrine\Generator\UuidV4Generator;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use Doctrine\ORM\Mapping as ORM;
+
 #[ORM\Entity(repositoryClass: MeinBerlinAddonOrgaRelationRepository::class)]
+#[ORM\Table(name: 'addon_mein_berlin_orga_relation')]
 class MeinBerlinAddonOrgaRelation implements UuidEntityInterface
 {
     #[ORM\Column(type: 'string', length: 36, nullable: false, options: ['fixed' => true])]
@@ -26,7 +28,7 @@ class MeinBerlinAddonOrgaRelation implements UuidEntityInterface
     private ?string $id = null;
 
     #[ORM\OneToOne(targetEntity: OrgaInterface::class)]
-    #[ORM\JoinColumn(name: '_orga_id', referencedColumnName: '_o_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'orga_id', referencedColumnName: '_o_id', nullable: false)]
     private ?OrgaInterface $orga = null;
 
     #[ORM\Column(name: 'mein_berlin_organisation_id', type: 'string', length: 255, nullable: false)]

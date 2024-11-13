@@ -13,13 +13,18 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use Exception;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\FilesystemOperator;
+use League\Flysystem\UnableToReadFile;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -27,9 +32,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use function array_key_exists;
 use function substr;
-use function is_file;
 use function base64_encode;
-use function file_get_contents;
 
 class MeinBerlinCreateProcedureService
 {
@@ -39,10 +42,15 @@ class MeinBerlinCreateProcedureService
         private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $meinBerlinProcedureCommunicator,
+        private readonly MessageBagInterface $messageBag,
+        private readonly FilesystemOperator $defaultStorage,
     ){
 
     }
 
+    /**
+     * @throws MeinBerlinCommunicationException
+     */
     public function createMeinBerlinProcedure(
         ProcedureInterface $procedure,
         MeinBerlinAddonEntity $correspondingAddonEntity,
@@ -57,17 +65,26 @@ class MeinBerlinCreateProcedureService
             [$correspondingAddonEntity, $correspondingAddonOrgaRelation, $procedure]
         );
 
-        $procedureCreateRequestData = $this->getRelevantProcedureCreateData(
-            $procedure,
-            $correspondingAddonEntity,
-            $correspondingAddonOrgaRelation
-        );
-        $this->meinBerlinProcedureCommunicator->createProcedure(
-            $procedureCreateRequestData,
-            $correspondingAddonEntity,
-            $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
-            $calledViaResourceTypeFlushIsQueued
-        );
+        try {
+            $procedureCreateRequestData = $this->getRelevantProcedureCreateData(
+                $procedure,
+                $correspondingAddonEntity,
+                $correspondingAddonOrgaRelation
+            );
+            $this->meinBerlinProcedureCommunicator->createProcedure(
+                $procedureCreateRequestData,
+                $correspondingAddonEntity,
+                $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
+                $calledViaResourceTypeFlushIsQueued
+            );
+            $this->messageBag->add('confirm', 'mein.berlin.communication.create.success');
+        } catch (MeinBerlinCommunicationException $e) {
+            $this->messageBag->add('error', 'mein.berlin.communication.create.error');
+            // propagate only if flush is still in queue - otherwise nothing can be done.
+            if ($calledViaResourceTypeFlushIsQueued) {
+                throw $e;
+            }
+        }
     }
 
     /**
@@ -119,10 +136,26 @@ class MeinBerlinCreateProcedureService
                     'demosplan-mein-berlin-addon found Pictogram on create - converting file contents to base64',
                     [$pictogram->getFileName(), $pictogram->getPath()]
                 );
-                if (is_file($pictogram->getPath())) {
-                    $base64FileString = base64_encode(file_get_contents($pictogram->getPath()));
+                if ($this->defaultStorage->fileExists($pictogram->getPath())) {
+                    $fileSize = $this->defaultStorage->fileSize($pictogram->getPath());
+                    if ((int) $this->parameterBag->get('pictogram_max_file_size') <= $fileSize) {
+                        $this->logger->error(
+                            'demosplan-mein-berlin-addon could not append pictogram base64 file
+                             to the procedure create message as the allowed max size was exceeded',
+                            [
+                                'Max-allowed' => $this->parameterBag->get('pictogram_max_file_size'),
+                                'Got-size' => $fileSize
+                            ]
+                        );
+                        $this->messageBag->add('error', 'mein.berlin.pictogram.file.to.large');
+
+                        return $base64FileString;
+                    }
+                    $base64FileString = base64_encode(
+                        $this->defaultStorage->read($pictogram->getPath())
+                    );
                 }
-            } catch (Exception $e) {
+            } catch (FilesystemException|UnableToReadFile|Exception $e) {
                 $this->logger->error(
                     'demosplan-mein-berlin-addon failed to load/convert the pictogram to base64 string',
                     [$e]
@@ -136,7 +169,7 @@ class MeinBerlinCreateProcedureService
     private function generateProcedurePublicRoute(string $slug): string
     {
         try {
-            $routeName = $this->getParameter('public_procedure_route');
+            $routeName = $this->parameterBag->get('public_procedure_route');
             $route = $this->router->generate(
                 $routeName,
                 ['slug' => $slug],
@@ -151,16 +184,6 @@ class MeinBerlinCreateProcedureService
         }
 
         return $route;
-    }
-
-    /**
-     * Gets a parameter by its name.
-     * @throws ParameterNotFoundException
-     * @return array<int|string, mixed>|bool|string|int|float|\UnitEnum|null
-     */
-    private function getParameter(string $name): array|bool|string|int|float|\UnitEnum|null
-    {
-        return $this->parameterBag->get($name);
     }
 
     /**

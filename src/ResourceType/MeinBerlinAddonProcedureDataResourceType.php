@@ -17,6 +17,7 @@ use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\ProcedureResourceTypeInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
@@ -93,7 +94,16 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                          - check if this change needs to be communicated to meinBerlin',
                             [$procedureShortName, $meinBerlinAddonEntity]
                         );
-                        $this->handleProcedureShortNameUpdateAttempt($meinBerlinAddonEntity, $procedureShortName);
+                        try {
+                            $this->handleProcedureShortNameUpdateAttempt($meinBerlinAddonEntity, $procedureShortName);
+                        } catch (InvalidArgumentException $e) {
+                            $this->logger->error(
+                                'demosplan-mein-berlin-addon is missing mandatory properties/relations',
+                                [$e]
+                            );
+                            $this->messageBag->add('error', 'mein.berlin.communication.update.error');
+                            throw $e;
+                        }
 
                         return [];
                     },
@@ -162,6 +172,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
     /**
      * @throws AddonResourceNotFoundException
      * @throws InvalidArgumentException
+     * @throws MeinBerlinCommunicationException
      */
     private function handleProcedureShortNameCreateAttempt(
         MeinBerlinAddonEntity $meinBerlinAddonEntity
@@ -188,7 +199,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 'mein.berlin.error.create.empty.procedure.short.name'
             );
 
-            throw new InvalidArgumentException('create with empty procedureShortName is invalid');
+            throw new AddonResourceNotFoundException('create with empty procedureShortName is invalid');
         }
         // creation is allowed from here on.
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
@@ -212,25 +223,54 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
 
     /**
      * @throws InvalidArgumentException
+     * @throws MeinBerlinCommunicationException
      */
     private function handleProcedureShortNameUpdateAttempt(
         MeinBerlinAddonEntity $meinBerlinAddonEntity,
         ?string $procedureShortName
     ): void {
         $meinBerlinAddonEntity->setProcedureShortName($procedureShortName);
-        $organisationId = $this->meinBerlinCommunicationHelper
+        $oragnisationRelation = $this->meinBerlinCommunicationHelper
             ->getCorrespondingOrgaRelation(
                 $this->currentContextProviderInterface->getCurrentProcedure()
-            )?->getMeinBerlinOrganisationId();
-        // the organisationId can not be null as in theory
-        // you can only create this entity in the first place with an existing id
-        Assert::notNull($organisationId);
+            );
+        Assert::notNull($oragnisationRelation);
+        $organisationId = $oragnisationRelation->getMeinBerlinOrganisationId();
+        // the organisationId can not be empty as in theory
+        // you can only create this Addon entity in the first place with an existing id
+        Assert::stringNotEmpty($organisationId);
         // check if update message should be sent by checking an existent communicationId
         if ('' === $meinBerlinAddonEntity->getDplanId()) {
             $this->logger->info(
                 'this procedure has not been transmitted to meinBerlin yet.
                 No update message will be sent to meinBerlin'
             );
+            // still check if all conditions for a create message are fulfilled
+            // to allow this field as a sort of retrigger if a previous create request failed
+            // if a prev update failded is a different question - would be a real problem as its content is lost.
+            $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
+            Assert::notNull($currentProcedure);
+            if ($this->meinBerlinCommunicationHelper
+                ->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
+            ) {
+                $this->logger->warning(
+                    'demosplan-mein-berlin-addon registered an update of a procedure that should have been
+                    transmitted to myBerlin, but is not. All conditions were met before here and now.
+                    - reattempt creating this procedure.',
+                    [
+                        $currentProcedure->getName() => $currentProcedure->getId(),
+                        'PublicParticipationPhasePermissionsetNotHidden' => true,
+                        'meinBerlinOrganisationId' => $organisationId,
+                        'meinBerlinprocedureShortName' => $procedureShortName,
+                    ]
+                );
+                $this->createProcedureService->createMeinBerlinProcedure(
+                    $currentProcedure,
+                    $meinBerlinAddonEntity,
+                    $oragnisationRelation,
+                    true
+                );
+            }
 
             return;
         }
@@ -241,7 +281,9 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         );
         $this->updateProcedureService->updateProcedureShortNameByResourceType(
             $meinBerlinAddonEntity,
-            $organisationId
+            $organisationId,
+            $meinBerlinAddonEntity->getDplanId(),
+            $this->currentContextProviderInterface->getCurrentProcedure()?->getId(),
         );
     }
 }
