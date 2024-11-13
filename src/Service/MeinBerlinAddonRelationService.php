@@ -11,29 +11,23 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Service;
 
+use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use Exception;
 use Illuminate\Support\Collection;
 
 class MeinBerlinAddonRelationService
 {
-    public function __construct(
-        private readonly MeinBerlinAddonOrgaRelation $orgaRelation,
-    )
-    {
-    }
-
     /**
-     * @param array $phaseKeys
+     * @param array<int, string> $phaseKeys
      * @return array
      * @throws Exception
      */
-    public function getProceduresWithEndedParticipation(array $phaseKeys): array
+    public function getProceduresWithEndedParticipation(array $phaseKeys, OrgaInterface $orga): array
     {
         try {
             $currentDate = new \DateTime();
-            $procedures = $this->orgaRelation->getOrga()->getProcedures();
+            $procedures = $orga->getProcedures();
             $phaseKeys = new Collection($phaseKeys);
             $hits = collect($procedures)->filter(
                 static fn (ProcedureInterface $procedure): bool => $procedure->getPublicParticipationEndDate() < $currentDate
