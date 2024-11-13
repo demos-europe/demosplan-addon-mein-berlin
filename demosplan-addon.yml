@@ -5,3 +5,10 @@ demosplan_addon:
     Integrates the mein.berlin API into the DEMOS plan platform.
   entry: DemosEurope\DemosplanAddon\DemosMeinBerlin\MeinBerlinAddon
   permissionInitializer: DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\PermissionInitializer
+  ui:
+    manifest: dist/assets-manifest.json
+    hooks:
+     mein.berlin.organisation.id.field:
+        entry: OrganisationIdField
+     mein.berlin.procedure.data.field:
+        entry: ProcedureDataField
