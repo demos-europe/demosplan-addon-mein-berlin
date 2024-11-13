@@ -7,6 +7,7 @@ use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinRouter;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationSerivce;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +32,7 @@ class RssFeedController extends AbstractController
      */
     public function generateRssFeed(
         MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation,
-        MeinBerlinAddonRelationSerivce $orgaRelationService
+        MeinBerlinAddonRelationService $orgaRelationService
     ): Response
     {
         $externalWritePhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('write');

@@ -4,9 +4,10 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Service;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
+use Exception;
 use Illuminate\Support\Collection;
 
-class MeinBerlinAddonRelationSerivce
+class MeinBerlinAddonRelationService
 {
     public function __construct(
         private readonly MeinBerlinAddonOrgaRelation $orgaRelation,
@@ -14,6 +15,11 @@ class MeinBerlinAddonRelationSerivce
     {
     }
 
+    /**
+     * @param array $phaseKeys
+     * @return array
+     * @throws Exception
+     */
     public function getProceduresWithEndedParticipation(array $phaseKeys): array
     {
         try {
@@ -26,7 +32,7 @@ class MeinBerlinAddonRelationSerivce
             );
 
             return $hits->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
