@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinRssFeedException;
@@ -14,6 +16,10 @@ use Webmozart\Assert\Assert;
 class MeinBerlinRouter
 {
     private const RSS_FEED = 'rss_feed';
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private UrlGeneratorInterface $generator;
     public function __construct(ParameterBagInterface $parameterBag)
     {
         if (!$parameterBag->has('mein_berlin_api_baseurl')) {
