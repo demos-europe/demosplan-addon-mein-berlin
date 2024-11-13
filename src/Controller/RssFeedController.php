@@ -6,12 +6,13 @@ use DemosEurope\DemosplanAddon\Contracts\Config\GlobalConfigInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinRouter;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationSerivce;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Laminas\Feed\Writer\Feed;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use DemosEurope\DemosplanAddon\Contracts\Services\ProcedureServiceInterface;
 use DateTime;
 
 class RssFeedController extends AbstractController
@@ -26,15 +27,16 @@ class RssFeedController extends AbstractController
 
     /**
      * @Route("/api/{organisationId}/rss-feed/", name="rss_feed")
+     * @throws Exception
      */
     public function generateRssFeed(
         MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation,
-        ProcedureServiceInterface $procedureService
+        MeinBerlinAddonRelationSerivce $procedureService
     ): Response
     {
         $externalWritePhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('write');
         // Fetch procedures from the service
-        $procedures = $procedureService->getProceduresWithEndedParticipation($externalWritePhaseKeys, false);
+        $procedures = $procedureService->getProceduresWithEndedParticipation($externalWritePhaseKeys);
         //base url : https://mein.berlin.de
         $url = $this->meinBerlinRouter->rssFeed($correspondingAddonOrgaRelation->getMeinBerlinOrganisationId());
         // Create the RSS feed
@@ -47,6 +49,9 @@ class RssFeedController extends AbstractController
         // Add items to the feed with numbering
         $procedureCount = 1;
         // Add items to the feed
+        /**
+         * @var ProcedureInterface $procedure
+         */
         foreach ($procedures as $procedure) {
             $entry = $feed->createEntry();
             $entry->setTitle("{$this->translator->trans('mein.berlin.building.plan.number')} {$procedureCount}: \"{$procedure->getExternalName()}\"");
