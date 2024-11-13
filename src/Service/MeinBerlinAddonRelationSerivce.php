@@ -3,7 +3,6 @@
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Service;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
-use DemosEurope\DemosplanAddon\Contracts\Services\ProcedureServiceInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use Illuminate\Support\Collection;
 
@@ -11,7 +10,6 @@ class MeinBerlinAddonRelationSerivce
 {
     public function __construct(
         private readonly MeinBerlinAddonOrgaRelation $orgaRelation,
-        private readonly ProcedureServiceInterface $procedureService,
     )
     {
     }
