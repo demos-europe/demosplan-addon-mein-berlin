@@ -4,10 +4,10 @@
       id="meinBerlinOrganisationId"
       v-model="currentValue"
       :label="{
-        text: Translator.trans('organisation.mein.berlin.id')
+        text: label
       }"
       @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-      required />
+      :required="required" />
   </div>
 </template>
 
@@ -22,7 +22,25 @@ export default {
   },
 
   props: {
-    orgaId: {
+    relationshipId: {
+      type: String,
+      required: false,
+      default: ''
+    },
+
+    resourceType: {
+      type: String,
+      required: true,
+      validator: (prop) => ['MeinBerlinAddonOrganisation', 'MeinBerlinAddonProcedureData'].includes(prop)
+    },
+
+    required: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+
+    label: {
       type: String,
       required: false,
       default: ''
@@ -32,53 +50,70 @@ export default {
   data () {
     return {
       currentValue: '',
-      meinBerlinOrganisation: null,
-      meinBerlinOrganisations: null,
-      meinBerlinOrganisationId: ''
+      item: null,
+      list: null,
+      resourceTypeMappings: {
+        'MeinBerlinAddonOrganisation': {
+          attribute: 'meinBerlinOrganisationId',
+          relationshipKey: 'orga'
+        },
+        'MeinBerlinAddonProcedureData': {
+          attribute: 'procedureShortName',
+          relationshipKey: 'procedure'
+        }
+      },
     }
   },
 
   computed: {
     addonPayload () {
       return {
-        id: this.meinBerlinOrganisationId,
-        resourceType: 'MeinBerlinAddonOrganisation',
+        id: this.item ? this.item.id : '',
+        resourceType: this.resourceType,
         attributes: {
-          meinBerlinOrganisationId: this.currentValue
+          [this.attribute]: this.currentValue
         },
-        request: this.meinBerlinOrganisation ? 'PATCH' : 'POST'
+        request: this.item ? 'PATCH' : 'POST'
       }
+    },
+
+    attribute () {
+      return this.resourceTypeMappings[this.resourceType]?.attribute || undefined
+    },
+
+    relationshipKey () {
+      return this.resourceTypeMappings[this.resourceType]?.relationshipKey || undefined
     }
   },
 
   methods: {
-    fetchMeinBerlinOrganisations () {
-      const url = Routing.generate('api_resource_list', { resourceType: 'MeinBerlinAddonOrganisation' })
+    fetchResourceList () {
+      const url = Routing.generate('api_resource_list', { resourceType: this.resourceType })
 
-      return dpApi.get(url, { include: ['orga'].join() })
+      return dpApi.get(url, { include: [this.relationshipKey].join() })
         .then(response => {
-          this.meinBerlinOrganisations = response.data.data.map(organisation => {
+          this.list = response.data.data.map(item => {
             return {
-              id: organisation.id,
-              attributes: organisation.attributes,
-              relationships: organisation.relationships
+              id: item.id,
+              attributes: item.attributes,
+              relationships: item.relationships
             }
           })
         })
         .catch(err => console.error(err))
     },
+
+    getItemByRelationshipId () {
+      this.item = Object.values(this.list).find(el => el.relationships[this.relationshipKey].data.id === this.relationshipId) || null
+
+      if (this.item) {
+        this.currentValue = this.item.attributes[this.attribute]
+      }
+    }
   },
 
   mounted () {
-    this.fetchMeinBerlinOrganisations()
-      .then(() => {
-        this.meinBerlinOrganisation = Object.values(this.meinBerlinOrganisations).find(el => el.relationships.orga.data.id === this.orgaId) || null
-
-        if (this.meinBerlinOrganisation) {
-          this.meinBerlinOrganisationId = this.meinBerlinOrganisation.id
-          this.currentValue = this.meinBerlinOrganisation.attributes.meinBerlinOrganisationId
-        }
-      })
+    this.fetchResourceList().then(this.getItemByRelationshipId)
   }
 }
 </script>
