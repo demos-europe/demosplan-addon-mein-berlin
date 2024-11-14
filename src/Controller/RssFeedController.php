@@ -4,8 +4,8 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Controller;
 
 use DemosEurope\DemosplanAddon\Contracts\Config\GlobalConfigInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinRouter;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Laminas\Feed\Writer\Feed;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use DateTime;
+use Webmozart\Assert\Assert;
 
 class RssFeedController extends AbstractController
 {
@@ -30,13 +31,20 @@ class RssFeedController extends AbstractController
      * @throws Exception
      */
     public function generateRssFeed(
-        MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation,
-        MeinBerlinAddonRelationService $orgaRelationService
+        MeinBerlinAddonOrgaRelationRepository $correspondingAddonOrgaRelationRepository,
+        MeinBerlinAddonRelationService $orgaRelationService,
+        string $organisationId
     ): Response
     {
+        $correspondingAddonOrgaRelation = $correspondingAddonOrgaRelationRepository->findOneBy(['meinBerlinOrganisationId' => $organisationId]);
+        Assert::notNull($correspondingAddonOrgaRelation);
+        $demosplanOrga = $correspondingAddonOrgaRelation->getOrga();
         $externalWritePhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('write');
         // Fetch procedures from the service
-        $procedures = $orgaRelationService->getProceduresWithEndedParticipation($externalWritePhaseKeys);
+        $procedures = $orgaRelationService->getProceduresWithEndedParticipation(
+            $externalWritePhaseKeys,
+            $demosplanOrga
+        );
         //base url : https://mein.berlin.de
         $url = $this->meinBerlinRouter->rssFeed($correspondingAddonOrgaRelation->getMeinBerlinOrganisationId());
         // Create the RSS feed

@@ -11,16 +11,15 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\RouterInterface;
 use Webmozart\Assert\Assert;
 
 class MeinBerlinRouter
 {
     private const RSS_FEED = 'rss_feed';
-    /**
-     * @var UrlGeneratorInterface
-     */
+
     private UrlGeneratorInterface $generator;
-    public function __construct(ParameterBagInterface $parameterBag)
+    public function __construct(ParameterBagInterface $parameterBag, RouterInterface $router)
     {
         if (!$parameterBag->has('mein_berlin_api_baseurl')) {
             throw MeinBerlinRssFeedException::missingParameter('mein_berlin_api_baseurl');
@@ -38,6 +37,10 @@ class MeinBerlinRouter
 
     public function rssFeed(string $organisationId): string
     {
-        return $this->generator->generate(self::RSS_FEED, ['organisationId' => $organisationId], UrlGeneratorInterface::ABSOLUTE_URL);
+        return $this->generator->generate(
+            self::RSS_FEED,
+            ['organisationId' => $organisationId],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
     }
 }

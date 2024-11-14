@@ -32,6 +32,8 @@ use EDT\Wrapping\PropertyBehavior\Attribute\Factory\CallbackAttributeSetBehavior
 use EDT\Wrapping\PropertyBehavior\FixedSetBehavior;
 use InvalidArgumentException;
 use Webmozart\Assert\Assert;
+use function is_array;
+use function array_key_exists;
 
 /**
  * @template-extends AddonResourceType<MeinBerlinAddonEntity>
@@ -128,7 +130,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                           and if all conditions for a create procedure entry at MeinBerlin are met.',
                         [$meinBerlinAddonEntity, $entityData]
                     );
-                    $this->handleProcedureShortNameCreateAttempt($meinBerlinAddonEntity);
+                    $this->handleProcedureShortNameCreateAttempt($meinBerlinAddonEntity, $entityData);
 
                     return [];
                 }
@@ -175,11 +177,27 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
      * @throws MeinBerlinCommunicationException
      */
     private function handleProcedureShortNameCreateAttempt(
-        MeinBerlinAddonEntity $meinBerlinAddonEntity
+        MeinBerlinAddonEntity $meinBerlinAddonEntity,
+        EntityDataInterface $entityData
     ): void {
         // check if create is allowed by checking the presence of a corresponding MeinBerlin OrganisationId
         $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
         Assert::notNull($currentProcedure);
+        if (!array_key_exists('procedure', $entityData->getToOneRelationships())
+            || !is_array($entityData->getToOneRelationships()['procedure'])
+            || !array_key_exists('id', $entityData->getToOneRelationships()['procedure'])
+            || $entityData->getToOneRelationships()['procedure']['id'] !== $currentProcedure?->getId()
+        ) {
+            throw new AddonResourceNotFoundException('create with invalid procedure is invalid');
+        }
+        if ($this->meinBerlinCommunicationHelper->getCorrespondingAddonEntity($currentProcedure)) {
+            $this->logger->error(
+                'A second MeinBerlinAddonEntity for this procedure was tried to be created',
+                ['procedureId' => $currentProcedure->getId()]
+            );
+            throw new AddonResourceNotFoundException('create with existing MeinBerlinAddonEntity is invalid');
+        }
+
         if (!$this->meinBerlinCommunicationHelper->hasOrganisationIdSet($currentProcedure)) {
             $this->logger->info('FP-A tried to set a procedureShortName, but his organisation has not
             MeinBerlinOrganisationId set yet - therefore this action is not allowed');
@@ -192,7 +210,9 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 'Can not create a MeinBerlinAddonEntity as no MeinBerlinAddonOrgaRelation has been set yet'
             );
         }
-        if ('' === $meinBerlinAddonEntity->getProcedureShortName()) {
+        if (!array_key_exists('procedureShortName', $entityData->getAttributes())
+            || '' === $entityData->getAttributes()['procedureShortName']
+        ) {
             $this->logger->info('FP-A tried saving an empty meinBerlin procedureShortName');
             $this->messageBag->add(
                 'error',
@@ -204,9 +224,8 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         // creation is allowed from here on.
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
         // check if create message should be sent by checking the procedurePhase
-        // lastly check if a dplanId (communicationId) is already set - this would be an error here - log potential case
-        if (null !== $currentProcedure &&
-            '' !== $meinBerlinAddonEntity->getDplanId() &&
+        // lastly check if a dplanId (communicationId) is already set - this would be an error here - unique constraint
+        if (!$this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure) &&
             $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
         ) {
             $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper

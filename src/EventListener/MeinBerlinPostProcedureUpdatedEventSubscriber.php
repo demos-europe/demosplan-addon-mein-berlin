@@ -96,7 +96,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         }
     }
 
-     private function isPublishedIfNeedsToBeIncludedOnUpdate(PostProcedureUpdatedEventInterface $event): ?bool
+     protected function isPublishedIfNeedsToBeIncludedOnUpdate(PostProcedureUpdatedEventInterface $event): ?bool
     {
         $oldPermissionSet = $event->getProcedureBeforeUpdate()->getPublicParticipationPhasePermissionset();
         $newPermissionSet = $event->getProcedureAfterUpdate()->getPublicParticipationPhasePermissionset();
