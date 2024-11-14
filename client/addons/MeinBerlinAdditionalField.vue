@@ -73,8 +73,7 @@ export default {
           [this.attribute]: this.currentValue
         },
         request: this.item ? 'PATCH' : 'POST',
-        value: this.currentValue,
-        initValue: this.item.attributes[this.attribute]
+        value: this.currentValue
       }
     },
 
