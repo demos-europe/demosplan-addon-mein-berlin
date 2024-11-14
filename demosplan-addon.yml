@@ -8,7 +8,5 @@ demosplan_addon:
   ui:
     manifest: dist/assets-manifest.json
     hooks:
-     mein.berlin.organisation.id.field:
-        entry: OrganisationIdField
-     mein.berlin.procedure.data.field:
-        entry: ProcedureDataField
+     mein.berlin.additional.field:
+        entry: MeinBerlinAdditionalField
