@@ -1,14 +1,15 @@
 <template>
-  <div class="flex flex-row">
-    <dp-input
-      id="meinBerlinOrganisationId"
-      v-model="currentValue"
-      :label="{
-        text: label
-      }"
-      @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-      :required="required" />
-  </div>
+  <dp-input
+    :id="resourceType"
+    :data-cy="`${resourceType}:field`"
+    v-model="currentValue"
+    :label="{
+      text: label,
+      hint: hint,
+    }"
+    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
+    @input="$emit('addonEvent:emit', { name: 'input', payload: currentValue })"
+    :required="required" />
 </template>
 
 <script>
@@ -38,12 +39,6 @@ export default {
       type: Boolean,
       required: false,
       default: false
-    },
-
-    label: {
-      type: String,
-      required: false,
-      default: ''
     }
   },
 
@@ -55,10 +50,14 @@ export default {
       resourceTypeMappings: {
         'MeinBerlinAddonOrganisation': {
           attribute: 'meinBerlinOrganisationId',
+          hint: Translator.trans(''),
+          label: Translator.trans('mein.berlin.organisation.id'),
           relationshipKey: 'orga'
         },
         'MeinBerlinAddonProcedureData': {
           attribute: 'procedureShortName',
+          hint: Translator.trans(''),
+          label: Translator.trans('mein.berlin.procedure.short.name'),
           relationshipKey: 'procedure'
         }
       },
@@ -73,12 +72,22 @@ export default {
         attributes: {
           [this.attribute]: this.currentValue
         },
-        request: this.item ? 'PATCH' : 'POST'
+        request: this.item ? 'PATCH' : 'POST',
+        value: this.currentValue,
+        initValue: this.item.attributes[this.attribute]
       }
     },
 
     attribute () {
       return this.resourceTypeMappings[this.resourceType]?.attribute || undefined
+    },
+
+    hint () {
+      return this.resourceTypeMappings[this.resourceType]?.hint || ''
+    },
+
+    label () {
+      return this.resourceTypeMappings[this.resourceType]?.label || ''
     },
 
     relationshipKey () {
