@@ -50,6 +50,7 @@ class RssFeedController extends AbstractController
         // Create the RSS feed
         $feed = new Feed();
         $feed->setTitle($this->translator->trans('mein.berlin.rss.feed.title'));
+        $feed->setDescription($this->translator->trans('mein.berlin.rss.feed.description', ['organisation' => $demosplanOrga->getName()]));
         $feed->setLink($url);
         $feed->setFeedLink($url, 'rss');
         $feed->setDateModified(new DateTime());
@@ -93,7 +94,7 @@ class RssFeedController extends AbstractController
                 {$startDate} - {$endDate}\n
                 {$procedure->getPublicParticipationPhaseName()}\n
                 {$procedure->getDesc()}\n
-                <a href="{$this->redirectToRoute('DemosPlan_procedure_public_detail')}">{$this->translator->trans('mein.berlin.more.informations')}</a>
+                <a href="{$this->redirectToRoute('DemosPlan_procedure_public_detail', ['procedure' => $procedure->getId()])}">{$this->translator->trans('mein.berlin.more.informations')}</a>
                 EOD;
         return nl2br($desc); // Convert newlines to <br> for proper HTML display
     }

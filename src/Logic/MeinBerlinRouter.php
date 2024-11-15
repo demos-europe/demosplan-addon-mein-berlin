@@ -21,18 +21,14 @@ class MeinBerlinRouter
     private UrlGeneratorInterface $generator;
     public function __construct(ParameterBagInterface $parameterBag, RouterInterface $router)
     {
-        if (!$parameterBag->has('mein_berlin_api_baseurl')) {
+        $baseUrl = $parameterBag->get('mein_berlin_api_baseurl') ??
             throw MeinBerlinRssFeedException::missingParameter('mein_berlin_api_baseurl');
-        }
+        Assert::string($baseUrl);
 
         $routes = new RouteCollection();
         $routes->add(self::RSS_FEED, new Route('/api/{organisationId}/rss-feed'));
 
-        $meinBerlinApiBaseurl = $parameterBag->get('mein_berlin_api_baseurl');
-        Assert::string($meinBerlinApiBaseurl);
-        $requestContext = RequestContext::fromUri($meinBerlinApiBaseurl);
-
-        $this->generator = new UrlGenerator($routes, $requestContext);
+        $this->generator = new UrlGenerator($routes, RequestContext::fromUri($baseUrl));
     }
 
     public function rssFeed(string $organisationId): string
