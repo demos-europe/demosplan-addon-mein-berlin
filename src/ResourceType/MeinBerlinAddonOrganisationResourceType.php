@@ -12,10 +12,13 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType;
 
 use DemosEurope\DemosplanAddon\Contracts\CurrentUserInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\OrgaResourceTypeInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
@@ -25,6 +28,8 @@ use EDT\JsonApi\ResourceConfig\Builder\ResourceConfigBuilderInterface;
 use EDT\Wrapping\EntityDataInterface;
 use EDT\Wrapping\PropertyBehavior\Attribute\Factory\CallbackAttributeSetBehaviorFactory;
 use EDT\Wrapping\PropertyBehavior\FixedSetBehavior;
+use function array_map;
+use function count;
 
 /**
  * @template-extends AddonResourceType<MeinBerlinAddonOrgaRelation>
@@ -37,6 +42,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
         private readonly OrgaResourceTypeInterface $orgaResourceType,
         private readonly MeinBerlinAddonOrgaRelationRepository $meinBerlinAddonOrgaRelationRepository,
         private readonly CurrentUserInterface $currentUser,
+        private readonly MessageBagInterface $messageBag,
     ) {
 
     }
@@ -84,12 +90,30 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                         MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
                         ?string $meinBerlinOrganisationId
                     ): array {
+                        // no update will be sent to meinBerlin as updating this field is allowed only until
+                        // the first procedure has been published with this organisationId
                         $this->logger->info('demosplan-mein-berlin-addon registered an
-                        MeinBerlinOrganisationId update - check if any Procedures were live already at MeinBerlin and
-                        attempt to update all of them',
+                        MeinBerlinOrganisationId update - check if any Procedures were live already',
                             [$meinBerlinAddonOrgaRelation, ['newMeinBerlinOrganisationId' => $meinBerlinOrganisationId]]
                         );
-                        // todo what todo with allready sent entries
+                        $alreadyEstablishedCommunications = $this->meinBerlinAddonOrgaRelationRepository
+                            ->getProceduresOfOrgaWithExistingDplanId($meinBerlinOrganisationId);
+                        if (0 < count($alreadyEstablishedCommunications)) {
+                            $alreadyEstablishedCommunicationProcedureIds = array_map(
+                                static fn(MeinBerlinAddonEntity $addonEntity) => $addonEntity->getProcedure()?->getId(),
+                                $alreadyEstablishedCommunications
+                            );
+                            $this->logger->info('demosplan-mein-berlin-addon found already established
+                            communications for MeinBerlinOrganisationId',
+                                ['procedures' => $alreadyEstablishedCommunicationProcedureIds]
+                            );
+                            $this->messageBag->add(
+                                'error',
+                                'mein.berlin.error.update.organisation.id.for.established.communication'
+                            );
+                            throw new MeinBerlinCommunicationException('MeinBerlinOrganisationId already in use');
+                        }
+                        $this->logger->info('checks passed - will update MeinBerlinOrganisationId');
                         $meinBerlinAddonOrgaRelation->setMeinBerlinOrganisationId($meinBerlinOrganisationId);
 
                         return [];
@@ -109,6 +133,28 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                     MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
                     EntityDataInterface $entityData
                 ): array {
+                    $meinBerlinAddonOrganisationId =
+                        ((array) $entityData->getAttributes())['meinBerlinOrganisationId'] ?? '';
+                    if ('' === $meinBerlinAddonOrganisationId) {
+                        $this->logger->warning('demosplan-mein-berlin-addon tried to create a new
+                            MeinBerlinOrganisation relation without a MeinBerlinOrganisationId',
+                            ['relationToOrga' => ((array) $entityData->getToOneRelationships())['orga']['id'] ?? null]
+                        );
+                        $this->messageBag->add('error', 'mein.berlin.error.create.empty.organisation.id');
+                        throw new MeinBerlinCommunicationException('missing MeinBerlinOrganisationId');
+                    }
+                    $orgaRelationId = ((array) $entityData->getToOneRelationships())['orga']['id'] ?? '';
+                    if ('' === $orgaRelationId
+                        || null !== $this->meinBerlinAddonOrgaRelationRepository->getByOrgaId($orgaRelationId)
+                    ) {
+                        $this->logger->error('demosplan-mein-berlin-addon tried to create a second new
+                            MeinBerlinOrganisation relation',
+                            ['relation for orgaId already present: ' => $orgaRelationId]
+                        );
+                        // messageBag gets the generic error message automatically
+                        throw new MeinBerlinCommunicationException('relation has to be unique');
+                    }
+
                     $this->meinBerlinAddonOrgaRelationRepository
                         ->persistMeinBerlinAddonOrgaRelation($meinBerlinAddonOrgaRelation);
                     $this->logger->info('demosplan-mein-berlin-addon registered a new

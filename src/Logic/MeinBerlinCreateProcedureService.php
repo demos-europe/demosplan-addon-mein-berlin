@@ -26,7 +26,6 @@ use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\UnableToReadFile;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -90,7 +89,7 @@ class MeinBerlinCreateProcedureService
     /**
      * @return array<string, string|bool>
      */
-    private function getRelevantProcedureCreateData(
+    public function getRelevantProcedureCreateData(
         ProcedureInterface $procedure,
         MeinBerlinAddonEntity $correspondingAddonEntity,
         MeinBerlinAddonOrgaRelation $correspondingAddonOrgaRelation

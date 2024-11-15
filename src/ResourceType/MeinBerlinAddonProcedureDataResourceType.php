@@ -32,7 +32,6 @@ use EDT\Wrapping\PropertyBehavior\Attribute\Factory\CallbackAttributeSetBehavior
 use EDT\Wrapping\PropertyBehavior\FixedSetBehavior;
 use InvalidArgumentException;
 use Webmozart\Assert\Assert;
-use function is_array;
 use function array_key_exists;
 
 /**

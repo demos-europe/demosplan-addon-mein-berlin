@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository;
 
+use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\Logic\ApiRequest\FluentRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -45,5 +47,25 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
     public function persistMeinBerlinAddonOrgaRelation(MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation): void
     {
         $this->getEntityManager()->persist($meinBerlinAddonOrgaRelation);
+    }
+
+    public function getProceduresOfOrgaWithExistingDplanId(string $orgaId): array
+    {
+        $procedureRepository = $this->getEntityManager()->getRepository(ProcedureInterface::class);
+        $proceduresOfOrga = $procedureRepository->findBy(['orga' => $orgaId]);
+        $proceduresOfOrga = array_map(
+            static fn(ProcedureInterface $procedure) => $procedure->getId(),
+            $proceduresOfOrga
+        );
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+
+        return $queryBuilder->select('addonEntity')
+        ->from(MeinBerlinAddonEntity::class, 'addonEntity')
+        ->where('addonEntity.procedureId IN (:procedureIds)')
+        ->andWhere('addonEntity.dplanId != :emptyDplanId')
+        ->setParameter('procedureIds', $proceduresOfOrga)
+        ->setParameter('emptyDplanId', '')
+        ->getQuery()
+        ->getResult();
     }
 }
