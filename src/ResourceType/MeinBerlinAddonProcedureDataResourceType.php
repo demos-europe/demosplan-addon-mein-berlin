@@ -183,10 +183,9 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         // check if create is allowed by checking the presence of a corresponding MeinBerlin OrganisationId
         $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
         Assert::notNull($currentProcedure);
-        if (!array_key_exists('procedure', $entityData->getToOneRelationships())
-            || !is_array($entityData->getToOneRelationships()['procedure'])
-            || !array_key_exists('id', $entityData->getToOneRelationships()['procedure'])
-            || $entityData->getToOneRelationships()['procedure']['id'] !== $currentProcedure?->getId()
+        $procedureId = ((array) $entityData->getToOneRelationships())['procedure']['id'] ?? null;
+        if (null === $procedureId
+            || $procedureId !== $currentProcedure?->getId()
         ) {
             throw new AddonResourceNotFoundException('create with invalid procedure is invalid');
         }
@@ -225,6 +224,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
         // check if create message should be sent by checking the procedurePhase
         // lastly check if a dplanId (communicationId) is already set - this would be an error here - unique constraint
+        // we do not want to send a message before the database says nope.
         if (!$this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure) &&
             $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
         ) {
@@ -248,6 +248,15 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         MeinBerlinAddonEntity $meinBerlinAddonEntity,
         ?string $procedureShortName
     ): void {
+        if ('' === $procedureShortName) {
+            $this->logger->info('FP-A tried saving an empty meinBerlin procedureShortName');
+            $this->messageBag->add(
+                'error',
+                'mein.berlin.error.create.empty.procedure.short.name'
+            );
+
+            throw new AddonResourceNotFoundException('create with empty procedureShortName is invalid');
+        }
         $meinBerlinAddonEntity->setProcedureShortName($procedureShortName);
         $oragnisationRelation = $this->meinBerlinCommunicationHelper
             ->getCorrespondingOrgaRelation(
