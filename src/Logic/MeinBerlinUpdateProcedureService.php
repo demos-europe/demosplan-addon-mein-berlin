@@ -127,51 +127,47 @@ class MeinBerlinUpdateProcedureService
      * @param array<string, mixed> $changeSet
      * @return array<string, string|bool>
      */
-    private function collectRelevantFields(array $changeSet): array
+    public function collectRelevantFields(array $changeSet): array
     {
         $importantChanges = [];
         $relevantProcedureChanges = [];
         $procedureChangeSet = RelevantProcedurePropertiesForMeinBerlinCommunication::getChangedProperties($changeSet);
         $procedureChangeSet = $this->getOnlyNewValuesForChangeSet($procedureChangeSet);
         foreach ($procedureChangeSet as $name => $value) {
-            if (RelevantProcedurePropertiesForMeinBerlinCommunication::SETTINGS->value === $name &&
-                RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($value)
-            ) {
-                $mappedProcedureSettingsChanges = $this->mapProcedureSettingsChanges($value);
-                // merge prepared changes
-                $importantChanges = array_merge($importantChanges, $mappedProcedureSettingsChanges);
+            if (RelevantProcedurePropertiesForMeinBerlinCommunication::SETTINGS->value === $name) {
+                if (RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($value)) {
+                    $mappedProcedureSettingsChanges = $this->mapProcedureSettingsChanges($value);
+                    // merge prepared changes
+                    $importantChanges = array_merge($importantChanges, $mappedProcedureSettingsChanges);
 
-                $this->logMappedProcedureSettingsChanges($mappedProcedureSettingsChanges);
-
+                    $this->logMappedProcedureSettingsChanges($mappedProcedureSettingsChanges);
+                }
                 continue;
             }
-            if (RelevantProcedurePropertiesForMeinBerlinCommunication::PARTICIPATIONPHASE->value === $name &&
-                RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($value)
-            ) {
-                $mappedProcedurePublicPhaseChanges = $this->mapProcedurePublicParticipationPhaseChanges($value);
+            if (RelevantProcedurePropertiesForMeinBerlinCommunication::PARTICIPATIONPHASE->value === $name) {
+                if (RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($value)) {
+                    $mappedProcedurePublicPhaseChanges = $this->mapProcedurePublicParticipationPhaseChanges($value);
 
-                $importantChanges = array_merge($importantChanges, $mappedProcedurePublicPhaseChanges);
+                    $importantChanges = array_merge($importantChanges, $mappedProcedurePublicPhaseChanges);
 
-                $this->logger->info(
-                    'demosplan-mein-berlin-addon mapped relevant ProcedureSettings changes like:',
-                    $mappedProcedurePublicPhaseChanges
-                );
-
+                    $this->logger->info(
+                        'demosplan-mein-berlin-addon mapped relevant ProcedureSettings changes like:',
+                        $mappedProcedurePublicPhaseChanges
+                    );
+                }
                 continue;
             }
-            if (RelevantProcedurePropertiesForMeinBerlinCommunication::CURRENTSLUG->value === $name &&
-                RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication::
-                    hasRelevantPropertyBeenChanged($value)
-            ) {
-                $mappedProcedureCurrentSlugChanges = $this->mapProcedureCurrentSlugChanges($value);
+            if (RelevantProcedurePropertiesForMeinBerlinCommunication::CURRENTSLUG->value === $name) {
+                if (RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication::hasRelevantPropertyBeenChanged($value)) {
+                    $mappedProcedureCurrentSlugChanges = $this->mapProcedureCurrentSlugChanges($value);
 
-                $importantChanges = array_merge($importantChanges, $mappedProcedureCurrentSlugChanges);
+                    $importantChanges = array_merge($importantChanges, $mappedProcedureCurrentSlugChanges);
 
-                $this->logger->info(
-                    'demosplan-mein-berlin-addon mapped relevant ProcedureCurrentSlug changes like:',
-                    $mappedProcedureCurrentSlugChanges
-                );
-
+                    $this->logger->info(
+                        'demosplan-mein-berlin-addon mapped relevant ProcedureCurrentSlug changes like:',
+                        $mappedProcedureCurrentSlugChanges
+                    );
+                }
                 continue;
             }
             $relevantProcedureChanges[] = $value;
@@ -180,7 +176,7 @@ class MeinBerlinUpdateProcedureService
             ] = $value;
         }
         $this->logger->info(
-            'demosplan-mein-berlin-addon discovered relevant the following Procedure changes:',
+            'demosplan-mein-berlin-addon discovered the following relevant Procedure changes:',
             $relevantProcedureChanges
         );
         $this->logger->info(
