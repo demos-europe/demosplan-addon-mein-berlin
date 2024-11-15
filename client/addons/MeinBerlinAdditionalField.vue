@@ -73,7 +73,8 @@ export default {
           [this.attribute]: this.currentValue
         },
         request: this.item ? 'PATCH' : 'POST',
-        value: this.currentValue
+        value: this.currentValue,
+        initValue: this.item ? this.item.attributes[this.attribute] : ''
       }
     },
 
@@ -122,6 +123,7 @@ export default {
 
   mounted () {
     this.fetchResourceList().then(this.getItemByRelationshipId)
+
   }
 }
 </script>
