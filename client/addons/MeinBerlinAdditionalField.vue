@@ -1,6 +1,7 @@
 <template>
   <dp-input
-    :id="resourceType"
+    id="addonAdditionalField"
+    ref="addonAdditionalField"
     :data-cy="`${resourceType}:field`"
     v-model="currentValue"
     :label="{
@@ -8,8 +9,7 @@
       hint: hint,
     }"
     @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-    @input="$emit('addonEvent:emit', { name: 'input', payload: currentValue })"
-    :required="required" />
+    :required="required || isValueRemoved" />
 </template>
 
 <script>
@@ -39,12 +39,19 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+
+    valueCanBeRemoved: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
 
   data () {
     return {
       currentValue: '',
+      initValue: '',
       item: null,
       list: null,
       resourceTypeMappings: {
@@ -60,7 +67,7 @@ export default {
           label: Translator.trans('mein.berlin.procedure.short.name'),
           relationshipKey: 'procedure'
         }
-      },
+      }
     }
   },
 
@@ -75,6 +82,18 @@ export default {
         request: this.item ? 'PATCH' : 'POST',
         value: this.currentValue,
         initValue: this.item ? this.item.attributes[this.attribute] : ''
+      }
+    },
+
+    isValueRemoved () {
+      if (this.valueCanBeRemoved) {
+        return false
+      } else {
+        if (!this.item) {
+          return false
+        }
+
+        return this.initValue && !this.currentValue
       }
     },
 
@@ -112,18 +131,27 @@ export default {
         .catch(err => console.error(err))
     },
 
+    handleFocus () {
+      const input = document.getElementById('addonAdditionalField')
+      /*
+      if (!this.initValue && input.classList.contains('is-invalid')) {
+        console.log('REMOVE')
+        input.classList.remove('is-invalid')
+      }*/
+    },
+
     getItemByRelationshipId () {
       this.item = Object.values(this.list).find(el => el.relationships[this.relationshipKey].data.id === this.relationshipId) || null
 
       if (this.item) {
         this.currentValue = this.item.attributes[this.attribute]
+        this.initValue = this.item.attributes[this.attribute]
       }
     }
   },
 
   mounted () {
     this.fetchResourceList().then(this.getItemByRelationshipId)
-
   }
 }
 </script>
