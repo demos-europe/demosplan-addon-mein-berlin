@@ -15,7 +15,7 @@
 import { dpApi, DpInput} from '@demos-europe/demosplan-ui'
 
 export default {
-  name: 'MeinBerlinAdditionalField',
+  name: 'AddonAdditionalField',
 
   components: {
     DpInput
@@ -34,10 +34,10 @@ export default {
       default: ''
     },
 
-    resourceType: {
+    relationshipKey: {
       type: String,
       required: true,
-      validator: (prop) => ['MeinBerlinAddonOrganisation', 'MeinBerlinAddonProcedureData'].includes(prop)
+      validator: (prop) => ['orga', 'procedure'].includes(prop)
     },
 
     required: {
@@ -53,18 +53,18 @@ export default {
       initValue: '',
       item: null,
       list: null,
-      resourceTypeMappings: {
-        'MeinBerlinAddonOrganisation': {
+      relationshipKeyMapping: {
+        'orga': {
           attribute: 'meinBerlinOrganisationId',
           hint: Translator.trans(''),
           label: Translator.trans('mein.berlin.organisation.id'),
-          relationshipKey: 'orga'
+          resourceType: 'MeinBerlinAddonOrganisation'
         },
-        'MeinBerlinAddonProcedureData': {
+        'procedure': {
           attribute: 'procedureShortName',
           hint: Translator.trans(''),
           label: Translator.trans('mein.berlin.procedure.short.name'),
-          relationshipKey: 'procedure'
+          resourceType: 'MeinBerlinAddonProcedureData'
         }
       }
     }
@@ -85,7 +85,7 @@ export default {
     },
 
     attribute () {
-      return this.resourceTypeMappings[this.resourceType]?.attribute || undefined
+      return this.relationshipKeyMapping[this.relationshipKey]?.attribute || undefined
     },
 
     hasValueBeenRemoved () {
@@ -97,15 +97,15 @@ export default {
     },
 
     hint () {
-      return this.resourceTypeMappings[this.resourceType]?.hint || ''
+      return this.relationshipKeyMapping[this.relationshipKey]?.hint || ''
     },
 
     label () {
-      return this.resourceTypeMappings[this.resourceType]?.label || ''
+      return this.relationshipKeyMapping[this.relationshipKey]?.label || ''
     },
 
-    relationshipKey () {
-      return this.resourceTypeMappings[this.resourceType]?.relationshipKey || undefined
+    resourceType () {
+      return this.relationshipKeyMapping[this.relationshipKey]?.resourceType || ''
     }
   },
 

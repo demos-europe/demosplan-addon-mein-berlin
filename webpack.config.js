@@ -3,7 +3,7 @@ const DemosPlanAddon = require('@demos-europe/demosplan-addon-client-builder')
 const config = DemosPlanAddon.build(
   'demosplan-addon-mein-berlin',
   {
-    MeinBerlinAdditionalField: DemosPlanAddon.resolve(
+    AddonAdditionalField: DemosPlanAddon.resolve(
       'client/addons/MeinBerlinAdditionalField.vue'
     ),
   }
