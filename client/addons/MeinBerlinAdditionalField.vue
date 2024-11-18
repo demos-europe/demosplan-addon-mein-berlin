@@ -1,12 +1,12 @@
 <template>
   <dp-input
-    id="meinBerlinAdditionalField"
+    id="addonAdditionalField"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
       hint: hint,
     }"
-    :required="required || (hasValueBeenRemoved && !isValueRemovable)"
+    :required="required || (Boolean(initValue) && !isValueRemovable)"
     v-model="currentValue"
     @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })" />
 </template>
@@ -86,14 +86,6 @@ export default {
 
     attribute () {
       return this.relationshipKeyMapping[this.relationshipKey]?.attribute || undefined
-    },
-
-    hasValueBeenRemoved () {
-      if (!this.item) {
-        return false
-      }
-
-      return this.initValue && !this.currentValue
     },
 
     hint () {
