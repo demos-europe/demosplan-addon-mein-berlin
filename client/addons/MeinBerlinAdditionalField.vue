@@ -1,7 +1,6 @@
 <template>
   <dp-input
-    id="addonAdditionalField"
-    ref="addonAdditionalField"
+    id="meinBerlinAdditionalField"
     :data-cy="`${resourceType}:field`"
     v-model="currentValue"
     :label="{
@@ -9,7 +8,7 @@
       hint: hint,
     }"
     @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-    :required="required || isValueRemoved" />
+    :required="required || (hasValueBeenRemoved && !isValueRemovable)" />
 </template>
 
 <script>
@@ -23,6 +22,12 @@ export default {
   },
 
   props: {
+    isValueRemovable: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+
     relationshipId: {
       type: String,
       required: false,
@@ -36,12 +41,6 @@ export default {
     },
 
     required: {
-      type: Boolean,
-      required: false,
-      default: false
-    },
-
-    valueCanBeRemoved: {
       type: Boolean,
       required: false,
       default: false
@@ -74,32 +73,27 @@ export default {
   computed: {
     addonPayload () {
       return {
-        id: this.item ? this.item.id : '',
-        resourceType: this.resourceType,
-        url: this.item ? 'api_resource_update' : 'api_resource_create',
         attributes: {
           [this.attribute]: this.currentValue
         },
-        request: this.item ? 'PATCH' : 'POST',
+        id: this.item ? this.item.id : '',
+        initValue: this.item ? this.initValue : '',
+        resourceType: this.resourceType,
         value: this.currentValue,
-        initValue: this.item ? this.item.attributes[this.attribute] : ''
-      }
-    },
-
-    isValueRemoved () {
-      if (this.valueCanBeRemoved) {
-        return false
-      } else {
-        if (!this.item) {
-          return false
-        }
-
-        return this.initValue && !this.currentValue
+        url: this.item ? 'api_resource_update' : 'api_resource_create'
       }
     },
 
     attribute () {
       return this.resourceTypeMappings[this.resourceType]?.attribute || undefined
+    },
+
+    hasValueBeenRemoved () {
+      if (!this.item) {
+        return false
+      }
+
+      return this.initValue && !this.currentValue
     },
 
     hint () {
@@ -130,15 +124,6 @@ export default {
           })
         })
         .catch(err => console.error(err))
-    },
-
-    handleFocus () {
-      const input = document.getElementById('addonAdditionalField')
-      /*
-      if (!this.initValue && input.classList.contains('is-invalid')) {
-        console.log('REMOVE')
-        input.classList.remove('is-invalid')
-      }*/
     },
 
     getItemByRelationshipId () {
