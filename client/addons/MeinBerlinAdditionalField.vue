@@ -2,20 +2,20 @@
   <dp-input
     id="meinBerlinAdditionalField"
     :data-cy="`${resourceType}:field`"
-    v-model="currentValue"
     :label="{
       text: label,
       hint: hint,
     }"
-    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-    :required="required || (hasValueBeenRemoved && !isValueRemovable)" />
+    :required="required || (hasValueBeenRemoved && !isValueRemovable)"
+    v-model="currentValue"
+    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })" />
 </template>
 
 <script>
 import { dpApi, DpInput} from '@demos-europe/demosplan-ui'
 
 export default {
-  name: 'MeinBerlinAddonOrganisationId',
+  name: 'MeinBerlinAdditionalField',
 
   components: {
     DpInput
