@@ -76,6 +76,7 @@ export default {
       return {
         id: this.item ? this.item.id : '',
         resourceType: this.resourceType,
+        url: this.item ? 'api_resource_update' : 'api_resource_create',
         attributes: {
           [this.attribute]: this.currentValue
         },
