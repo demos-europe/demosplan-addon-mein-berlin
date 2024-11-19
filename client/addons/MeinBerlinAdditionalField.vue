@@ -5,6 +5,7 @@
     :label="{
       text: label,
       hint: hint,
+      tooltip: tooltip
     }"
     :required="required || (Boolean(initValue) && !isValueRemovable)"
     v-model="currentValue"
@@ -58,13 +59,15 @@ export default {
           attribute: 'meinBerlinOrganisationId',
           hint: Translator.trans(''),
           label: Translator.trans('mein.berlin.organisation.id'),
-          resourceType: 'MeinBerlinAddonOrganisation'
+          resourceType: 'MeinBerlinAddonOrganisation',
+          tooltip: Translator.trans('mein.berlin.organisation.id.tooltip')
         },
         'procedure': {
           attribute: 'procedureShortName',
           hint: Translator.trans(''),
           label: Translator.trans('mein.berlin.procedure.short.name'),
-          resourceType: 'MeinBerlinAddonProcedureData'
+          resourceType: 'MeinBerlinAddonProcedureData',
+          tooltip: Translator.trans('mein.berlin.procedure.short.name.tooltip')
         }
       }
     }
@@ -98,6 +101,10 @@ export default {
 
     resourceType () {
       return this.relationshipKeyMapping[this.relationshipKey]?.resourceType || ''
+    },
+
+    tooltip () {
+      return this.relationshipKeyMapping[this.relationshipKey]?.tooltip || ''
     }
   },
 
