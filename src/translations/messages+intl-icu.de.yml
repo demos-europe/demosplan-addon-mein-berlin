@@ -8,7 +8,7 @@ mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden
 mein.berlin.communication.create.success: "Dieses Verfahrens wurden soeben erfolgreich an mein-berlin übertragen."
 mein.berlin.pictogram.file.to.large: "Das Verfahrenspiktogram konnte nicht an mein-berlin übertragen werden, da hierbei die maximale Größe von 5-MB überschritten wurde."
 mein.berlin.procedure.short.name: "Bebauungsplannummer"
-mein.berlin.procedure.short.name.tooltip: "Hier kommt die Information zur Bebauungsplannummer"
+mein.berlin.procedure.short.name.tooltip: "Die Bebauungsplannummer beinhaltet NUR die Ziffern des Bebauungsplans, z.B. 4-123a. Dieses Feld ist wichtig für die Verortung des Bebauungsplanes auf mein.berlin.de und kann nicht nachträglich gelöscht werden."
 mein.berlin.rss.feed.title: "Beteiligung Sie sich an unseren aktuellen Bebauungsplanverfahren!"
 mein.berlin.building.plan.number: "Bebauungsplan Nr."
 mein.berlin.more.informations: "Weitere Informationen"

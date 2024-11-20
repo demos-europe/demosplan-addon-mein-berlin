@@ -9,7 +9,8 @@
     }"
     :required="required || (Boolean(initValue) && !isValueRemovable)"
     v-model="currentValue"
-    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })" />
+    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
+    @focus="handleFocus" />
 </template>
 
 <script>
@@ -131,6 +132,14 @@ export default {
       if (this.item) {
         this.currentValue = this.item.attributes[this.attribute]
         this.initValue = this.item.attributes[this.attribute]
+      }
+    },
+
+    handleFocus () {
+      const input = document.getElementById('addonAdditionalField')
+
+      if (input.classList.contains('is-invalid')) {
+        input.classList.remove('is-invalid')
       }
     }
   },
