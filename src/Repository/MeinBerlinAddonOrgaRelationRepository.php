@@ -49,10 +49,17 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
         $this->getEntityManager()->persist($meinBerlinAddonOrgaRelation);
     }
 
-    public function getProceduresOfOrgaWithExistingDplanId(string $orgaId): array
+    /**
+     * This method is used to determine if a meinBerlin organisation id is allowed to be updated.
+     * It will return all already to meinBerlin communicated addonEntities of an organisation using the existing
+     * meinBerlin organisation id. If the old organisation id is in use already, an update should be prohibited.
+     * @return MeinBerlinAddonEntity[]
+     */
+    public function getProceduresOfOrgaWithExistingDplanId(MeinBerlinAddonOrgaRelation $orgaRelation): array
     {
+        $orgaId = $orgaRelation->getOrga()?->getId();
         $procedureRepository = $this->getEntityManager()->getRepository(ProcedureInterface::class);
-        $proceduresOfOrga = $procedureRepository->findBy(['orga' => $orgaId, 'deleted => false']);
+        $proceduresOfOrga = $procedureRepository->findBy(['orga' => $orgaId, 'deleted' => false]);
         $proceduresOfOrga = array_map(
             static fn(ProcedureInterface $procedure) => $procedure->getId(),
             $proceduresOfOrga
@@ -60,12 +67,12 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
         return $queryBuilder->select('addonEntity')
-        ->from(MeinBerlinAddonEntity::class, 'addonEntity')
-        ->where('addonEntity.procedure IN (:procedureIds)')
-        ->andWhere('addonEntity.dplanId != :emptyDplanId')
-        ->setParameter('procedureIds', $proceduresOfOrga)
-        ->setParameter('emptyDplanId', '')
-        ->getQuery()
-        ->getResult();
+            ->from(MeinBerlinAddonEntity::class, 'addonEntity')
+            ->where('addonEntity.procedure IN (:procedureIds)')
+            ->andWhere('addonEntity.dplanId != :emptyDplanId')
+            ->setParameter('procedureIds', $proceduresOfOrga)
+            ->setParameter('emptyDplanId', '')
+            ->getQuery()
+            ->getResult();
     }
 }
