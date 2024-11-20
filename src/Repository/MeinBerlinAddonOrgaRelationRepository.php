@@ -52,7 +52,7 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
     public function getProceduresOfOrgaWithExistingDplanId(string $orgaId): array
     {
         $procedureRepository = $this->getEntityManager()->getRepository(ProcedureInterface::class);
-        $proceduresOfOrga = $procedureRepository->findBy(['orga' => $orgaId]);
+        $proceduresOfOrga = $procedureRepository->findBy(['orga' => $orgaId, 'deleted => false']);
         $proceduresOfOrga = array_map(
             static fn(ProcedureInterface $procedure) => $procedure->getId(),
             $proceduresOfOrga
@@ -61,7 +61,7 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
 
         return $queryBuilder->select('addonEntity')
         ->from(MeinBerlinAddonEntity::class, 'addonEntity')
-        ->where('addonEntity.procedureId IN (:procedureIds)')
+        ->where('addonEntity.procedure IN (:procedureIds)')
         ->andWhere('addonEntity.dplanId != :emptyDplanId')
         ->setParameter('procedureIds', $proceduresOfOrga)
         ->setParameter('emptyDplanId', '')

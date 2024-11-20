@@ -9,7 +9,7 @@ declare(strict_types=1);
  * All rights reserved
  */
 
-namespace Application\Migrations;
+namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\DoctrineMigrations;
 
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
