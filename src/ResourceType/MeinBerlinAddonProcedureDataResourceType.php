@@ -274,7 +274,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             );
             // still check if all conditions for a create message are fulfilled
             // to allow this field as a sort of retrigger if a previous create request failed
-            // if a prev update failded is a different question - would be a real problem as its content is lost.
+            // if a prev update failed is a different question - would be a real problem as its content is lost.
             $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
             Assert::notNull($currentProcedure);
             if ($this->meinBerlinCommunicationHelper
