@@ -26,7 +26,7 @@
     }"
     :options="options"
     v-model="currentValue"
-    @selected="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"/>
+    @select="$emit('addonEvent:emit', { name: 'selected', payload: addonPayload })"/>
 </template>
 
 <script>
