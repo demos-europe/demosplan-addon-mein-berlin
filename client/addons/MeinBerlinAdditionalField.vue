@@ -1,5 +1,21 @@
 <template>
+  <dp-input
+    v-if="isInput"
+    id="addonAdditionalField"
+    :data-cy="`${resourceType}:field`"
+    :label="{
+      text: label,
+      hint: hint,
+      tooltip: tooltip
+    }"
+    :required="required || (Boolean(initValue) && !isValueRemovable)"
+    v-model="currentValue"
+    pattern="^[^\s-].* - .*[^\s-]$"
+    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
+    @focus="handleFocus"/>
+
   <dp-select
+    v-else
     id="addonAdditionalField"
     name="addonAdditionalField"
     :data-cy="`${resourceType}:field`"
@@ -10,20 +26,27 @@
     }"
     :options="options"
     v-model="currentValue"
-    @selected="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })" />
+    @selected="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"/>
 </template>
 
 <script>
-import { dpApi, DpSelect } from '@demos-europe/demosplan-ui'
+import {dpApi, DpInput, DpSelect} from '@demos-europe/demosplan-ui'
 
 export default {
   name: 'AddonAdditionalField',
 
   components: {
+    DpInput,
     DpSelect
   },
 
   props: {
+    isInput: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+
     isValueRemovable: {
       type: Boolean,
       required: false,
@@ -49,26 +72,26 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       currentValue: '',
       initValue: '',
       item: null,
       list: null,
       options: [
-        { label: 'Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen', value: '14' },
-        { label: 'Bezirksamt Charlottenburg-Wilmersdorf', value: '27' },
-        { label: 'Bezirksamt Friedrichshain-Kreuzberg', value: '28' },
-        { label: 'Bezirksamt Lichtenberg ', value: '29' },
-        { label: 'Bezirksamt Marzahn-Hellersdorf ', value: '25' },
-        { label: 'Bezirksamt Mitte', value: '16' },
-        { label: 'Bezirksamt Neukölln', value: '30' },
-        { label: 'Bezirksamt Pankow', value: '20' },
-        { label: 'Bezirksamt Reinickendorf', value: '31' },
-        { label: 'Bezirksamt Spandau', value: '26' },
-        { label: 'Bezirksamt Steglitz-Zehlendorf', value: '32' },
-        { label: 'Bezirksamt Tempelhof-Schöneberg', value: '24' },
-        { label: 'Bezirksamt Treptow-Köpenick', value: '15' }
+        {label: 'Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen', value: '14'},
+        {label: 'Bezirksamt Charlottenburg-Wilmersdorf', value: '27'},
+        {label: 'Bezirksamt Friedrichshain-Kreuzberg', value: '28'},
+        {label: 'Bezirksamt Lichtenberg ', value: '29'},
+        {label: 'Bezirksamt Marzahn-Hellersdorf ', value: '25'},
+        {label: 'Bezirksamt Mitte', value: '16'},
+        {label: 'Bezirksamt Neukölln', value: '30'},
+        {label: 'Bezirksamt Pankow', value: '20'},
+        {label: 'Bezirksamt Reinickendorf', value: '31'},
+        {label: 'Bezirksamt Spandau', value: '26'},
+        {label: 'Bezirksamt Steglitz-Zehlendorf', value: '32'},
+        {label: 'Bezirksamt Tempelhof-Schöneberg', value: '24'},
+        {label: 'Bezirksamt Treptow-Köpenick', value: '15'}
       ],
       relationshipKeyMapping: {
         'orga': {
@@ -90,7 +113,7 @@ export default {
   },
 
   computed: {
-    addonPayload () {
+    addonPayload() {
       return {
         attributes: {
           [this.attribute]: this.currentValue
@@ -103,23 +126,23 @@ export default {
       }
     },
 
-    attribute () {
+    attribute() {
       return this.relationshipKeyMapping[this.relationshipKey]?.attribute || undefined
     },
 
-    hint () {
+    hint() {
       return this.relationshipKeyMapping[this.relationshipKey]?.hint || ''
     },
 
-    label () {
+    label() {
       return this.relationshipKeyMapping[this.relationshipKey]?.label || ''
     },
 
-    resourceType () {
+    resourceType() {
       return this.relationshipKeyMapping[this.relationshipKey]?.resourceType || ''
     },
 
-    tooltip () {
+    tooltip() {
       return this.relationshipKeyMapping[this.relationshipKey]?.tooltip || ''
     }
   },
@@ -148,10 +171,18 @@ export default {
         this.currentValue = this.item.attributes[this.attribute]
         this.initValue = this.item.attributes[this.attribute]
       }
+    },
+
+    handleFocus() {
+      const input = document.getElementById('addonAdditionalField')
+
+      if (input.classList.contains('is-invalid')) {
+        input.classList.remove('is-invalid')
+      }
     }
   },
 
-  mounted () {
+  mounted() {
     this.fetchResourceList().then(this.getItemByRelationshipId)
   }
 }
