@@ -116,7 +116,7 @@ class MeinBerlinCreateProcedureService
                 $procedure->getSettings()->getPictogramAltText(),
             'bplan_id' => $correspondingAddonEntity->getProcedureShortName(),
             'organisation_id' => $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
-            'is_published' => true,
+            'is_draft' => true,
         ];
         $this->logProcedureCreateData($data);
 

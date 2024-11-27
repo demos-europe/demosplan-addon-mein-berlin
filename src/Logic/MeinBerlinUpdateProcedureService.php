@@ -104,7 +104,7 @@ class MeinBerlinUpdateProcedureService
             );
             $fieldsToUpdate = $this->collectRelevantFields($changeSet);
             if (null !== $isPublished) {
-                $fieldsToUpdate['is_published '] = $isPublished;
+                $fieldsToUpdate['is_draft '] = $isPublished;
             }
 
             try {

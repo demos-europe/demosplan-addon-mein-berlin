@@ -148,7 +148,7 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name => 'altText',
             'bplan_id' => 'shortName',
             'organisation_id' => 'organisationId',
-            'is_published' => true,
+            'is_draft' => true,
         ];
 
         self::assertEquals($expected, $result);

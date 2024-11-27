@@ -82,7 +82,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             // update all fields for previously at MeinBerlin created Procedures
             $changeSet = $postProcedureUpdatedEvent->getModifiedValues();
             // check if publicPhase permission set visibility changed from hidden to something else or vice versa
-            // if it did - include it as is_published boolean in PATCH request
+            // if it did - include it as is_draft boolean in PATCH request
             $isPublishedVal = $this->isPublishedIfNeedsToBeIncludedOnUpdate($postProcedureUpdatedEvent);
             $this->updateProcedureService->updateMeinBerlinProcedureEntry(
                 $changeSet,
