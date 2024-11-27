@@ -1,5 +1,5 @@
 mein.berlin.organisation.id: "Mein Berlin Organizations-ID"
-mein.berlin.organisation.id.tooltip: "Hier kommt die Information zur Organisations-ID"
+mein.berlin.organisation.id.tooltip: "Bitte wählen Sie aus der Liste den Bezirk aus, in dem sich der Bebauungsplan befindet"
 mein.berlin.organisation.id.missing: "Ihrer Organisation wurde von der Mandanten-Administration noch keine Id zugeteilt."
 mein.berlin.error.create.empty.procedure.short.name: "Es kann kein leeres Feld gespeichert werden."
 mein.berlin.error.create.empty.organisation.id: "Es muss eine Organisations id vergeben werden."
