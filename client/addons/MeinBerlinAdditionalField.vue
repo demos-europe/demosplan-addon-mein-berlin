@@ -10,7 +10,7 @@
     }"
     :required="required || (Boolean(initValue) && !isValueRemovable)"
     v-model="currentValue"
-    pattern="^[^\s-].* - .*[^\s-]$"
+    pattern="^[^\s-]+-[^\s-]+$"
     @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
     @focus="handleFocus"/>
 
@@ -79,19 +79,19 @@ export default {
       item: null,
       list: null,
       options: [
-        {label: 'Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen', value: '14'},
-        {label: 'Bezirksamt Charlottenburg-Wilmersdorf', value: '27'},
-        {label: 'Bezirksamt Friedrichshain-Kreuzberg', value: '28'},
-        {label: 'Bezirksamt Lichtenberg ', value: '29'},
-        {label: 'Bezirksamt Marzahn-Hellersdorf ', value: '25'},
-        {label: 'Bezirksamt Mitte', value: '16'},
-        {label: 'Bezirksamt Neukölln', value: '30'},
-        {label: 'Bezirksamt Pankow', value: '20'},
-        {label: 'Bezirksamt Reinickendorf', value: '31'},
-        {label: 'Bezirksamt Spandau', value: '26'},
-        {label: 'Bezirksamt Steglitz-Zehlendorf', value: '32'},
-        {label: 'Bezirksamt Tempelhof-Schöneberg', value: '24'},
-        {label: 'Bezirksamt Treptow-Köpenick', value: '15'}
+        { label: 'Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen', value: '14' },
+        { label: 'Bezirksamt Charlottenburg-Wilmersdorf', value: '27' },
+        { label: 'Bezirksamt Friedrichshain-Kreuzberg', value: '28' },
+        { label: 'Bezirksamt Lichtenberg ', value: '29' },
+        { label: 'Bezirksamt Marzahn-Hellersdorf ', value: '25' },
+        { label: 'Bezirksamt Mitte', value: '16' },
+        { label: 'Bezirksamt Neukölln', value: '30' },
+        { label: 'Bezirksamt Pankow', value: '20' },
+        { label: 'Bezirksamt Reinickendorf', value: '31' },
+        { label: 'Bezirksamt Spandau', value: '26' },
+        { label: 'Bezirksamt Steglitz-Zehlendorf', value: '32' },
+        { label: 'Bezirksamt Tempelhof-Schöneberg', value: '24' },
+        { label: 'Bezirksamt Treptow-Köpenick', value: '15' }
       ],
       relationshipKeyMapping: {
         'orga': {
