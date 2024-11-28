@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import {dpApi, DpInput, DpSelect} from '@demos-europe/demosplan-ui'
+import { dpApi, DpInput, DpSelect } from '@demos-europe/demosplan-ui'
 
 export default {
   name: 'AddonAdditionalField',
