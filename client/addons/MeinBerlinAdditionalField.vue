@@ -17,7 +17,6 @@
   <dp-select
     v-else
     id="addonAdditionalField"
-    name="addonAdditionalField"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
