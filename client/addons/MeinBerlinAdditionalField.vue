@@ -10,7 +10,7 @@
     }"
     :required="required || (Boolean(initValue) && !isValueRemovable)"
     v-model="currentValue"
-    pattern="^[^\s-]+-[^\s-]+$"
+    pattern="^[^\\s-].*-.*[^\s-]$"
     @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
     @focus="handleFocus"/>
 
