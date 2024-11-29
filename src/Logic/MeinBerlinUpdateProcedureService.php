@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DateTime;
-use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
@@ -22,9 +21,6 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhaseProp
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonProcedureDataResourceType;
 use Exception;
-use League\Flysystem\FilesystemException;
-use League\Flysystem\FilesystemOperator;
-use League\Flysystem\UnableToReadFile;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -34,7 +30,6 @@ use function is_array;
 use function array_key_exists;
 use function array_merge;
 use function substr;
-use function base64_encode;
 
 class MeinBerlinUpdateProcedureService
 {
