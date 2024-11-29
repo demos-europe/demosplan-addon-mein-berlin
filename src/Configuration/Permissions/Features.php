@@ -34,7 +34,7 @@ class Features extends AbstractPermissionMeta
     }
 
     /**
-     * Allows to set a custom organisation id related to our organisation id.
+     * Allows to get a custom organisation id related to our organisation id.
      * This is a necessary parameter of an update url for meinBerlin
      */
     public static function feature_get_mein_berlin_organisation_id(): self
