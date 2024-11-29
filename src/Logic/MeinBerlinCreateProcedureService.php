@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
-use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
@@ -22,27 +21,22 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPro
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use Exception;
-use League\Flysystem\FilesystemException;
-use League\Flysystem\FilesystemOperator;
-use League\Flysystem\UnableToReadFile;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use function array_key_exists;
 use function substr;
-use function base64_encode;
 
 class MeinBerlinCreateProcedureService
 {
     public function __construct(
-        private readonly FileServiceInterface $fileService,
         private readonly LoggerInterface $logger,
         private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $meinBerlinProcedureCommunicator,
         private readonly MessageBagInterface $messageBag,
-        private readonly FilesystemOperator $defaultStorage,
+        private readonly MeinBerlinProcedurePictogramFileHandler $meinBerlinProcedurePictogramFileHandler,
     ){
 
     }
@@ -126,43 +120,9 @@ class MeinBerlinCreateProcedureService
     private function getBase64PictogramFileString(ProcedureInterface $procedure): string
     {
         $pictogramFileString = $procedure->getPictogram();
-        $base64FileString = '';
 
-        if ('' !== $pictogramFileString && null !== $pictogramFileString) {
-            try {
-                $pictogram = $this->fileService->getFileInfoFromFileString($pictogramFileString);
-                $this->logger->info(
-                    'demosplan-mein-berlin-addon found Pictogram on create - converting file contents to base64',
-                    [$pictogram->getFileName(), $pictogram->getPath()]
-                );
-                if ($this->defaultStorage->fileExists($pictogram->getPath())) {
-                    $fileSize = $this->defaultStorage->fileSize($pictogram->getPath());
-                    if ((int) $this->parameterBag->get('mein_berlin_pictogram_max_file_size') <= $fileSize) {
-                        $this->logger->error(
-                            'demosplan-mein-berlin-addon could not append pictogram base64 file
-                             to the procedure create message as the allowed max size was exceeded',
-                            [
-                                'Max-allowed' => $this->parameterBag->get('mein_berlin_pictogram_max_file_size'),
-                                'Got-size' => $fileSize
-                            ]
-                        );
-                        $this->messageBag->add('error', 'mein.berlin.pictogram.file.to.large');
-
-                        return $base64FileString;
-                    }
-                    $base64FileString = base64_encode(
-                        $this->defaultStorage->read($pictogram->getPath())
-                    );
-                }
-            } catch (FilesystemException|UnableToReadFile|Exception $e) {
-                $this->logger->error(
-                    'demosplan-mein-berlin-addon failed to load/convert the pictogram to base64 string',
-                    [$e]
-                );
-            }
-        }
-
-        return $base64FileString;
+        return $this->meinBerlinProcedurePictogramFileHandler
+            ->checkForPictogramAndGetBase64FileString($pictogramFileString);
     }
 
     private function generateProcedurePublicRoute(string $slug): string

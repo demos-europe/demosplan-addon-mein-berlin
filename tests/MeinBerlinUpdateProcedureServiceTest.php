@@ -9,14 +9,13 @@ declare(strict_types=1);
  * All rights reserved
  */
 
-use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureCommunicator;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedurePictogramFileHandler;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
-use League\Flysystem\FilesystemOperator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -30,7 +29,6 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $fileService = $this->createMock(FileServiceInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $parameterBag = $this->createMock(ParameterBagInterface::class);
         $parameterBag->method('get')
@@ -38,16 +36,19 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
         $router = $this->createMock(RouterInterface::class);
         $meinBerlinProcedureCommunicator = $this->createMock(MeinBerlinProcedureCommunicator::class);
         $messageBag = $this->createMock(MessageBagInterface::class);
-        $defaultStorage = $this->createMock(FilesystemOperator::class);
+        $procedurePictogramFileHandler = $this->createMock(
+            MeinBerlinProcedurePictogramFileHandler::class
+        );
+        $procedurePictogramFileHandler->method('checkForPictogramAndGetBase64FileString')
+            ->willReturn('');
 
         $this->sut = new MeinBerlinUpdateProcedureService(
-            $fileService,
             $this->logger,
             $parameterBag,
             $router,
             $meinBerlinProcedureCommunicator,
             $messageBag,
-            $defaultStorage
+            $procedurePictogramFileHandler
         );
     }
     public function testUpdateMeinBerlinProcedureEntryWithRelevantChanges()

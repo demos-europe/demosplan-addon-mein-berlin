@@ -39,13 +39,12 @@ use function base64_encode;
 class MeinBerlinUpdateProcedureService
 {
     public function __construct(
-        private readonly FileServiceInterface $fileService,
         private readonly LoggerInterface $logger,
         private readonly ParameterBagInterface $parameterBag,
         private readonly RouterInterface $router,
         private readonly MeinBerlinProcedureCommunicator $procedureCommunicator,
         private readonly MessageBagInterface $messageBag,
-        private readonly FilesystemOperator $defaultStorage,
+        private readonly MeinBerlinProcedurePictogramFileHandler $meinBerlinProcedurePictogramFileHandler,
     ){
 
     }
@@ -242,7 +241,7 @@ class MeinBerlinUpdateProcedureService
      * @param array<string, mixed> $relevantProcedurePublicPhaseChanges
      * @return array<string, mixed>
      */
-    private function checkForPictogramAndReplaceLinkWithFileContent(array $relevantProcedurePublicPhaseChanges): array
+    private function getBase64PictogramFileString(array $relevantProcedurePublicPhaseChanges): array
     {
         if (array_key_exists(
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value,
@@ -251,45 +250,11 @@ class MeinBerlinUpdateProcedureService
             $pictogramFileString = $relevantProcedurePublicPhaseChanges[
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
             ];
-            if ('' !== $pictogramFileString && null !== $pictogramFileString) {
-                try {
-                    $pictogram = $this->fileService->getFileInfoFromFileString($pictogramFileString);
-                    $this->logger->info(
-                        'demosplan-mein-berlin-addon found changed Pictogram - converting file contents to base64',
-                        [$pictogram->getFileName(), $pictogram->getPath()]
-                    );
-                    if ($this->defaultStorage->fileExists($pictogram->getPath())) {
-                        $fileSize = $this->defaultStorage->fileSize($pictogram->getPath());
-                        if ((int) $this->parameterBag->get('mein_berlin_pictogram_max_file_size') <= $fileSize) {
-                            $this->logger->error(
-                                'demosplan-mein-berlin-addon could not append pictogram base64 file
-                             to procedure update message as the allowed max size was exceeded',
-                                [
-                                    'Max-allowed' => $this->parameterBag->get('mein_berlin_pictogram_max_file_size'),
-                                    'Got-size' => $fileSize
-                                ]
-                            );
-                            $this->messageBag->add('error', 'mein.berlin.pictogram.file.to.large');
+            $relevantProcedurePublicPhaseChanges[
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
+            ] = $this->meinBerlinProcedurePictogramFileHandler
+                ->checkForPictogramAndGetBase64FileString($pictogramFileString);
 
-                            throw new Exception('FileSize to large');
-                        }
-                        $relevantProcedurePublicPhaseChanges[
-                        RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
-                        ] = base64_encode(
-                            $this->defaultStorage->read($pictogram->getPath())
-                        );
-                    }
-                } catch (FilesystemException|UnableToReadFile|Exception $e) {
-                    $this->logger->error(
-                        'demosplan-mein-berlin-addon failed to load/convert the pictogram to base64 string',
-                        [$e]
-                    );
-
-                    $relevantProcedurePublicPhaseChanges[
-                        RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
-                    ] = '';
-                }
-            }
         }
 
         return $relevantProcedurePublicPhaseChanges;
@@ -421,7 +386,7 @@ class MeinBerlinUpdateProcedureService
             'demosplan-mein-berlin-addon discovered relevant ProcedureSettings changes:',
             $relevantProcedureSettingsChanges
         );
-        $relevantProcedureSettingsChanges = $this->checkForPictogramAndReplaceLinkWithFileContent(
+        $relevantProcedureSettingsChanges = $this->getBase64PictogramFileString(
             $relevantProcedureSettingsChanges
         );
 

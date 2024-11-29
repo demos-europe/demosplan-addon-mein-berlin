@@ -13,7 +13,6 @@ use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureSettingsInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\SlugInterface;
-use DemosEurope\DemosplanAddon\Contracts\FileServiceInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
@@ -24,7 +23,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhaseProp
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureCommunicator;
-use League\Flysystem\FilesystemOperator;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedurePictogramFileHandler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -74,7 +73,6 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
 
         $this->messageBag = $this->createMock(MessageBagInterface::class);
 
-        $fileService = $this->createMock(FileServiceInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $parameterBag = $this->createMock(ParameterBagInterface::class);
         $router = $this->createMock(RouterInterface::class);
@@ -91,7 +89,11 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
                     echo 'test';
                 }
             );
-        $defaultStorage = $this->createMock(FilesystemOperator::class);
+        $meinBerlinProcedurePictureFileHandler = $this->createMock(
+            MeinBerlinProcedurePictogramFileHandler::class
+        );
+        $meinBerlinProcedurePictureFileHandler->method('checkForPictogramAndGetBase64FileString')
+            ->willReturn('');
 
         $parameterBag->method('get')
             ->with('mein_berlin_public_procedure_route')
@@ -101,13 +103,12 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             ->willReturn('mein.berlin/test');
 
         $this->sut = new MeinBerlinCreateProcedureService(
-            $fileService,
             $this->logger,
             $parameterBag,
             $router,
             $meinBerlinProcedureCommunicator,
             $this->messageBag,
-            $defaultStorage
+            $meinBerlinProcedurePictureFileHandler
         );
     }
 
