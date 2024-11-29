@@ -114,9 +114,9 @@ class MeinBerlinCreateProcedureService
                 $procedure->getSettings()->getPictogramCopyright(),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name =>
                 $procedure->getSettings()->getPictogramAltText(),
-            'bplan_id' => $correspondingAddonEntity->getProcedureShortName(),
-            'organisation_id' => $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
-            'is_draft' => true,
+            MeinBerlinAddonEntity::MEIN_BERLIN_PROCEDURE_SHORT_NAME => $correspondingAddonEntity->getProcedureShortName(),
+            MeinBerlinAddonOrgaRelation::MEIN_BERLIN_ORGANISATION_ID => $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
+            MeinBerlinAddonEntity::MEIN_BERLIN_IS_DRAFT => false,
         ];
         $this->logProcedureCreateData($data);
 

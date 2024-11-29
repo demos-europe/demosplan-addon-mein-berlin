@@ -21,6 +21,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'addon_mein_berlin_entity')]
 class MeinBerlinAddonEntity implements UuidEntityInterface
 {
+    public const MEIN_BERLIN_PROCEDURE_SHORT_NAME = 'bplan_id';
+    public const MEIN_BERLIN_IS_DRAFT = 'is_draft';
+
     #[ORM\Column(type: 'string', length: 36, nullable: false, options:['fixed' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]

@@ -61,7 +61,9 @@ class MeinBerlinUpdateProcedureService
     ): void
     {
         $fieldsToUpdate = [];
-        $fieldsToUpdate['bplan_id'] = $changedEntity->getProcedureShortName();
+        $fieldsToUpdate[
+            MeinBerlinAddonEntity::MEIN_BERLIN_PROCEDURE_SHORT_NAME
+        ] = $changedEntity->getProcedureShortName();
 
         try {
             $this->procedureCommunicator->updateProcedure(
@@ -104,7 +106,7 @@ class MeinBerlinUpdateProcedureService
             );
             $fieldsToUpdate = $this->collectRelevantFields($changeSet);
             if (null !== $isPublished) {
-                $fieldsToUpdate['is_draft '] = $isPublished;
+                $fieldsToUpdate[MeinBerlinAddonEntity::MEIN_BERLIN_IS_DRAFT] = !$isPublished;
             }
 
             try {

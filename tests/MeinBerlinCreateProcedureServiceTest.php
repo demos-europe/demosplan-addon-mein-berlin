@@ -146,9 +146,9 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name => 'coordinate',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_copyright->name => 'copyright',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name => 'altText',
-            'bplan_id' => 'shortName',
-            'organisation_id' => 'organisationId',
-            'is_draft' => true,
+            MeinBerlinAddonEntity::MEIN_BERLIN_PROCEDURE_SHORT_NAME => 'shortName',
+            MeinBerlinAddonOrgaRelation::MEIN_BERLIN_ORGANISATION_ID => 'organisationId',
+            MeinBerlinAddonEntity::MEIN_BERLIN_IS_DRAFT => false,
         ];
 
         self::assertEquals($expected, $result);
