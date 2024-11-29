@@ -14,6 +14,7 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
+use Exception;
 use InvalidArgumentException;
 use JsonException;
 use Psr\Log\LoggerInterface;
@@ -92,6 +93,7 @@ class MeinBerlinProcedureCommunicator
                 - check all parameters are correctly set/defined',
                 [
                     'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
                     'procedureId' => $procedureId,
                     'procedureData' => $preparedProcedureData,
                 ]
@@ -102,6 +104,7 @@ class MeinBerlinProcedureCommunicator
                 'demosplan-mein-berlin-addon failed to prepare - parse requestData',
                 [
                     'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
                     'procedureId' => $procedureId,
                     'procedureData' => $preparedProcedureData,
                 ]
@@ -117,8 +120,19 @@ class MeinBerlinProcedureCommunicator
                 'demosplan-mein-berlin-addon failed transmitting the procedure update message',
                 [
                     'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
                     'procedureId' => $procedureId,
                     'json' => $json,
+                ]
+            );
+            throw new MeinBerlinCommunicationException($e->getMessage());
+        } catch (Exception $e) {
+            $this->logger->error(
+                'demosplan-mein-berlin-addon failed updating a procedure.',
+                [
+                    'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
+                    'procedureId' => $procedureId,
                 ]
             );
             throw new MeinBerlinCommunicationException($e->getMessage());
@@ -185,6 +199,7 @@ class MeinBerlinProcedureCommunicator
                 'demosplan-mein-berlin-addon failed to transmit a procedure create message',
                 [
                     'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
                     $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
                     'procedureData' => $preparedProcedureData,
                 ]
@@ -195,6 +210,7 @@ class MeinBerlinProcedureCommunicator
                 'demosplan-mein-berlin-addon failed to parse requestData',
                 [
                     'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
                     $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
                     'procedureData' => $preparedProcedureData,
                 ]
@@ -210,6 +226,7 @@ class MeinBerlinProcedureCommunicator
                 'demosplan-mein-berlin-addon failed transmitting the procedure create message',
                 [
                     'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
                     $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
                     'json' => $json,
                 ]
@@ -221,8 +238,19 @@ class MeinBerlinProcedureCommunicator
                  Expected different type or layout',
                 [
                     'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
                     $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
                     'json' => $json,
+                ]
+            );
+            throw new MeinBerlinCommunicationException($e->getMessage());
+        } catch (Exception $e) {
+            $this->logger->error(
+                'demosplan-mein-berlin-addon failed creating a new procedure.',
+                [
+                    'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
+                    $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
                 ]
             );
             throw new MeinBerlinCommunicationException($e->getMessage());
