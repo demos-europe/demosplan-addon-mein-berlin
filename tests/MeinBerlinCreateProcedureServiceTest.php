@@ -94,8 +94,8 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
         $defaultStorage = $this->createMock(FilesystemOperator::class);
 
         $parameterBag->method('get')
-            ->with('public_procedure_route')
-            ->willReturn('public_procedure_route');
+            ->with('mein_berlin_public_procedure_route')
+            ->willReturn('mein_berlin_public_procedure_route');
 
         $router->method('generate')
             ->willReturn('mein.berlin/test');

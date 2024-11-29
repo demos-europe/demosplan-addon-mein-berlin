@@ -54,7 +54,7 @@ class MeinBerlinProcedureCommunicator
             $url = str_replace(
                 ['<organisation-id>', '<bplan-id>'],
                 [$organisationId, $dplanId],
-                $this->parameterBag->get('procedure_update_url')
+                $this->parameterBag->get('mein_berlin_procedure_update_url')
             );
             $json = json_encode($preparedProcedureData, JSON_THROW_ON_ERROR);
             $this->logger->info('demosplan-mein-berlin-addon sends PATCH to update Procedure now!', [$url]);
@@ -140,7 +140,7 @@ class MeinBerlinProcedureCommunicator
             $url = str_replace(
                 '<organisation-id>',
                 $organisationId,
-                $this->parameterBag->get('procedure_create_url')
+                $this->parameterBag->get('mein_berlin_procedure_create_url')
             );
             $json = json_encode($preparedProcedureData, JSON_THROW_ON_ERROR);
 
@@ -238,7 +238,7 @@ class MeinBerlinProcedureCommunicator
      */
     private function getMeinBerlinHeader(): array
     {
-        $bearerAuth = $this->parameterBag->get('meinBerlinAuthorization');
+        $bearerAuth = $this->parameterBag->get('mein_berlin_authorization');
         Assert::stringNotEmpty($bearerAuth);
 
         return [

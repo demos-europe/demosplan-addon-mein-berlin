@@ -258,12 +258,12 @@ class MeinBerlinUpdateProcedureService
                     );
                     if ($this->defaultStorage->fileExists($pictogram->getPath())) {
                         $fileSize = $this->defaultStorage->fileSize($pictogram->getPath());
-                        if ((int) $this->parameterBag->get('pictogram_max_file_size') <= $fileSize) {
+                        if ((int) $this->parameterBag->get('mein_berlin_pictogram_max_file_size') <= $fileSize) {
                             $this->logger->error(
                                 'demosplan-mein-berlin-addon could not append pictogram base64 file
                              to procedure update message as the allowed max size was exceeded',
                                 [
-                                    'Max-allowed' => $this->parameterBag->get('pictogram_max_file_size'),
+                                    'Max-allowed' => $this->parameterBag->get('mein_berlin_pictogram_max_file_size'),
                                     'Got-size' => $fileSize
                                 ]
                             );
@@ -346,7 +346,7 @@ class MeinBerlinUpdateProcedureService
             RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication::url->value
             ];
             try {
-                $routeName = $this->getParameter('public_procedure_route');
+                $routeName = $this->getParameter('mein_berlin_public_procedure_route');
                 $route = $this->router->generate(
                     $routeName,
                     ['slug' => $slug],
