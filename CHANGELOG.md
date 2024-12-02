@@ -16,7 +16,7 @@ procedures will be communicated to meinBerlin if:
   [MeinBerlinCommunicationHelper::checkProcedurePublicPhasePermissionsetNotHidden](./src/Logic/MeinBerlinCommunicationHelper.php)
 
 When sending a create POST we should get a dplanId in response which:
-- singanls this procedure has been communicated to meinBerlin
+- signals this procedure has been communicated to meinBerlin
 - is required to send updates regarding this procedrue at meinBerlin
   [MeinBerlinAddonEntity::dplanId](./src/Entity/MeinBerlinAddonEntity.php)
 
@@ -38,4 +38,4 @@ The procedureShortName aka 'Bebauungsplannummer' can be updated freely but can n
 as it is a required field for meinBerlin.
 
 **There is no delete method support at myBerlin - so deleting a procedure is not handled  yet !!!**
-We can only hide the procedrue publicly at meinBerlin by updating the procedrue with is_draft -> false
+We can only hide the procedrue publicly at meinBerlin by updating the procedure with is_draft -> false
