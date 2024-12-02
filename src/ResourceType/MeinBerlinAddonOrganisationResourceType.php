@@ -11,15 +11,20 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType;
 
+use DemosEurope\DemosplanAddon\Contracts\CurrentContextProviderInterface;
 use DemosEurope\DemosplanAddon\Contracts\CurrentUserInterface;
+use DemosEurope\DemosplanAddon\Contracts\Entities\CustomerInterface;
+use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\OrgaResourceTypeInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinAccessControlPermissionException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
+use DemosEurope\DemosplanAddon\Permission\AccessControl\AccessControlRepositoryInterface;
 use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
 use EDT\ConditionFactory\ConditionFactoryInterface;
 use EDT\JsonApi\ApiDocumentation\DefaultField;
@@ -28,6 +33,11 @@ use EDT\JsonApi\ResourceConfig\Builder\ResourceConfigBuilderInterface;
 use EDT\Wrapping\EntityDataInterface;
 use EDT\Wrapping\PropertyBehavior\Attribute\Factory\CallbackAttributeSetBehaviorFactory;
 use EDT\Wrapping\PropertyBehavior\FixedSetBehavior;
+use Exception;
+use InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Webmozart\Assert\Assert;
 use function array_map;
 use function count;
 
@@ -42,6 +52,9 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
         private readonly OrgaResourceTypeInterface $orgaResourceType,
         private readonly MeinBerlinAddonOrgaRelationRepository $meinBerlinAddonOrgaRelationRepository,
         private readonly CurrentUserInterface $currentUser,
+        private readonly CurrentContextProviderInterface $currentContextProvider,
+        private readonly AccessControlRepositoryInterface $accessControlRepository,
+        private readonly parameterBagInterface $parameterBag,
         private readonly MessageBagInterface $messageBag,
     ) {
 
@@ -154,7 +167,26 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                         // messageBag gets the generic error message automatically
                         throw new MeinBerlinCommunicationException('relation has to be unique');
                     }
-
+                    // add AccessControlPictogramPermission for the this organisation, the current customer and the roles
+                    // defined within the parameters.yml
+                    try {
+                        $this->addAccessControlPictogramPermission(
+                            $this->currentContextProvider->getCurrentCustomer(),
+                            $orgaRelationId
+                        );
+                    } catch (Exception $e) {
+                        $this->logger->error(
+                            'demosplan-mein-berlin-addon failed to add AccessControlPictogramPermission',
+                            ['ExceptionMessage' => $e->getMessage(), 'Exception' => $e]
+                        );
+                        $this->messageBag->add(
+                            'error',
+                            'mein.berlin.error.create.access.control.permission'
+                        );
+                        throw new MeinBerlinAccessControlPermissionException(
+                            'failed to add AccessControlPictogramPermission'
+                        );
+                    }
                     $this->meinBerlinAddonOrgaRelationRepository
                         ->persistMeinBerlinAddonOrgaRelation($meinBerlinAddonOrgaRelation);
                     $this->logger->info('demosplan-mein-berlin-addon registered a new
@@ -202,5 +234,32 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
     public function isUpdateAllowed(): bool
     {
         return $this->isCreateAllowed();
+    }
+
+    /**
+     * @param string $orgaRelationId an {{ @link OrgaInterface }} id
+     *
+     * @throws InvalidArgumentException
+     * @throws ParameterNotFoundException
+     * @throws Exception
+     */
+    private function addAccessControlPictogramPermission(
+        CustomerInterface $customer,
+        string $orgaRelationId,
+    ): void {
+        $organisation = $this->meinBerlinAddonOrgaRelationRepository->getOrganisationById($orgaRelationId);
+        Assert::notNull($organisation);
+        $roleCodes = $this->parameterBag->get('mein_berlin_pictogram_roles');
+        Assert::isArray($roleCodes);
+        $permissionName = $this->parameterBag->get('mein_berlin_pictogram_permission_name');
+        Assert::string($permissionName);
+        foreach ($roleCodes as $roleCode) {
+            $this->accessControlRepository->addManually(
+                $organisation,
+                $customer,
+                $roleCode,
+                $permissionName
+            );
+        }
     }
 }
