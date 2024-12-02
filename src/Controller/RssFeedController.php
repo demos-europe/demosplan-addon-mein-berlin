@@ -13,7 +13,6 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Controller;
 
 use DemosEurope\DemosplanAddon\Contracts\Config\GlobalConfigInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinRouter;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
 use Exception;
@@ -22,6 +21,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Laminas\Feed\Writer\Feed;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use DateTime;
 use Webmozart\Assert\Assert;
@@ -29,8 +30,8 @@ use Webmozart\Assert\Assert;
 class RssFeedController extends AbstractController
 {
     public function __construct(
-        protected readonly MeinBerlinRouter $meinBerlinRouter,
         protected readonly GlobalConfigInterface $demosplanConfig,
+        private readonly RouterInterface $router,
         protected readonly TranslatorInterface $translator,
         private readonly LoggerInterface $logger,
     )
@@ -38,7 +39,7 @@ class RssFeedController extends AbstractController
     }
 
     /**
-     * @Route("/api/{organisationId}/rss-feed", name="rss_feed")
+     * @Route("mein_berlin/rss/{organisationId}", name="addon_mein_berlin_rss_feed")
      * @throws Exception
      */
     public function generateRssFeed(
@@ -55,36 +56,30 @@ class RssFeedController extends AbstractController
         Assert::notNull($correspondingAddonOrgaRelation);
         $demosplanOrga = $correspondingAddonOrgaRelation->getOrga();
         Assert::notNull($demosplanOrga);
-        $externalWritePhaseKeys = $this->demosplanConfig->getExternalPhaseKeys();
+        $externalPhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('read||write');
         // Fetch procedures from the service
-        $procedures = $orgaRelationService->getProceduresWithEndedParticipation(
-            $externalWritePhaseKeys,
+        $procedures = $orgaRelationService->getVisibleProcedures(
+            $externalPhaseKeys,
             $demosplanOrga
         );
-        //base url : https://mein.berlin.de
-        $url = $this->meinBerlinRouter->rssFeed($correspondingAddonOrgaRelation->getMeinBerlinOrganisationId());
         // Create the RSS feed
         $feed = new Feed();
         $feed->setTitle($this->translator->trans('mein.berlin.rss.feed.title'));
         $feed->setDescription($this->translator->trans('mein.berlin.rss.feed.description', ['organisation' => $demosplanOrga->getName()]));
-        $feed->setLink($url);
-        $feed->setFeedLink($url, 'rss');
+        $feed->setLink($this->router->generate('core_home', [], UrlGeneratorInterface::ABSOLUTE_URL));
+        $feed->setFeedLink($this->router->generate('addon_mein_berlin_rss_feed', ['organisationId' => $organisationId], UrlGeneratorInterface::ABSOLUTE_URL), 'rss');
+        $feed->setGenerator('demosplan');
         $feed->setDateModified(new DateTime());
 
-        // Add items to the feed with numbering
-        $procedureCount = 1;
         // Add items to the feed
-        /**
-         * @var ProcedureInterface $procedure
-         */
         foreach ($procedures as $procedure) {
             $entry = $feed->createEntry();
-            $entry->setTitle("{$this->translator->trans('mein.berlin.building.plan.number')} {$procedureCount}: \"{$procedure->getExternalName()}\"");
+            $entry->setTitle(sprintf('%s: %s',
+                $this->translator->trans('mein.berlin.rss.feed.plan.prefix'),
+                $procedure->getExternalName()
+            ));
             $entry->setDescription($this->formatDescription($procedure));
             $feed->addEntry($entry);
-
-            // Increment the counter for the next procedure
-            $procedureCount++;
         }
 
         // Generate RSS XML
@@ -106,12 +101,18 @@ class RssFeedController extends AbstractController
         // Format the description to match the structure seen in the image
         $startDate = $procedure->getPublicParticipationStartDate()->format('d.m.Y');
         $endDate = $procedure->getPublicParticipationEndDate()->format('d.m.Y');
-        $desc = <<<EOD
-                {$startDate} - {$endDate}\n
-                {$procedure->getPublicParticipationPhaseName()}\n
-                {$procedure->getDesc()}\n
-                <a href="{$this->meinBerlinRouter->publicDetail($procedure->getId())}">{$this->translator->trans('mein.berlin.more.informations')}</a>
-                EOD;
-        return nl2br($desc); // Convert newlines to <br> for proper HTML display
+        $descParts = [];
+        $descParts[] = "{$startDate} - {$endDate}";
+        if ('' !== $procedure->getPublicParticipationPhaseName()) {
+            $descParts[] = $procedure->getPublicParticipationPhaseName();
+        }
+        if ('' !== $procedure->getExternalDesc()) {
+            $descParts[] = $procedure->getExternalDesc();
+        }
+        $descParts[] = sprintf('<a href="%s">%s</a>',
+            $this->router->generate('DemosPlan_procedure_public_detail', ['procedure' => $procedure->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+            $this->translator->trans('mein.berlin.more.information'));
+        return implode("<br/>", $descParts);
+
     }
 }
