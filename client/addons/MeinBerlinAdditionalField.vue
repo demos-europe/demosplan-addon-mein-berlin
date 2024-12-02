@@ -108,7 +108,7 @@ export default {
   },
 
   computed: {
-    addonPayload() {
+    addonPayload () {
       return {
         attributes: {
           [this.attribute]: this.currentValue
@@ -121,29 +121,25 @@ export default {
       }
     },
 
-    attribute() {
+    attribute () {
       return this.relationshipKeyMapping[this.relationshipKey]?.attribute || undefined
     },
 
-    hint() {
-      return this.relationshipKeyMapping[this.relationshipKey]?.hint || ''
-    },
-
-    label() {
+    label () {
       return this.relationshipKeyMapping[this.relationshipKey]?.label || ''
     },
 
-    resourceType() {
+    resourceType () {
       return this.relationshipKeyMapping[this.relationshipKey]?.resourceType || ''
     },
 
-    tooltip() {
+    tooltip () {
       return this.relationshipKeyMapping[this.relationshipKey]?.tooltip || ''
     }
   },
 
   methods: {
-    fetchResourceList() {
+    fetchResourceList () {
       const url = Routing.generate('api_resource_list', { resourceType: this.resourceType })
 
       return dpApi.get(url, { include: [this.relationshipKey].join() })
@@ -159,7 +155,7 @@ export default {
         .catch(err => console.error(err))
     },
 
-    getItemByRelationshipId() {
+    getItemByRelationshipId () {
       this.item = Object.values(this.list).find(el => el.relationships[this.relationshipKey].data.id === this.relationshipId) || null
 
       if (this.item) {
@@ -168,7 +164,7 @@ export default {
       }
     },
 
-    handleFocus() {
+    handleFocus () {
       const input = document.getElementById('addonAdditionalField')
 
       if (input.classList.contains('is-invalid')) {
@@ -177,7 +173,7 @@ export default {
     }
   },
 
-  mounted() {
+  mounted () {
     this.fetchResourceList().then(this.getItemByRelationshipId)
   }
 }
