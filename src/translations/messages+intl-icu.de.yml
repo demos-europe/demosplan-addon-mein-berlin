@@ -21,7 +21,7 @@ mein.berlin.error.update.organisation.id.for.established.communication: "Die Org
 mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-berlin übermittelt werden."
 mein.berlin.communication.create.error: "Beim Versuch Informationen zu diesem Verfahren an mein-berlin zu übermitteln ist ein Fehler aufgetreten."
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
-mein.berlin.communication.create.success: "Dieses Verfahrens wurden soeben erfolgreich an mein-berlin übertragen."
+mein.berlin.communication.create.success: "Dieses Verfahren wurde erfolgreich an mein-berlin übertragen."
 mein.berlin.pictogram.file.to.large: "Das Verfahrenspiktogram konnte nicht an mein-berlin übertragen werden, da hierbei die maximale Größe von 5-MB überschritten wurde."
 mein.berlin.procedure.short.name: "Bebauungsplannummer"
 mein.berlin.procedure.short.name.tooltip: "Die Bebauungsplannummer beinhaltet NUR die Ziffern des Bebauungsplans, z.B. 4 - 123a oder VI - 123/4 . Dieses Feld ist wichtig für die Informationen auf der Karte auf mein.berlin.de. Die Eintragung in diesem Feld kann nach dem erstmaligen Speichern wieder geändert werden. Das Feld darf nicht leer sein."
