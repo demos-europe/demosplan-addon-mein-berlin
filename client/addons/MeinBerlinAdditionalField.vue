@@ -91,13 +91,13 @@ export default {
         { label: Translator.trans('district.office.treptow_koepenick'), value: '15' }
       ],
       relationshipKeyMapping: {
-        'orga': {
+        orga: {
           attribute: 'meinBerlinOrganisationId',
           label: Translator.trans('mein.berlin.organisation.id'),
           resourceType: 'MeinBerlinAddonOrganisation',
           tooltip: Translator.trans('mein.berlin.organisation.id.tooltip')
         },
-        'procedure': {
+        procedure: {
           attribute: 'procedureShortName',
           label: Translator.trans('mein.berlin.procedure.short.name'),
           resourceType: 'MeinBerlinAddonProcedureData',
