@@ -145,10 +145,12 @@ export default {
       return dpApi.get(url, { include: [this.relationshipKey].join() })
         .then(response => {
           this.list = response.data.data.map(item => {
+            const { attributes, id, relationships } = item
+
             return {
-              id: item.id,
-              attributes: item.attributes,
-              relationships: item.relationships
+              id,
+              attributes,
+              relationships
             }
           })
         })
