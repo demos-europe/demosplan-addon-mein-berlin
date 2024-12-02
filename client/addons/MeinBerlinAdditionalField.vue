@@ -78,31 +78,29 @@ export default {
       item: null,
       list: null,
       options: [
-        { label: 'Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen', value: '14' },
-        { label: 'Bezirksamt Charlottenburg-Wilmersdorf', value: '27' },
-        { label: 'Bezirksamt Friedrichshain-Kreuzberg', value: '28' },
-        { label: 'Bezirksamt Lichtenberg ', value: '29' },
-        { label: 'Bezirksamt Marzahn-Hellersdorf ', value: '25' },
-        { label: 'Bezirksamt Mitte', value: '16' },
-        { label: 'Bezirksamt Neukölln', value: '30' },
-        { label: 'Bezirksamt Pankow', value: '20' },
-        { label: 'Bezirksamt Reinickendorf', value: '31' },
-        { label: 'Bezirksamt Spandau', value: '26' },
-        { label: 'Bezirksamt Steglitz-Zehlendorf', value: '32' },
-        { label: 'Bezirksamt Tempelhof-Schöneberg', value: '24' },
-        { label: 'Bezirksamt Treptow-Köpenick', value: '15' }
+        { label: Translator.trans('district.office.administration'), value: '14' },
+        { label: Translator.trans('district.office.charlottenburg_wilmersdorf'), value: '27' },
+        { label: Translator.trans('district.office.friedrichshain_kreuzberg'), value: '28' },
+        { label: Translator.trans('district.office.lichtenberg'), value: '29' },
+        { label: Translator.trans('district.office.marzahn_hellersdorf'), value: '25' },
+        { label: Translator.trans('district.office.mitte'), value: '16' },
+        { label: Translator.trans('district.office.neukoelln'), value: '30' },
+        { label: Translator.trans('district.office.pankow'), value: '20' },
+        { label: Translator.trans('district.office.reinickendorf'), value: '31' },
+        { label: Translator.trans('district.office.spandau'), value: '26' },
+        { label: Translator.trans('district.office.steglitz_zehlendorf'), value: '32' },
+        { label: Translator.trans('district.office.tempelhof_schoeneberg'), value: '24' },
+        { label: Translator.trans('district.office.treptow_koepenick'), value: '15' }
       ],
       relationshipKeyMapping: {
         'orga': {
           attribute: 'meinBerlinOrganisationId',
-          hint: Translator.trans(''),
           label: Translator.trans('mein.berlin.organisation.id'),
           resourceType: 'MeinBerlinAddonOrganisation',
           tooltip: Translator.trans('mein.berlin.organisation.id.tooltip')
         },
         'procedure': {
           attribute: 'procedureShortName',
-          hint: Translator.trans(''),
           label: Translator.trans('mein.berlin.procedure.short.name'),
           resourceType: 'MeinBerlinAddonProcedureData',
           tooltip: Translator.trans('mein.berlin.procedure.short.name.tooltip')
@@ -148,9 +146,9 @@ export default {
 
   methods: {
     fetchResourceList() {
-      const url = Routing.generate('api_resource_list', {resourceType: this.resourceType})
+      const url = Routing.generate('api_resource_list', { resourceType: this.resourceType })
 
-      return dpApi.get(url, {include: [this.relationshipKey].join()})
+      return dpApi.get(url, { include: [this.relationshipKey].join() })
         .then(response => {
           this.list = response.data.data.map(item => {
             return {
