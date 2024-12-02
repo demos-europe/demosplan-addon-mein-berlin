@@ -5,8 +5,7 @@
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
-      hint: hint,
-      tooltip: tooltip
+      tooltip
     }"
     :required="required || (Boolean(initValue) && !isValueRemovable)"
     v-model="currentValue"
@@ -20,8 +19,7 @@
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
-      hint: hint,
-      tooltip: tooltip
+      tooltip
     }"
     :options="options"
     v-model="currentValue"
