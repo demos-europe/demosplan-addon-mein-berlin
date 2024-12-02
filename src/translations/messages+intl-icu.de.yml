@@ -17,7 +17,7 @@ mein.berlin.organisation.id.tooltip: "Bitte wählen Sie aus der Liste den Bezirk
 mein.berlin.organisation.id.missing: "Ihrer Organisation wurde von der Mandanten-Administration noch keine ID zugeteilt."
 mein.berlin.error.create.empty.procedure.short.name: "Es kann kein leeres Feld gespeichert werden."
 mein.berlin.error.create.empty.organisation.id: "Es muss eine Organisations-ID vergeben werden."
-mein.berlin.error.update.organisation.id.for.established.communication: "Die Organisations id kann nicht geändert werden, wenn ein Verfahren diese bereits zur Kommunikation mit mein-berlin nutzt."
+mein.berlin.error.update.organisation.id.for.established.communication: "Die Organisations-ID kann nicht geändert werden, wenn ein Verfahren diese bereits zur Kommunikation mit mein-berlin nutzt."
 mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-berlin übermittelt werden."
 mein.berlin.communication.create.error: "Beim Versuch Informationen zu diesem Verfahren an mein-berlin zu übermitteln ist ein Fehler aufgetreten."
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
