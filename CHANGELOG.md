@@ -16,7 +16,7 @@ procedures will be communicated to meinBerlin if:
   [MeinBerlinCommunicationHelper::checkProcedurePublicPhasePermissionsetNotHidden](./src/Logic/MeinBerlinCommunicationHelper.php)
 
 When sending a create POST we should get a dplanId in response which:
-- singanls this procedure has been communicated to meinBerlin
+- signals this procedure has been communicated to meinBerlin
 - is required to send updates regarding this procedrue at meinBerlin
   [MeinBerlinAddonEntity::dplanId](./src/Entity/MeinBerlinAddonEntity.php)
 
