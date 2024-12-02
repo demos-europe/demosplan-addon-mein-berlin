@@ -17,6 +17,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinRouter;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,12 +32,13 @@ class RssFeedController extends AbstractController
         protected readonly MeinBerlinRouter $meinBerlinRouter,
         protected readonly GlobalConfigInterface $demosplanConfig,
         protected readonly TranslatorInterface $translator,
+        private readonly LoggerInterface $logger,
     )
     {
     }
 
     /**
-     * @Route("/api/{organisationId}/rss-feed/", name="rss_feed")
+     * @Route("/api/{organisationId}/rss-feed", name="rss_feed")
      * @throws Exception
      */
     public function generateRssFeed(
@@ -46,9 +48,14 @@ class RssFeedController extends AbstractController
     ): Response
     {
         $correspondingAddonOrgaRelation = $correspondingAddonOrgaRelationRepository->findOneBy(['meinBerlinOrganisationId' => $organisationId]);
+        if ($correspondingAddonOrgaRelation === null) {
+            $this->logger->error('No corresponding addon organization relation found for organisationId: ' . $organisationId);
+            return new Response('', 200);
+        }
         Assert::notNull($correspondingAddonOrgaRelation);
         $demosplanOrga = $correspondingAddonOrgaRelation->getOrga();
-        $externalWritePhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('write');
+        Assert::notNull($demosplanOrga);
+        $externalWritePhaseKeys = $this->demosplanConfig->getExternalPhaseKeys();
         // Fetch procedures from the service
         $procedures = $orgaRelationService->getProceduresWithEndedParticipation(
             $externalWritePhaseKeys,
@@ -103,7 +110,7 @@ class RssFeedController extends AbstractController
                 {$startDate} - {$endDate}\n
                 {$procedure->getPublicParticipationPhaseName()}\n
                 {$procedure->getDesc()}\n
-                <a href="{$this->redirectToRoute('DemosPlan_procedure_public_detail', ['procedure' => $procedure->getId()])}">{$this->translator->trans('mein.berlin.more.informations')}</a>
+                <a href="{$this->meinBerlinRouter->publicDetail($procedure->getId())}">{$this->translator->trans('mein.berlin.more.informations')}</a>
                 EOD;
         return nl2br($desc); // Convert newlines to <br> for proper HTML display
     }
