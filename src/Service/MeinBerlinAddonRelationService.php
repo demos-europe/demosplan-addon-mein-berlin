@@ -14,30 +14,24 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Service;
 use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use Exception;
-use Illuminate\Support\Collection;
 
 class MeinBerlinAddonRelationService
 {
     /**
      * @param array<int, string> $phaseKeys
-     * @return array
+     * @return ProcedureInterface[]
      * @throws Exception
      */
-    public function getProceduresWithEndedParticipation(array $phaseKeys, OrgaInterface $orga): array
+    public function getVisibleProcedures(array $phaseKeys, OrgaInterface $orga): array
     {
-        try {
-            $currentDate = new \DateTime();
-            $procedures = $orga->getProcedures();
-            $phaseKeys = new Collection($phaseKeys);
-            $hits = collect($procedures)->filter(
-                static fn (ProcedureInterface $procedure): bool => $procedure->getPublicParticipationEndDate() < $currentDate
-                    && $phaseKeys->contains($procedure->getPublicParticipationPhase())
-            );
+        $procedures = $orga->getProcedures();
+        $phaseKeysCollection = collect($phaseKeys);
+        $hits = collect($procedures)->filter(
+            static fn (ProcedureInterface $procedure): bool => $phaseKeysCollection->contains($procedure->getPublicParticipationPhase())
+        )
+        ->sortByDesc(static fn (ProcedureInterface $procedure): int => $procedure->getPublicParticipationEndDateTimestamp());
 
-            return $hits->toArray();
-        } catch (Exception $e) {
-            throw $e;
-        }
+        return $hits->toArray();
     }
 
 }

@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository;
 
+use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
@@ -47,6 +48,11 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
     public function persistMeinBerlinAddonOrgaRelation(MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation): void
     {
         $this->getEntityManager()->persist($meinBerlinAddonOrgaRelation);
+    }
+
+    public function getOrganisationById(string $organisationId): ?OrgaInterface
+    {
+        return $this->getEntityManager()->getRepository(OrgaInterface::class)->find($organisationId);
     }
 
     /**
