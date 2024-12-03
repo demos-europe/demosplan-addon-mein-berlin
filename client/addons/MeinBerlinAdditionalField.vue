@@ -75,7 +75,7 @@ export default {
       initValue: '',
       item: null,
       list: null,
-      options: [
+      options: [ /* Organization / Authority ID on mein.berlin.de */
         { label: Translator.trans('mein.berlin.district.office.administration'), value: '14' },
         { label: Translator.trans('mein.berlin.district.office.charlottenburg_wilmersdorf'), value: '27' },
         { label: Translator.trans('mein.berlin.district.office.friedrichshain_kreuzberg'), value: '28' },
