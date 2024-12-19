@@ -75,20 +75,20 @@ export default {
       initValue: '',
       item: null,
       list: null,
-      options: [
-        { label: Translator.trans('district.office.administration'), value: '14' },
-        { label: Translator.trans('district.office.charlottenburg_wilmersdorf'), value: '27' },
-        { label: Translator.trans('district.office.friedrichshain_kreuzberg'), value: '28' },
-        { label: Translator.trans('district.office.lichtenberg'), value: '29' },
-        { label: Translator.trans('district.office.marzahn_hellersdorf'), value: '25' },
-        { label: Translator.trans('district.office.mitte'), value: '16' },
-        { label: Translator.trans('district.office.neukoelln'), value: '30' },
-        { label: Translator.trans('district.office.pankow'), value: '20' },
-        { label: Translator.trans('district.office.reinickendorf'), value: '31' },
-        { label: Translator.trans('district.office.spandau'), value: '26' },
-        { label: Translator.trans('district.office.steglitz_zehlendorf'), value: '32' },
-        { label: Translator.trans('district.office.tempelhof_schoeneberg'), value: '24' },
-        { label: Translator.trans('district.office.treptow_koepenick'), value: '15' }
+      options: [ /* Organization / Authority ID on mein.berlin.de */
+        { label: Translator.trans('mein.berlin.district.office.administration'), value: '14' },
+        { label: Translator.trans('mein.berlin.district.office.charlottenburg_wilmersdorf'), value: '27' },
+        { label: Translator.trans('mein.berlin.district.office.friedrichshain_kreuzberg'), value: '28' },
+        { label: Translator.trans('mein.berlin.district.office.lichtenberg'), value: '29' },
+        { label: Translator.trans('mein.berlin.district.office.marzahn_hellersdorf'), value: '25' },
+        { label: Translator.trans('mein.berlin.district.office.mitte'), value: '16' },
+        { label: Translator.trans('mein.berlin.district.office.neukoelln'), value: '30' },
+        { label: Translator.trans('mein.berlin.district.office.pankow'), value: '20' },
+        { label: Translator.trans('mein.berlin.district.office.reinickendorf'), value: '31' },
+        { label: Translator.trans('mein.berlin.district.office.spandau'), value: '26' },
+        { label: Translator.trans('mein.berlin.district.office.steglitz_zehlendorf'), value: '32' },
+        { label: Translator.trans('mein.berlin.district.office.tempelhof_schoeneberg'), value: '24' },
+        { label: Translator.trans('mein.berlin.district.office.treptow_koepenick'), value: '15' }
       ],
       relationshipKeyMapping: {
         orga: {
@@ -109,10 +109,14 @@ export default {
 
   computed: {
     addonPayload () {
+      let attributes = {}
+
+      if (this.attribute) {
+        attributes[this.attribute] = this.currentValue
+      }
+
       return {
-        attributes: {
-          [this.attribute]: this.currentValue
-        },
+        attributes,
         id: this.item ? this.item.id : '',
         initValue: this.item ? this.initValue : '',
         resourceType: this.resourceType,
@@ -122,7 +126,7 @@ export default {
     },
 
     attribute () {
-      return this.relationshipKeyMapping[this.relationshipKey]?.attribute || undefined
+      return this.relationshipKeyMapping[this.relationshipKey]?.attribute || ''
     },
 
     label () {
@@ -176,7 +180,9 @@ export default {
   },
 
   mounted () {
-    this.fetchResourceList().then(this.getItemByRelationshipId)
+    this.fetchResourceList().then(() => {
+      this.getItemByRelationshipId()
+    })
   }
 }
 </script>
