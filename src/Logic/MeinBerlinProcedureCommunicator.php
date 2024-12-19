@@ -57,51 +57,40 @@ class MeinBerlinProcedureCommunicator
                 [$organisationId, $dplanId],
                 $this->parameterBag->get('mein_berlin_procedure_update_url')
             );
-            $json = json_encode($preparedProcedureData, JSON_THROW_ON_ERROR);
             $this->logger->info('demosplan-mein-berlin-addon sends PATCH to update Procedure now!', [$url]);
             $response = $this->httpClient->request(
                 $method,
                 $url,
                 [
                     'headers' => $this->getMeinBerlinHeader(),
-                    'json' => $json
+                    'json' => $preparedProcedureData
                 ]
             );
 
             $statusCode = $response->getStatusCode();
             if (200 > $statusCode || 299 < $statusCode) {
                 $this->logger->error(
-                    'demosplan-mein-berlin-addon failed transmitting the procedure create message',
+                    'demosplan-mein-berlin-addon failed transmitting the procedure create message during update',
                     [
                         'statusCode' => $statusCode,
                         'procedureId' => $procedureId,
                         'meinBerlinOrganisationId' => $organisationId,
                         'meinBerlinProcedureCommunicationId' => $dplanId,
                         'PATCH url' => $url,
-                        'json' => $json,
+                        'payload' => $preparedProcedureData,
+                        'content' => $response->getContent(false)
                     ]
                 );
                 throw new MeinBerlinCommunicationException('failed to update procedure data for meinBerlin');
             }
             $this->logger->info(
                 'demosplan-mein-berlin-addon successfully transmitted updated procedure data',
-                ['procedureId' => $procedureId, 'PATCH url' => $url, 'json' => $json]
+                ['procedureId' => $procedureId, 'PATCH url' => $url, 'payload' => $preparedProcedureData]
             );
         } catch (ParameterNotFoundException $e) {
             $this->logger->error(
                 'demosplan-mein-berlin-addon failed to transmit a procedure update message
                 - check all parameters are correctly set/defined',
-                [
-                    'Exception' => $e,
-                    'ExceptionMessage' => $e->getMessage(),
-                    'procedureId' => $procedureId,
-                    'procedureData' => $preparedProcedureData,
-                ]
-            );
-            throw new MeinBerlinCommunicationException($e->getMessage());
-        }catch (JsonException $e) {
-            $this->logger->error(
-                'demosplan-mein-berlin-addon failed to prepare - parse requestData',
                 [
                     'Exception' => $e,
                     'ExceptionMessage' => $e->getMessage(),
@@ -122,7 +111,7 @@ class MeinBerlinProcedureCommunicator
                     'Exception' => $e,
                     'ExceptionMessage' => $e->getMessage(),
                     'procedureId' => $procedureId,
-                    'json' => $json,
+                    'payload' => $preparedProcedureData,
                 ]
             );
             throw new MeinBerlinCommunicationException($e->getMessage());
@@ -156,7 +145,6 @@ class MeinBerlinProcedureCommunicator
                 $organisationId,
                 $this->parameterBag->get('mein_berlin_procedure_create_url')
             );
-            $json = json_encode($preparedProcedureData, JSON_THROW_ON_ERROR);
 
             $this->logger->info('demosplan-mein-berlin-addon sends POST to create Procedure now!', [$url]);
             $response = $this->httpClient->request(
@@ -164,18 +152,19 @@ class MeinBerlinProcedureCommunicator
                 $url,
                 [
                     'headers' => $this->getMeinBerlinHeader(),
-                    'json' => $json
+                    'json' => $preparedProcedureData
                 ]
             );
             $statusCode = $response->getStatusCode();
             if (200 > $statusCode || 299 < $statusCode) {
                 $this->logger->error(
-                    'demosplan-mein-berlin-addon failed transmitting the procedure create message',
+                    'demosplan-mein-berlin-addon failed transmitting the procedure create message during create, non 2xx status code',
                     [
                         'statusCode' => $statusCode,
                         'meinBerlinOrganisationId' => $organisationId,
                         $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
-                        'json' => $json,
+                        'payload' => $preparedProcedureData,
+                        'content' => $response->getContent(false)
                     ]
                 );
                 throw new MeinBerlinCommunicationException(
@@ -228,7 +217,9 @@ class MeinBerlinProcedureCommunicator
                     'Exception' => $e,
                     'ExceptionMessage' => $e->getMessage(),
                     $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
-                    'json' => $json,
+                    'payload' => $preparedProcedureData,
+                    'content' => $response?->getContent(false)
+
                 ]
             );
             throw new MeinBerlinCommunicationException($e->getMessage());
@@ -240,7 +231,7 @@ class MeinBerlinProcedureCommunicator
                     'Exception' => $e,
                     'ExceptionMessage' => $e->getMessage(),
                     $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
-                    'json' => $json,
+                    'payload' => $preparedProcedureData,
                 ]
             );
             throw new MeinBerlinCommunicationException($e->getMessage());
