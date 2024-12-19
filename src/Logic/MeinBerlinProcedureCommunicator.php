@@ -288,13 +288,7 @@ class MeinBerlinProcedureCommunicator
             'demosplan-mein-berlin-addon failed to extract the id
             necessary for future procedure related communication.'
         );
-        $procedureRelatedCommunicationId = $responseContentArray['id'];
-        Assert::string(
-            $procedureRelatedCommunicationId,
-            'demosplan-mein-berlin-addon procedure communication id must be of type string.'
-        );
-
-        return $procedureRelatedCommunicationId;
+        return (string)$responseContentArray['id'];
     }
 
     private function attachDplanCommunicationId(
