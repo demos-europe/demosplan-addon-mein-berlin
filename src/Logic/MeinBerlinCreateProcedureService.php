@@ -99,7 +99,7 @@ class MeinBerlinCreateProcedureService
                 $procedure->getPublicParticipationPhaseObject()->getStartDate()->format('Y-m-d'),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name =>
                 $procedure->getPublicParticipationPhaseObject()->getEndDate()->format('Y-m-d'),
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name =>
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name =>
                 $this->getBase64PictogramFileString($procedure),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name =>
                 $procedure->getPublicParticipationPhaseObject()->getName(),
@@ -165,14 +165,14 @@ class MeinBerlinCreateProcedureService
     {
         // cut base64 content for logging purpose
         if(array_key_exists(
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name,
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name,
             $mappedProcedureData)
         ) {
             $mappedProcedureData[
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name
             ] = substr(
                 $mappedProcedureData[
-                RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name
+                RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name
                 ],
                 0,
                 64

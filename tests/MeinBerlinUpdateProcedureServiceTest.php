@@ -115,7 +115,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             'irrelevantField' => ['old' => 'oldValue', 'new' => 'newValue'],
         ];
         $settingsChangeSet = [
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value => ['old' => 'oldUrl', 'new' => ''],
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value => ['old' => 'oldUrl', 'new' => ''],
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->value => ['old' => 'oldAlt', 'new' => 'newAlt'],
             'irrelevantField' => ['old' => 'oldValue', 'new' => 'newValue'],
         ];
@@ -136,7 +136,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name => (new DateTime())->format('Y-m-d'),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name => (new DateTime())->format('Y-m-d'),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name => 'newStatus',
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name => '',
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name => '',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name => 'newAlt'
         ];
 

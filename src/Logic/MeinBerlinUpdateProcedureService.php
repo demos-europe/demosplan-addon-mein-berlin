@@ -239,14 +239,14 @@ class MeinBerlinUpdateProcedureService
     private function getBase64PictogramFileString(array $relevantProcedurePublicPhaseChanges): array
     {
         if (array_key_exists(
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value,
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value,
             $relevantProcedurePublicPhaseChanges
         )) {
             $pictogramFileString = $relevantProcedurePublicPhaseChanges[
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value
             ];
             $relevantProcedurePublicPhaseChanges[
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->value
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value
             ] = $this->meinBerlinProcedurePictogramFileHandler
                 ->checkForPictogramAndGetBase64FileString($pictogramFileString);
 
@@ -277,14 +277,14 @@ class MeinBerlinUpdateProcedureService
     {
         // cut base64 content for logging purpose
         if(array_key_exists(
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name,
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name,
             $mappedProcedureSettingsChanges)
         ) {
             $mappedProcedureSettingsChanges[
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name
             ] = substr(
                 $mappedProcedureSettingsChanges[
-                RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_url->name
+                RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name
                 ],
                 0,
                 64
