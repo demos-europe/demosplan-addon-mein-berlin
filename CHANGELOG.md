@@ -1,8 +1,6 @@
 # CHANGELOG
 
 ## UNRELEASED
-
-## v0.1 (2024-11-21)
 Basic Feature Implementation:
 Ticket: https://demoseurope.youtrack.cloud/issue/BEAA2-10/AP-1-Schnittstellenumsetzung-zwischen-DiPlanBeteiligung-und-mein.berlin.de
 
@@ -39,3 +37,7 @@ as it is a required field for meinBerlin.
 
 **There is no delete method support at myBerlin - so deleting a procedure is not handled  yet !!!**
 We can only hide the procedrue publicly at meinBerlin by updating the procedure with is_draft -> false
+
+## v0.1 (2024-11-21)
+
+Technical start of the changelog
