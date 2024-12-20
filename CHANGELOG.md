@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.1 (2024-12-20)
 Basic Feature Implementation:
 Ticket: https://demoseurope.youtrack.cloud/issue/BEAA2-10/AP-1-Schnittstellenumsetzung-zwischen-DiPlanBeteiligung-und-mein.berlin.de
 
