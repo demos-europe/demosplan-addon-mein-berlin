@@ -10,7 +10,7 @@
   "devDependencies": {
     "@demos-europe/demosplan-addon-client-builder": "^0.0.9",
     "webpack": "5.88.2",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^6.0.0"
   },
   "scripts": {
     "dev": "webpack build",
