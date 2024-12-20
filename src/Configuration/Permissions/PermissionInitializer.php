@@ -1,18 +1,64 @@
 <?php
-
 declare(strict_types=1);
+
+/**
+ * This file is part of the package demosplan.
+ *
+ * (c) 2010-present DEMOS plan GmbH, for more information see the license file.
+ *
+ * All rights reserved
+ */
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions;
 
+use DemosEurope\DemosplanAddon\Contracts\Config\GlobalConfigInterface;
+use DemosEurope\DemosplanAddon\Contracts\Entities\RoleInterface;
+use DemosEurope\DemosplanAddon\Permission\PermissionConditionBuilder;
 use DemosEurope\DemosplanAddon\Permission\PermissionInitializerInterface;
 use DemosEurope\DemosplanAddon\Permission\ResolvablePermissionCollectionInterface;
 
 class PermissionInitializer implements PermissionInitializerInterface
 {
+    private const PLANNING_ROLES_SET = [
+        RoleInterface::PLANNING_AGENCY_ADMIN,
+        RoleInterface::PLANNING_AGENCY_WORKER,
+        RoleInterface::PRIVATE_PLANNING_AGENCY,
+    ];
+
+    private bool $procedureRestricedAccess;
+    public function __construct(GlobalConfigInterface $globalConfig) {
+        $this->procedureRestricedAccess = $globalConfig->hasProcedureUserRestrictedAccess();
+    }
 
 
     public function configurePermissions(ResolvablePermissionCollectionInterface $permissionCollection): void
     {
-        throw new \Exception('Method not yet implemented.');
+        $permissionCollection->configurePermissionInstance(
+            Features::feature_set_mein_berlin_organisation_id(),
+            PermissionConditionBuilder::start()->enableIfUserHasRole(RoleInterface::CUSTOMER_MASTER_USER)
+        );
+
+        $permissionCollection->configurePermissionInstance(
+            Features::feature_get_mein_berlin_organisation_id(),
+            PermissionConditionBuilder::start()
+                ->enableIfProcedureOwnedViaOrganisation(
+                    self::PLANNING_ROLES_SET, $this->procedureRestricedAccess
+                )
+                ->enableIfProcedureOwnedViaPlanningAgency(
+                    self::PLANNING_ROLES_SET
+                )
+                ->enableIfUserHasRole(RoleInterface::CUSTOMER_MASTER_USER)
+        );
+
+        $permissionCollection->configurePermissionInstance(
+            Features::feature_set_mein_berlin_procedure_short_name(),
+            PermissionConditionBuilder::start()
+                ->enableIfProcedureOwnedViaOrganisation(
+                self::PLANNING_ROLES_SET, $this->procedureRestricedAccess
+                )
+                ->enableIfProcedureOwnedViaPlanningAgency(
+                    self::PLANNING_ROLES_SET
+                )
+        );
     }
 }

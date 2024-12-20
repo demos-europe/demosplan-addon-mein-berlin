@@ -13,3 +13,26 @@ services:
     exclude:
       - '../src/Entity'
       - '../src/*/Test'
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener\MeinBerlinPostProcedureUpdatedEventSubscriber:
+    tags: [ kernel.event_subscriber ]
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository:
+    arguments:
+      $entityClass: 'DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity'
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository:
+      arguments:
+          $entityClass: 'DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation'
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonProcedureDataResourceType:
+      autowire: true
+      arguments:
+        $conditionFactory: '@EDT\DqlQuerying\ConditionFactories\DqlConditionFactory'
+      tags: [ 'dplan.resourceType' ]
+
+  DemosEurope\DemosplanAddon\DemosMeinBerlin\ResourceType\MeinBerlinAddonOrganisationResourceType:
+      autowire: true
+      arguments:
+        $conditionFactory: '@EDT\DqlQuerying\ConditionFactories\DqlConditionFactory'
+      tags: [ 'dplan.resourceType' ]

@@ -1,4 +1,16 @@
 # These parameters can be imported into other config files
 # by enclosing the key with % (like %database_user%)
 parameters:
-
+    mein_berlin_public_procedure_route: 'core_procedure_slug'
+    mein_berlin_procedure_create_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/'
+    mein_berlin_procedure_update_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/<bplan-id>/'
+    mein_berlin_api_baseurl: "https://mein.berlin.de/"
+    mein_berlin_rss_feed_url: 'https://mein.berlin.de/api/<organisation-id>/rss-feed/'
+    mein_berlin_authorization: ''
+    # maximal file size allowed to base64 encode procedure-pictogram - 5MB
+    mein_berlin_pictogram_max_file_size: 5242880
+    # role codes to activate pictogram access control permission when setting a mein_berlin_organization_id via the API
+    mein_berlin_pictogram_roles:
+        - !php/const DemosEurope\DemosplanAddon\Contracts\Entities\RoleInterface::PLANNING_AGENCY_ADMIN
+        - !php/const DemosEurope\DemosplanAddon\Contracts\Entities\RoleInterface::PLANNING_AGENCY_WORKER
+    mein_berlin_pictogram_permission_name: 'field_procedure_pictogram'
