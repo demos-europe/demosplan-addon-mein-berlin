@@ -1,6 +1,13 @@
 # CHANGELOG
 
+## v0.2 (2025-01-06)
+- fix getting procedureShortName from procedure
+  the property had to be set at the [MeinBerlinAddonEntity::procedureShortName](./src/Entity/MeinBerlinAddonEntity.php)
+  before the getter can be used.
+- fix strict type hint to null or string in [MeinBerlinProcedurePictogramFileHandler::checkForPictogramAndGetBase64FileString](./src/Logic/MeinBerlinProcedurePictogramFileHandler.php)
+
 ## UNRELEASED
+
 ## v0.1 (2024-12-20)
 Basic Feature Implementation:
 Ticket: https://demoseurope.youtrack.cloud/issue/BEAA2-10/AP-1-Schnittstellenumsetzung-zwischen-DiPlanBeteiligung-und-mein.berlin.de
