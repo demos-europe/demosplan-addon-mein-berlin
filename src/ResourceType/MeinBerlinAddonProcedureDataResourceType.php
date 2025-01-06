@@ -230,6 +230,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper
                 ->getCorrespondingOrgaRelation($currentProcedure);
             Assert::notNull($correspondingAddonOrgaRelation);
+            $meinBerlinAddonEntity->setProcedureShortName($entityData->getAttributes()['procedureShortName']);
             $this->createProcedureService->createMeinBerlinProcedure(
                 $currentProcedure,
                 $meinBerlinAddonEntity,

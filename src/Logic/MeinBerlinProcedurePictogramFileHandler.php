@@ -32,7 +32,7 @@ class MeinBerlinProcedurePictogramFileHandler
     ) {
 
     }
-    public function checkForPictogramAndGetBase64FileString(string $pictogramFileString): string
+    public function checkForPictogramAndGetBase64FileString(?string $pictogramFileString): string
     {
         $base64FileString = '';
         if ('' !== $pictogramFileString && null !== $pictogramFileString) {
