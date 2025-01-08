@@ -13,7 +13,6 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
-use DemosEurope\DemosplanAddon\Contracts\Services\MapProjectionConverterInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
@@ -32,13 +31,13 @@ use function substr;
 class MeinBerlinCreateProcedureService
 {
     public function __construct(
-        private readonly LoggerInterface $logger,
-        private readonly MapProjectionConverterInterface $mapProjectionConverter,
-        private readonly ParameterBagInterface $parameterBag,
-        private readonly RouterInterface $router,
-        private readonly MeinBerlinProcedureCommunicator $meinBerlinProcedureCommunicator,
-        private readonly MessageBagInterface $messageBag,
-        private readonly MeinBerlinProcedurePictogramFileHandler $meinBerlinProcedurePictogramFileHandler,
+        private readonly LoggerInterface                              $logger,
+        private readonly ParameterBagInterface                        $parameterBag,
+        private readonly RouterInterface                              $router,
+        private readonly MeinBerlinProcedureCommunicator              $meinBerlinProcedureCommunicator,
+        private readonly MessageBagInterface                          $messageBag,
+        private readonly MeinBerlinProcedurePictogramFileHandler      $meinBerlinProcedurePictogramFileHandler,
+        private readonly MeinBerlinProcedureSettingsCoordinateHandler $meinBerlinProcedureSettingsCoordinateHandler,
     ){
 
     }
@@ -105,7 +104,8 @@ class MeinBerlinCreateProcedureService
                 $this->getBase64PictogramFileString($procedure),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name =>
                 $procedure->getPublicParticipationPhaseObject()->getName(),
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name => $this->getCoordinateAsGeoJSON($procedure),
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name =>
+                $this->meinBerlinProcedureSettingsCoordinateHandler->getCoordinateAsGeoJSON($procedure->getCoordinate()),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_copyright->name =>
                 $procedure->getSettings()->getPictogramCopyright(),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name =>
@@ -183,37 +183,4 @@ class MeinBerlinCreateProcedureService
 
         return $mappedProcedureData;
     }
-
-    private function getCoordinateAsGeoJSON(ProcedureInterface $procedure): string
-    {
-        $coordinate = $procedure->getCoordinate();
-        if (null === $coordinate || '' === $coordinate) {
-            return '';
-        }
-
-        $coordinate4326 = $this->mapProjectionConverter->convertCoordinate(
-            $coordinate,
-            $this->mapProjectionConverter->getProjection('EPSG:3857'),
-            $this->mapProjectionConverter->getProjection('EPSG:4326')
-        );
-        $geoJson = [
-            'type' => 'Feature',
-            'geometry' => [
-                'type' => 'Point',
-                'coordinates' => [
-                    $coordinate4326[0],
-                    $coordinate4326[1],
-                ],
-            ],
-        ];
-
-        try {
-            return json_encode($geoJson, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            $this->logger->error('failed to convert the coordinate to geojson', [$e]);
-        }
-
-        return '';
-    }
-
 }

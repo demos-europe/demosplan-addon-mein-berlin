@@ -46,7 +46,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
     public function onProcedureUpdate(PostProcedureUpdatedEventInterface $postProcedureUpdatedEvent): void
     {
         // check if procedure is listed to be communicated at all and figure out what kind POST || PATCH
-        // by checking for an organization-id as well as a publicly visible phase and dplan-id
+        // by checking for an organization-id as well as a publicly visible phase and dplan-id as well as a pictogram
         $newProcedure = $postProcedureUpdatedEvent->getProcedureAfterUpdate();
         if (false === $this->communicationHelper->hasOrganisationIdSet($newProcedure)) {
             // for this procedure is no MeinBerlin organisationId set (dplan name: procedureShortName)
@@ -59,7 +59,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $hasPictogram = $newProcedure->getPictogram() !== null && $newProcedure->getPictogram() !== '';
         if ($isPublishedVal && $hasProcedureShortNameSet && $hasPictogram && !$dplanIdIsPresent) {
             // create new Procedure entry at MeinBerlin if procedure is publicly visible, has an procedureShortName set
-            // but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
+            // and has a pictogram set, but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
             $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
             // those can not be null as indirectly checked by methods beforehand
