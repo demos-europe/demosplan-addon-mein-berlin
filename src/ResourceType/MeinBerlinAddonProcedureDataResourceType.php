@@ -224,7 +224,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         // check if create message should be sent by checking the procedurePhase
         // lastly check if a dplanId (communicationId) is already set - this would be an error here - unique constraint
         // we do not want to send a message before the database says nope.
-        $hasPictogram = !empty($currentProcedure->getPictogram());
+        $hasPictogram = $currentProcedure->getPictogram() !== null && $currentProcedure->getPictogram() !== '';
         if (!$this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure) &&
             $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure) &&
             $hasPictogram
@@ -279,7 +279,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             // to allow this field as a sort of retrigger if a previous create request failed
             // if a prev update failed is a different question - would be a real problem as its content is lost.
             $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
-            $hasPictogram = !empty($currentProcedure->getPictogram());
+            $hasPictogram = $currentProcedure->getPictogram() !== null && $currentProcedure->getPictogram() !== '';
             Assert::notNull($currentProcedure);
             if ($this->meinBerlinCommunicationHelper
                 ->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure) && $hasPictogram
