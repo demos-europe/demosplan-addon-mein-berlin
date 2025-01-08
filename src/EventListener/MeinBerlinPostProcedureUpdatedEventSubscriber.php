@@ -56,7 +56,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($newProcedure);
         $hasProcedureShortNameSet = $this->communicationHelper->hasProcedureShortNameSet($newProcedure);
         $dplanIdIsPresent = $this->communicationHelper->hasDplanIdSet($newProcedure);
-        if ($isPublishedVal && $hasProcedureShortNameSet && !$dplanIdIsPresent) {
+        $hasPictogram = $newProcedure->getPictogram() ? true : false;
+        if ($isPublishedVal && $hasProcedureShortNameSet && $hasPictogram && !$dplanIdIsPresent) {
             // create new Procedure entry at MeinBerlin if procedure is publicly visible, has an procedureShortName set
             // but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
