@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## UNRELEASED
+
 ## v0.2 (2025-01-06)
 - add the pictogram to the list of mandatory fields for a meinBerlin communication.
   procedures will now only be created at meinBerlin if a pictogram has also been set.
@@ -10,8 +12,6 @@
 - fix strict type hint to null or string in [MeinBerlinProcedurePictogramFileHandler::checkForPictogramAndGetBase64FileString](./src/Logic/MeinBerlinProcedurePictogramFileHandler.php)
 - Add coordinate transfor helper class and implemented its usage for updates and create messages
   [MeinBerlinCoordinateTransformer::getCoordinateAsGeoJSON](./src/Logic/MeinBerlinProcedureSettingsCoordinateHandler.php)
-
-## UNRELEASED
 
 ## v0.1 (2024-12-20)
 Basic Feature Implementation:
