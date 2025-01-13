@@ -221,15 +221,18 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         }
         // creation is allowed from here on.
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
-        // check if create message should be sent by checking the procedurePhase
+        // check if create message should be sent by checking the procedurePhase and an existing pictogram
         // lastly check if a dplanId (communicationId) is already set - this would be an error here - unique constraint
         // we do not want to send a message before the database says nope.
+        $hasPictogram = $currentProcedure->getPictogram() !== null && $currentProcedure->getPictogram() !== '';
         if (!$this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure) &&
-            $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
+            $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure) &&
+            $hasPictogram
         ) {
             $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper
                 ->getCorrespondingOrgaRelation($currentProcedure);
             Assert::notNull($correspondingAddonOrgaRelation);
+            $meinBerlinAddonEntity->setProcedureShortName($entityData->getAttributes()['procedureShortName']);
             $this->createProcedureService->createMeinBerlinProcedure(
                 $currentProcedure,
                 $meinBerlinAddonEntity,
@@ -273,12 +276,14 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 No update message will be sent to meinBerlin'
             );
             // still check if all conditions for a create message are fulfilled
+            // (viable shortName, publicPhase, pictogram and organisationRelation, but no dplanId)
             // to allow this field as a sort of retrigger if a previous create request failed
             // if a prev update failed is a different question - would be a real problem as its content is lost.
             $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
+            $hasPictogram = $currentProcedure->getPictogram() !== null && $currentProcedure->getPictogram() !== '';
             Assert::notNull($currentProcedure);
             if ($this->meinBerlinCommunicationHelper
-                ->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
+                ->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure) && $hasPictogram
             ) {
                 $this->logger->warning(
                     'demosplan-mein-berlin-addon registered an update of a procedure that should have been

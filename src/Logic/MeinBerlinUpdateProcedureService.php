@@ -40,6 +40,7 @@ class MeinBerlinUpdateProcedureService
         private readonly MeinBerlinProcedureCommunicator $procedureCommunicator,
         private readonly MessageBagInterface $messageBag,
         private readonly MeinBerlinProcedurePictogramFileHandler $meinBerlinProcedurePictogramFileHandler,
+        private readonly MeinBerlinProcedureSettingsCoordinateHandler $meinBerlinProcedureSettingsCoordinateHandler,
     ){
 
     }
@@ -256,6 +257,27 @@ class MeinBerlinUpdateProcedureService
     }
 
     /**
+     * @param array<string, mixed> $relevantProcedureCoordsChanges
+     * @return array<string, mixed>
+     */
+    private function getCoordinateAsGeoJson(array $relevantProcedureCoordsChanges): array
+    {
+        if (array_key_exists(
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->value,
+            $relevantProcedureCoordsChanges
+        )) {
+            $coordinate = $relevantProcedureCoordsChanges[
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->value
+            ];
+            $relevantProcedureCoordsChanges[
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->value
+            ] = $this->meinBerlinProcedureSettingsCoordinateHandler->getCoordinateAsGeoJSON($coordinate);
+        }
+
+        return $relevantProcedureCoordsChanges;
+    }
+
+    /**
      * @param array<string, string> $mappedProcedureSettingsChanges
      */
     private function logMappedProcedureSettingsChanges(array $mappedProcedureSettingsChanges): void
@@ -384,6 +406,7 @@ class MeinBerlinUpdateProcedureService
         $relevantProcedureSettingsChanges = $this->getBase64PictogramFileString(
             $relevantProcedureSettingsChanges
         );
+        $relevantProcedureSettingsChanges = $this->getCoordinateAsGeoJson($relevantProcedureSettingsChanges);
 
         // map our property names to their requested names
         return RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::

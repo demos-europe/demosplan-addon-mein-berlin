@@ -1,6 +1,18 @@
 # CHANGELOG
 
 ## UNRELEASED
+
+## v0.2 (2025-01-06)
+- add the pictogram to the list of mandatory fields for a meinBerlin communication.
+  procedures will now only be created at meinBerlin if a pictogram has also been set.
+  documentation of v0.1 has been updated accordingly.
+- fix getting procedureShortName from procedure
+  the property had to be set at the [MeinBerlinAddonEntity::procedureShortName](./src/Entity/MeinBerlinAddonEntity.php)
+  before the getter can be used.
+- fix strict type hint to null or string in [MeinBerlinProcedurePictogramFileHandler::checkForPictogramAndGetBase64FileString](./src/Logic/MeinBerlinProcedurePictogramFileHandler.php)
+- Add coordinate transfor helper class and implemented its usage for updates and create messages
+  [MeinBerlinCoordinateTransformer::getCoordinateAsGeoJSON](./src/Logic/MeinBerlinProcedureSettingsCoordinateHandler.php)
+
 ## v0.1 (2024-12-20)
 Basic Feature Implementation:
 Ticket: https://demoseurope.youtrack.cloud/issue/BEAA2-10/AP-1-Schnittstellenumsetzung-zwischen-DiPlanBeteiligung-und-mein.berlin.de
@@ -13,6 +25,7 @@ procedures will be communicated to meinBerlin if:
   [MeinBerlinAddonEntity::procedureShortName](./src/Entity/MeinBerlinAddonEntity.php)
 - The procedure is in a public visible phase (premissionset read/write)
   [MeinBerlinCommunicationHelper::checkProcedurePublicPhasePermissionsetNotHidden](./src/Logic/MeinBerlinCommunicationHelper.php)
+- The procedure has a pictogram set
 
 When sending a create POST we should get a dplanId in response which:
 - signals this procedure has been communicated to meinBerlin
