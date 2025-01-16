@@ -16,6 +16,7 @@ use DemosEurope\DemosplanAddon\Contracts\Entities\RoleInterface;
 use DemosEurope\DemosplanAddon\Permission\PermissionConditionBuilder;
 use DemosEurope\DemosplanAddon\Permission\PermissionInitializerInterface;
 use DemosEurope\DemosplanAddon\Permission\ResolvablePermissionCollectionInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class PermissionInitializer implements PermissionInitializerInterface
 {
@@ -26,7 +27,9 @@ class PermissionInitializer implements PermissionInitializerInterface
     ];
 
     private bool $procedureRestricedAccess;
-    public function __construct(GlobalConfigInterface $globalConfig) {
+    public function __construct(
+        private readonly GlobalConfigInterface $globalConfig,
+        private readonly ParameterBagInterface $parameterBag) {
         $this->procedureRestricedAccess = $globalConfig->hasProcedureUserRestrictedAccess();
     }
 
@@ -60,5 +63,10 @@ class PermissionInitializer implements PermissionInitializerInterface
                     self::PLANNING_ROLES_SET
                 )
         );
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->parameterBag->get('mein_berlin_subdomain') === $this->globalConfig->getSubdomain();
     }
 }
