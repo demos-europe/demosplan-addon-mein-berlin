@@ -2,6 +2,8 @@
 
 ## UNRELEASED
 - remove unused params
+- enable addon only for specific customer, defined by param `mein_berlin_subdomain` 
+
 
 ## v0.2 (2025-01-06)
 - add the pictogram to the list of mandatory fields for a meinBerlin communication.
