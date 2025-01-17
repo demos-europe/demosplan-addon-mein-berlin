@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.3 (2025-01-17)
 - remove unused params
 - enable addon only for specific customer, defined by param `mein_berlin_subdomain` 
 
