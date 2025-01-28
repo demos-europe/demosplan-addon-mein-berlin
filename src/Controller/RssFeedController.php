@@ -70,6 +70,7 @@ class RssFeedController extends AbstractController
         $feed->setFeedLink($this->router->generate('addon_mein_berlin_rss_feed', ['organisationId' => $organisationId], UrlGeneratorInterface::ABSOLUTE_URL), 'rss');
         $feed->setGenerator('demosplan');
         $feed->setDateModified(new DateTime());
+        $feed->setEncoding('UTF-8');
 
         // Add items to the feed
         foreach ($procedures as $procedure) {
@@ -78,7 +79,9 @@ class RssFeedController extends AbstractController
                 $this->translator->trans('mein.berlin.rss.feed.plan.prefix'),
                 $procedure->getExternalName()
             ));
-            $entry->setDescription($this->formatDescription($procedure));
+            $url = $this->router->generate('DemosPlan_procedure_public_detail', ['procedure' => $procedure->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+            $entry->setLink($url);
+            $entry->setDescription($this->formatDescription($procedure, $url));
             $feed->addEntry($entry);
         }
 
@@ -96,7 +99,7 @@ class RssFeedController extends AbstractController
         return $response;
     }
 
-    private function formatDescription(ProcedureInterface $procedure): string
+    private function formatDescription(ProcedureInterface $procedure, string $url): string
     {
         // Format the description to match the structure seen in the image
         $startDate = $procedure->getPublicParticipationStartDate()->format('d.m.Y');
@@ -110,7 +113,7 @@ class RssFeedController extends AbstractController
             $descParts[] = $procedure->getExternalDesc();
         }
         $descParts[] = sprintf('<a href="%s">%s</a>',
-            $this->router->generate('DemosPlan_procedure_public_detail', ['procedure' => $procedure->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+            $url,
             $this->translator->trans('mein.berlin.more.information'));
         return implode("<br/>", $descParts);
 
