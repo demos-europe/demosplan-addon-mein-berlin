@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.4 (2025-01-28)
 - add entry link and encoding
 
 ## v0.3 (2025-01-17)
