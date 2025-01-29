@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.5 (2025-01-29)
 - always enable addon when called via cli as subdomain is never set
 
 ## v0.4 (2025-01-28)
