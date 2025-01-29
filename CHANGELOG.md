@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- always enable addon when called via cli as subdomain is never set
+
 ## v0.4 (2025-01-28)
 - add entry link and encoding
 

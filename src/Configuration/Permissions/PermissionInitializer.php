@@ -67,6 +67,10 @@ class PermissionInitializer implements PermissionInitializerInterface
 
     public function isEnabled(): bool
     {
+        // when called from CLI, the addon needs to be enabled as we do not have a subdomain
+        if (PHP_SAPI === 'cli') {
+            return true;
+        }
         return $this->parameterBag->get('mein_berlin_subdomain') === $this->globalConfig->getSubdomain();
     }
 }
