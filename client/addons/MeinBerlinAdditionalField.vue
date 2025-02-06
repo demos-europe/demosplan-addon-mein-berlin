@@ -38,6 +38,12 @@ export default {
   },
 
   props: {
+    additionalFieldOptions: {
+      type: Array,
+      required: false,
+      default: () => []
+    },
+
     isInput: {
       type: Boolean,
       required: false,
@@ -180,9 +186,16 @@ export default {
   },
 
   mounted () {
-    this.fetchResourceList().then(() => {
+    if (!this.additionalFieldOptions.length) {
+      this.fetchResourceList()
+        .then(() => {
+          this.$emit('addonEvent:emit', { name: 'resourceList:loaded', payload: this.list })
+          this.getItemByRelationshipId()
+        })
+    } else {
+      this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
-    })
+    }
   }
 }
 </script>
