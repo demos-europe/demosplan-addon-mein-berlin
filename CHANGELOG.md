@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## UNRELEASED
+
+- fix: avoid unnecessary requests to fetch dropdown options
+
 ## v0.5 (2025-01-29)
 - always enable addon when called via cli as subdomain is never set
 
