@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 
+## v0.6 (2025-02-06)
 - fix: avoid unnecessary requests to fetch dropdown options
 
 ## v0.5 (2025-01-29)
