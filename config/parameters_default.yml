@@ -13,4 +13,4 @@ parameters:
         - !php/const DemosEurope\DemosplanAddon\Contracts\Entities\RoleInterface::PLANNING_AGENCY_ADMIN
         - !php/const DemosEurope\DemosplanAddon\Contracts\Entities\RoleInterface::PLANNING_AGENCY_WORKER
     mein_berlin_pictogram_permission_name: 'field_procedure_pictogram'
-    mein_berlin_pictogram_resolution_restriction_permission_name: 'field_procedure_pictogram_resolution_restriction'
+    mein_berlin_pictogram_resolution_restriction_permission_name: 'feature_procedure_pictogram_resolution_restriction'
