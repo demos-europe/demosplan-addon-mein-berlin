@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 
+## v0.7 (2025-02-11)
 - Enable core permission 'field_procedure_pictogram_resolution_restriction' dynamically to be
   able to check for pictogram related restrictions regarding this addon within the core.
   Restrictions are 300x500px and 5MB max size.
