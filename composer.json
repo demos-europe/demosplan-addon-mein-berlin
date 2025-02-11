@@ -1,7 +1,7 @@
 {
   "name": "demos-europe/demosplan-addon-mein-berlin",
   "description": "demosplan Addon to integrate with mein.berlin.de",
-  "version": "v0.6",
+  "version": "v0.7",
   "type": "demosplan-addon",
   "license": "proprietary",
   "autoload": {
