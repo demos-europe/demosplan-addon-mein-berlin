@@ -2,6 +2,11 @@
 
 ## UNRELEASED
 
+- Enable core permission 'field_procedure_pictogram_resolution_restriction' dynamically to be
+  able to check for pictogram related restrictions regarding this addon within the core.
+  Restrictions are 300x500px and 5MB max size.
+  [MeinBerlinAddonOrganisationResourceType::addAccessControlPictogramPermission](./src/ResourceType/MeinBerlinAddonOrganisationResourceType.php)
+
 ## v0.6 (2025-02-06)
 - fix: avoid unnecessary requests to fetch dropdown options
 
