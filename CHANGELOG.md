@@ -2,6 +2,10 @@
 
 ## UNRELEASED
 
+## v0.8 (2024-02-12)
+ - migration to add missing access control permission for pictogram restrictions
+   for already established meinBerlin orgaRelations.
+
 ## v0.7 (2025-02-11)
 - Enable core permission 'field_procedure_pictogram_resolution_restriction' dynamically to be
   able to check for pictogram related restrictions regarding this addon within the core.
