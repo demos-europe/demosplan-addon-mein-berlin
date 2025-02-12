@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.8 (2025-02-12)
  - migration to add missing access control permission for pictogram restrictions
    for already established meinBerlin orgaRelations.
 
