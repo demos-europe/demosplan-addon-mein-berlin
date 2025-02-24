@@ -1152,9 +1152,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@demos-europe/demosplan-ui@npm:0.3.45":
-  version: 0.3.45
-  resolution: "@demos-europe/demosplan-ui@npm:0.3.45"
+"@demos-europe/demosplan-ui@npm:0.3.49":
+  version: 0.3.49
+  resolution: "@demos-europe/demosplan-ui@npm:0.3.49"
   dependencies:
     "@braintree/sanitize-url": "npm:^7.0.0"
     "@floating-ui/dom": "npm:^1.4.5"
@@ -1229,7 +1229,7 @@ __metadata:
       optional: true
     prosemirror-view:
       optional: true
-  checksum: 10c0/4020148687840a4a75e55afe20df041a861a4ef2786518b5a61afd7a3f9ec2323fea6450945936ea31dd0c591e0732ceb7c89897db997cb84268b8a7bac987c2
+  checksum: 10c0/6961dd47a9775ad9210b31d08fa03327e24ba955682b6c2a6010c46f24ca5b1d41ea2c11cd9127619bba12299a474752988dafaf5ed4f086c2fd03478ec7b764
   languageName: node
   linkType: hard
 
@@ -2814,7 +2814,7 @@ __metadata:
   resolution: "demosplan-addon-mein-berlin@workspace:."
   dependencies:
     "@demos-europe/demosplan-addon-client-builder": "npm:^0.0.9"
-    "@demos-europe/demosplan-ui": "npm:0.3.45"
+    "@demos-europe/demosplan-ui": "npm:0.3.49"
     webpack: "npm:5.88.2"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
