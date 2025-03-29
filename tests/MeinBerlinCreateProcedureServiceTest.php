@@ -24,6 +24,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunication
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureCommunicator;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedurePictogramFileHandler;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureSettingsCoordinateHandler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -102,13 +103,19 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
         $router->method('generate')
             ->willReturn('mein.berlin/test');
 
+
+        $procedureCoordinateHandler = $this->createMock(
+            MeinBerlinProcedureSettingsCoordinateHandler::class
+        );
+
         $this->sut = new MeinBerlinCreateProcedureService(
             $this->logger,
             $parameterBag,
             $router,
             $meinBerlinProcedureCommunicator,
             $this->messageBag,
-            $meinBerlinProcedurePictureFileHandler
+            $meinBerlinProcedurePictureFileHandler,
+            $procedureCoordinateHandler
         );
     }
 

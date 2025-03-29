@@ -20,6 +20,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureSe
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 
 class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
 {
@@ -36,7 +37,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
 
         // Create a partial mock for the SUT
         $this->sut = $this->getMockBuilder(MeinBerlinPostProcedureUpdatedEventSubscriber::class)
-            ->setConstructorArgs([$this->communicationHelper, $this->createProcedureService, $this->updateProcedureService])
+            ->setConstructorArgs([(new NullLogger()),$this->communicationHelper, $this->createProcedureService, $this->updateProcedureService])
             ->onlyMethods(['isPublishedIfNeedsToBeIncludedOnUpdate'])
             ->getMock();
 

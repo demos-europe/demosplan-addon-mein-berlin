@@ -15,6 +15,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPro
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevelantProcedurePhasePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureCommunicator;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedurePictogramFileHandler;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureSettingsCoordinateHandler;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -39,6 +40,9 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
         $procedurePictogramFileHandler = $this->createMock(
             MeinBerlinProcedurePictogramFileHandler::class
         );
+        $procedureCoordinateHandler = $this->createMock(
+            MeinBerlinProcedureSettingsCoordinateHandler::class
+        );
         $procedurePictogramFileHandler->method('checkForPictogramAndGetBase64FileString')
             ->willReturn('');
 
@@ -48,7 +52,8 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             $router,
             $meinBerlinProcedureCommunicator,
             $messageBag,
-            $procedurePictogramFileHandler
+            $procedurePictogramFileHandler,
+            $procedureCoordinateHandler
         );
     }
     public function testUpdateMeinBerlinProcedureEntryWithRelevantChanges()
@@ -64,6 +69,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
                 might be relevant to communicate. - start collecting relevant changes',
             'demosplan-mein-berlin-addon discovered the following relevant Procedure changes:',
             'demosplan-mein-berlin-addon mapped relevant Procedure changes like:',
+            'demosplan-mein-berlin-addon discovered the following important Procedure changes:',
         ];
         $this->logger->method('info')
             ->willReturnCallback(
@@ -81,7 +87,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             'testDplanId',
             'testProcedureId',
         );
-        self::assertCount(3, $expectedMessages);
+        self::assertCount(4, $expectedMessages);
     }
 
     public function testUpdateMeinBerlinProcedureEntryWithIrrelevantChanges()
