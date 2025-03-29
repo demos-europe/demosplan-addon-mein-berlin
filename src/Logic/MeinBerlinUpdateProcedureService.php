@@ -104,6 +104,16 @@ class MeinBerlinUpdateProcedureService
                 $fieldsToUpdate[MeinBerlinAddonEntity::MEIN_BERLIN_IS_DRAFT] = !$isPublished;
             }
 
+            // do not send anything if no relevant changes have been found
+            if(0 === count($fieldsToUpdate)) {
+                $this->logger->info(
+                    'demosplan-mein-berlin-addon update - no relevant changes found',
+                    $changeSet
+                );
+
+                return;
+            }
+
             try {
                 $this->procedureCommunicator->updateProcedure(
                     $fieldsToUpdate,
