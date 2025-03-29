@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## UNRELEASED
+- do not send anything if no relevant changes have been found
+- add logger calls
+- fix tests
+
 ## v0.8 (2025-02-12)
  - migration to add missing access control permission for pictogram restrictions
    for already established meinBerlin orgaRelations.
