@@ -183,6 +183,11 @@ class MeinBerlinUpdateProcedureService
             )
         );
 
+        $this->logger->info(
+            'demosplan-mein-berlin-addon discovered the following important Procedure changes:',
+            [$importantChanges]
+        );
+
         return $importantChanges;
     }
 

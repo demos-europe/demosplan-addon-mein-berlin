@@ -18,12 +18,14 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelp
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinUpdateProcedureService;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Webmozart\Assert\Assert;
 
 class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberInterface
 {
     public function __construct(
+        private readonly LoggerInterface $logger,
         private readonly MeinBerlinCommunicationHelper $communicationHelper,
         private readonly MeinBerlinCreateProcedureService $createProcedureService,
         private readonly MeinBerlinUpdateProcedureService $updateProcedureService,
@@ -45,12 +47,15 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
      */
     public function onProcedureUpdate(PostProcedureUpdatedEventInterface $postProcedureUpdatedEvent): void
     {
+        $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate');
         // check if procedure is listed to be communicated at all and figure out what kind POST || PATCH
         // by checking for an organization-id as well as a publicly visible phase and dplan-id as well as a pictogram
         $newProcedure = $postProcedureUpdatedEvent->getProcedureAfterUpdate();
         if (false === $this->communicationHelper->hasOrganisationIdSet($newProcedure)) {
             // for this procedure is no MeinBerlin organisationId set (dplan name: procedureShortName)
             // - it will not be published
+            $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - no organisationId set');
+
             return;
         }
         $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($newProcedure);
@@ -58,6 +63,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $dplanIdIsPresent = $this->communicationHelper->hasDplanIdSet($newProcedure);
         $hasPictogram = $newProcedure->getPictogram() !== null && $newProcedure->getPictogram() !== '';
         if ($isPublishedVal && $hasProcedureShortNameSet && $hasPictogram && !$dplanIdIsPresent) {
+            $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - create new procedure entry at MeinBerlin');
             // create new Procedure entry at MeinBerlin if procedure is publicly visible, has an procedureShortName set
             // and has a pictogram set, but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
@@ -66,6 +72,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             Assert::notNull($correspondingAddonOrgaRelation);
             Assert::notNull($correspondingAddonEntity);
 
+            $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - createMeinBerlinProcedure request');
             $this->createProcedureService->createMeinBerlinProcedure(
                 $newProcedure,
                 $correspondingAddonEntity,
@@ -75,6 +82,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             return;
         }
         if ($dplanIdIsPresent) {
+            $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - update existing procedure entry at MeinBerlin');
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
             $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
             // those can not be null as indirectly checked by metods beforehand
@@ -85,6 +93,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             // check if publicPhase permission set visibility changed from hidden to something else or vice versa
             // if it did - include it as is_draft boolean in PATCH request
             $isPublishedVal = $this->isPublishedIfNeedsToBeIncludedOnUpdate($postProcedureUpdatedEvent);
+            $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - updateMeinBerlinProcedureEntry request');
             $this->updateProcedureService->updateMeinBerlinProcedureEntry(
                 $changeSet,
                 $isPublishedVal,
@@ -93,7 +102,6 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $newProcedure->getId()
             );
 
-            return;
         }
     }
 
