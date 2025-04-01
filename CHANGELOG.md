@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 - dynamically set real project url
+- do not fail request when procedure is already saved in database
 
 ## v0.9 (2025-03-29)
 - do not send anything if no relevant changes have been found

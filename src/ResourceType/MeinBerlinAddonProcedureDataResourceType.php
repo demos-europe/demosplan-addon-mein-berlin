@@ -189,11 +189,12 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             throw new AddonResourceNotFoundException('create with invalid procedure is invalid');
         }
         if ($this->meinBerlinCommunicationHelper->getCorrespondingAddonEntity($currentProcedure)) {
-            $this->logger->error(
+            $this->logger->warning(
                 'A second MeinBerlinAddonEntity for this procedure was tried to be created',
                 ['procedureId' => $currentProcedure->getId()]
             );
-            throw new AddonResourceNotFoundException('create with existing MeinBerlinAddonEntity is invalid');
+
+            return;
         }
 
         if (!$this->meinBerlinCommunicationHelper->hasOrganisationIdSet($currentProcedure)) {
