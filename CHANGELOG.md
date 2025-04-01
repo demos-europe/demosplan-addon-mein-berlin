@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- dynamically set real project url
+
 ## v0.9 (2025-03-29)
 - do not send anything if no relevant changes have been found
 - add logger calls

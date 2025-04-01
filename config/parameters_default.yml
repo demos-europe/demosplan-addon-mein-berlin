@@ -1,6 +1,7 @@
 # These parameters can be imported into other config files
 # by enclosing the key with % (like %database_user%)
 parameters:
+    mein_berlin_dplan_hostname: 'dplan.local'
     mein_berlin_public_procedure_route: 'core_procedure_slug'
     mein_berlin_procedure_create_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/'
     mein_berlin_procedure_update_url: 'https://mein.berlin.de/api/organisations/<organisation-id>/bplan/<bplan-id>/'

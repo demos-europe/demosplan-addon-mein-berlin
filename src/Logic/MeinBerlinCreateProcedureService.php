@@ -24,6 +24,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouterInterface;
 use function array_key_exists;
 use function substr;
@@ -34,6 +35,7 @@ class MeinBerlinCreateProcedureService
         private readonly LoggerInterface                              $logger,
         private readonly ParameterBagInterface                        $parameterBag,
         private readonly RouterInterface                              $router,
+        private readonly RequestContext $context,
         private readonly MeinBerlinProcedureCommunicator              $meinBerlinProcedureCommunicator,
         private readonly MessageBagInterface                          $messageBag,
         private readonly MeinBerlinProcedurePictogramFileHandler      $meinBerlinProcedurePictogramFileHandler,
@@ -130,6 +132,17 @@ class MeinBerlinCreateProcedureService
     private function generateProcedurePublicRoute(string $slug): string
     {
         try {
+            $host = $this->context->getHost();
+            // when called via command localhost is default. Set context url to the public url
+            if ($host === 'localhost') {
+                $realHost = sprintf(
+                    '%s.%s',
+                    $this->parameterBag->get('mein_berlin_subdomain'),
+                    $this->parameterBag->get('mein_berlin_dplan_hostname')
+                );
+                $this->context->setHost($realHost);
+            }
+
             $routeName = $this->parameterBag->get('mein_berlin_public_procedure_route');
             $route = $this->router->generate(
                 $routeName,
