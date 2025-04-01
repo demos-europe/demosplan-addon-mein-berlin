@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.10 (2025-04-01)
 - dynamically set real project url
 - do not fail request when procedure is already saved in database
 
