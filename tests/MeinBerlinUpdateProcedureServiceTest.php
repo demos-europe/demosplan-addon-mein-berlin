@@ -9,6 +9,8 @@ declare(strict_types=1);
  * All rights reserved
  */
 
+namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
+
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;

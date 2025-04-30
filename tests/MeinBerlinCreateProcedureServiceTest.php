@@ -9,6 +9,8 @@ declare(strict_types=1);
  * All rights reserved
  */
 
+namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
+
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureSettingsInterface;
