@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.11 (2025-05-14)
 - add missing test namespaces
 - update to symfony 6
 - do not duplicate link to procedure
