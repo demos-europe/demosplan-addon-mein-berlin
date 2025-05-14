@@ -3,6 +3,7 @@
 ## UNRELEASED
 - add missing test namespaces
 - update to symfony 6
+- do not duplicate link to procedure
 
 ## v0.10 (2025-04-01)
 - dynamically set real project url

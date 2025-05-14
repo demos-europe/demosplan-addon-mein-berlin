@@ -112,9 +112,6 @@ class RssFeedController extends AbstractController
         if ('' !== $procedure->getExternalDesc()) {
             $descParts[] = $procedure->getExternalDesc();
         }
-        $descParts[] = sprintf('<a href="%s">%s</a>',
-            $url,
-            $this->translator->trans('mein.berlin.more.information'));
         return implode("<br/>", $descParts);
 
     }
