@@ -11,7 +11,7 @@
     v-model="currentValue"
     pattern="^.*\S-\S.*$"
     @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-    @focus="handleFocus"/>
+    @focus="handleFocus" />
 
   <dp-select
     v-else
@@ -23,14 +23,14 @@
     }"
     :options="options"
     v-model="currentValue"
-    @select="$emit('addonEvent:emit', { name: 'selected', payload: addonPayload })"/>
+    @select="$emit('addonEvent:emit', { name: 'selected', payload: addonPayload })" />
 </template>
 
 <script>
 import { dpApi, DpInput, DpSelect } from '@demos-europe/demosplan-ui'
 
 export default {
-  name: 'AddonAdditionalField',
+  name: 'MeinBerlinAdditionalField',
 
   components: {
     DpInput,
@@ -75,7 +75,7 @@ export default {
     }
   },
 
-  data() {
+  data () {
     return {
       currentValue: '',
       initValue: '',
@@ -115,7 +115,7 @@ export default {
 
   computed: {
     addonPayload () {
-      let attributes = {}
+      const attributes = {}
 
       if (this.attribute) {
         attributes[this.attribute] = this.currentValue

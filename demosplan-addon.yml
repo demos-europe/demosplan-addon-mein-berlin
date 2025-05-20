@@ -9,4 +9,4 @@ demosplan_addon:
     manifest: dist/assets-manifest.json
     hooks:
      addon.additional.field:
-        entry: AddonAdditionalField
+        entry: MeinBerlinAdditionalField
