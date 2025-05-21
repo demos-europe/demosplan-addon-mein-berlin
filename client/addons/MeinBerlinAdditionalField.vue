@@ -23,7 +23,8 @@
     }"
     :options="options"
     v-model="currentValue"
-    @select="$emit('addonEvent:emit', { name: 'selected', payload: addonPayload })"/>
+    @input="onSelectInput"
+    @select="onSelectChange"/>
 </template>
 
 <script>
@@ -77,8 +78,9 @@ export default {
 
   data() {
     return {
-      currentValue: '',
-      initValue: '',
+      // Initialize without a default value
+      currentValue: null,
+      initValue: null,
       item: null,
       list: null,
       options: [ /* Organization / Authority ID on mein.berlin.de */
@@ -118,9 +120,17 @@ export default {
       let attributes = {}
 
       if (this.attribute) {
-        attributes[this.attribute] = this.currentValue
+        // Only send a value if it's actually set
+        if (this.currentValue !== null && this.currentValue !== '') {
+          attributes[this.attribute] = this.currentValue.toString()
+        } else if (this.initValue !== null && this.initValue !== '') {
+          attributes[this.attribute] = this.initValue.toString()
+        } else {
+          // Don't set a value if nothing is selected
+          attributes[this.attribute] = ''
+        }
       }
-
+      
       return {
         attributes,
         id: this.item ? this.item.id : '',
@@ -171,8 +181,18 @@ export default {
       this.item = Object.values(this.list).find(el => el.relationships[this.relationshipKey].data.id === this.relationshipId) || null
 
       if (this.item) {
-        this.currentValue = this.item.attributes[this.attribute]
-        this.initValue = this.item.attributes[this.attribute]
+        // Only set a value if one exists, otherwise keep it null/empty
+        if (this.item.attributes[this.attribute]) {
+          this.currentValue = this.item.attributes[this.attribute]
+          this.initValue = this.item.attributes[this.attribute]
+        } else {
+          this.currentValue = ''
+          this.initValue = null
+        }
+      } else {
+        // Reset if no item
+        this.currentValue = ''
+        this.initValue = null
       }
     },
 
@@ -181,6 +201,31 @@ export default {
 
       if (input.classList.contains('is-invalid')) {
         input.classList.remove('is-invalid')
+      }
+    },
+    
+    onSelectInput(value) {
+      // Explicitly update currentValue when select input changes
+      this.currentValue = value
+      this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
+    },
+    
+    onSelectChange(value) {
+      // Explicitly update currentValue when select changes
+      this.currentValue = value
+      this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
+    }
+  },
+
+  watch: {
+    // Ensure v-model changes get properly saved
+    currentValue(newVal) {
+      if (this.item && this.attribute) {
+        // Update the data model when the display value changes
+        this.$emit('addonEvent:emit', { 
+          name: 'valueChanged', 
+          payload: this.addonPayload 
+        })
       }
     }
   },
