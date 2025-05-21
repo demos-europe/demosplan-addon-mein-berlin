@@ -23,7 +23,7 @@
     }"
     :options="options"
     v-model="currentValue"
-    @select="$emit('addonEvent:emit', { name: 'selected', payload: addonPayload })"/>
+    @select="onChange"/>
 </template>
 
 <script>
@@ -77,8 +77,9 @@ export default {
 
   data() {
     return {
-      currentValue: '',
-      initValue: '',
+      // Initialize without a default value
+      currentValue: null,
+      initValue: null,
       item: null,
       list: null,
       options: [ /* Organization / Authority ID on mein.berlin.de */
@@ -118,7 +119,15 @@ export default {
       let attributes = {}
 
       if (this.attribute) {
-        attributes[this.attribute] = this.currentValue
+        // Only send a value if it's actually set
+        if (this.currentValue !== null && this.currentValue !== '') {
+          attributes[this.attribute] = this.currentValue.toString()
+        } else if (this.initValue !== null && this.initValue !== '') {
+          attributes[this.attribute] = this.initValue.toString()
+        } else {
+          // Don't set a value if nothing is selected
+          attributes[this.attribute] = ''
+        }
       }
 
       return {
@@ -170,7 +179,12 @@ export default {
     getItemByRelationshipId () {
       this.item = Object.values(this.list).find(el => el.relationships[this.relationshipKey].data.id === this.relationshipId) || null
 
-      if (this.item) {
+      // Reset if no item
+      this.currentValue = ''
+      this.initValue = null
+
+      // Only set a value if one exists, otherwise keep it null/empty
+      if (this.item?.attributes[this.attribute]) {
         this.currentValue = this.item.attributes[this.attribute]
         this.initValue = this.item.attributes[this.attribute]
       }
@@ -182,8 +196,13 @@ export default {
       if (input.classList.contains('is-invalid')) {
         input.classList.remove('is-invalid')
       }
-    }
-  },
+    },
+
+    onChange (value) {
+      // Explicitly update currentValue when input changes
+      this.currentValue = value
+      this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
+    },
 
   mounted () {
     if (!this.additionalFieldOptions.length) {
