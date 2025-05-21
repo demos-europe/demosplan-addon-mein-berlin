@@ -23,8 +23,7 @@
     }"
     :options="options"
     v-model="currentValue"
-    @input="onSelectInput"
-    @select="onSelectChange"/>
+    @select="onChange"/>
 </template>
 
 <script>
@@ -130,7 +129,7 @@ export default {
           attributes[this.attribute] = ''
         }
       }
-      
+
       return {
         attributes,
         id: this.item ? this.item.id : '',
@@ -180,19 +179,14 @@ export default {
     getItemByRelationshipId () {
       this.item = Object.values(this.list).find(el => el.relationships[this.relationshipKey].data.id === this.relationshipId) || null
 
-      if (this.item) {
-        // Only set a value if one exists, otherwise keep it null/empty
-        if (this.item.attributes[this.attribute]) {
-          this.currentValue = this.item.attributes[this.attribute]
-          this.initValue = this.item.attributes[this.attribute]
-        } else {
-          this.currentValue = ''
-          this.initValue = null
-        }
-      } else {
-        // Reset if no item
-        this.currentValue = ''
-        this.initValue = null
+      // Reset if no item
+      this.currentValue = ''
+      this.initValue = null
+
+      // Only set a value if one exists, otherwise keep it null/empty
+      if (this.item?.attributes[this.attribute]) {
+        this.currentValue = this.item.attributes[this.attribute]
+        this.initValue = this.item.attributes[this.attribute]
       }
     },
 
@@ -203,32 +197,12 @@ export default {
         input.classList.remove('is-invalid')
       }
     },
-    
-    onSelectInput(value) {
-      // Explicitly update currentValue when select input changes
+
+    onChange (value) {
+      // Explicitly update currentValue when input changes
       this.currentValue = value
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
     },
-    
-    onSelectChange(value) {
-      // Explicitly update currentValue when select changes
-      this.currentValue = value
-      this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
-    }
-  },
-
-  watch: {
-    // Ensure v-model changes get properly saved
-    currentValue(newVal) {
-      if (this.item && this.attribute) {
-        // Update the data model when the display value changes
-        this.$emit('addonEvent:emit', { 
-          name: 'valueChanged', 
-          payload: this.addonPayload 
-        })
-      }
-    }
-  },
 
   mounted () {
     if (!this.additionalFieldOptions.length) {
