@@ -1,6 +1,6 @@
 {
   "name": "demosplan-addon-mein-berlin",
-  "version": "v0.13",
+  "version": "v0.14",
   "description": "UI for DemosMeinBerlin demosplan-core addon",
   "repository": "git@github.com:demos-europe/demosplan-addon-mein-berlin",
   "license": "LicenseRef-LICENSE",
