@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- update demos-europe/demosplan-addon to v0.59
+
 ## v0.13 (2025-05-21)
 - fix: save meinBerlin organisationId at the orga 
 
