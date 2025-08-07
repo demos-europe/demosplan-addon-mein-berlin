@@ -1,4 +1,4 @@
-# DemosPlan Addon: mein.berlin Integration
+# demosplan Addon: meinBerlin.de Integration
 
 ## Overview
 
