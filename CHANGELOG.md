@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.13.1 (2025-08-07)
 - fix: public participation phase in rss feed
 
 ## v0.13 (2025-05-21)
