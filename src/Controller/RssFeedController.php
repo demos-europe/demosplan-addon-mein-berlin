@@ -106,9 +106,9 @@ class RssFeedController extends AbstractController
         $endDate = $procedure->getPublicParticipationEndDate()->format('d.m.Y');
         $descParts = [];
         $descParts[] = "{$startDate} - {$endDate}";
-        if ('' !== $procedure->getPublicParticipationPhaseName()) {
-            $descParts[] = $procedure->getPublicParticipationPhaseName();
-        }
+        $descParts[] = $this->demosplanConfig->getPhaseNameWithPriorityExternal(
+            $procedure->getPublicParticipationPhase()
+        );
         if ('' !== $procedure->getExternalDesc()) {
             $descParts[] = $procedure->getExternalDesc();
         }

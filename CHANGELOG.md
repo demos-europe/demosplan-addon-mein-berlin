@@ -4,6 +4,9 @@
 ## v0.14 (2025-08-04)
 - update demos-europe/demosplan-addon to v0.59
 
+## v0.13.1 (2025-08-07)
+- fix: public participation phase in rss feed
+
 ## v0.13 (2025-05-21)
 - fix: save meinBerlin organisationId at the orga 
 
