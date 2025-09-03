@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- update demos-europe/demosplan-addon to v0.60
+
 ## v0.14 (2025-08-04)
 - update demos-europe/demosplan-addon to v0.59
 
@@ -9,7 +11,6 @@
 
 ## v0.13 (2025-05-21)
 - fix: save meinBerlin organisationId at the orga 
-
 
 ## v0.12 (2025-05-20)
 - Make Addon work with Tailwind 4
@@ -49,8 +50,7 @@
 
 ## v0.3 (2025-01-17)
 - remove unused params
-- enable addon only for specific customer, defined by param `mein_berlin_subdomain` 
-
+- enable addon only for specific customer, defined by param `mein_berlin_subdomain`
 
 ## v0.2 (2025-01-06)
 - add the pictogram to the list of mandatory fields for a meinBerlin communication.
