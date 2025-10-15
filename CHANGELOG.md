@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.16 (2025-10-15)
 - update demos-europe/demosplan-addon to v0.64
 
 ## v0.15 (2025-09-03)
