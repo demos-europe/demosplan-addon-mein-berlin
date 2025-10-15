@@ -19,7 +19,7 @@
     "php": "^8.1",
     "symfony/translation": "6.*.*",
     "demos-europe/demosplan-addon-installer": "^0",
-    "demos-europe/demosplan-addon": "~v0.60",
+    "demos-europe/demosplan-addon": "~v0.64",
     "doctrine/doctrine-bundle": "^2",
     "doctrine/doctrine-migrations-bundle": "^3.2",
     "gedmo/doctrine-extensions": "^3",
