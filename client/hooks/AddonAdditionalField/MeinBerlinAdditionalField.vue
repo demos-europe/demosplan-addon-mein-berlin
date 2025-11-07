@@ -2,7 +2,7 @@
   <component
     v-if="isInput"
     :is="demosplanUi.DpInput"
-    id="addonAdditionalField"
+    id="addonAdditionalField-input"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
@@ -18,7 +18,7 @@
   <component
     v-else
     :is="demosplanUi.DpSelect"
-    id="addonAdditionalField"
+    id="addonAdditionalField-select"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
@@ -193,7 +193,7 @@ export default {
     },
 
     handleFocus () {
-      const input = document.getElementById('addonAdditionalField')
+      const input = document.getElementById('addonAdditionalField-input')
 
       if (input.classList.contains('is-invalid')) {
         input.classList.remove('is-invalid')
