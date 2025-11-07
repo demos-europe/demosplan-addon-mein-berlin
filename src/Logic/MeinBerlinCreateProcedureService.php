@@ -99,9 +99,9 @@ class MeinBerlinCreateProcedureService
             RelevantProcedurePropertiesForMeinBerlinCommunication::office_worker_email->name =>
                 $procedure->getAgencyMainEmailAddress(),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name =>
-                $procedure->getPublicParticipationPhaseObject()->getStartDate()->format('Y-m-d'),
+                $procedure->getPublicParticipationPhaseObject()->getStartDate()->format('Y-m-d\TH:i'),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name =>
-                $procedure->getPublicParticipationPhaseObject()->getEndDate()->format('Y-m-d'),
+                $procedure->getPublicParticipationPhaseObject()->getEndDate()->format('Y-m-d\TH:i'),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name =>
                 $this->getBase64PictogramFileString($procedure),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name =>

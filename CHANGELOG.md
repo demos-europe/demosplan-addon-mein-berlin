@@ -2,6 +2,11 @@
 
 ## UNRELEASED
 
+## v0.15.1 (2025-11-07)
+- change public participation start and end dates to include the time. (Y-m-d\TH:i ISO 8601 without seconds)
+  The endDate time is per default (ProcedureRepository::generateObjectValues) at 23:59
+- The startDate time is per default (CoreRepository::convertUserInputDate) at 02:00
+
 ## v0.15 (2025-09-03)
 - update demos-europe/demosplan-addon to v0.60
 

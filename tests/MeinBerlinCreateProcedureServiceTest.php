@@ -31,6 +31,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouterInterface;
 
 class MeinBerlinCreateProcedureServiceTest extends TestCase
@@ -109,11 +110,16 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
         $procedureCoordinateHandler = $this->createMock(
             MeinBerlinProcedureSettingsCoordinateHandler::class
         );
+        $procedureCoordinateHandler->method('getCoordinateAsGeoJSON')
+            ->willReturn('coordinate');
+
+        $requestContext = $this->createMock(RequestContext::class);
 
         $this->sut = new MeinBerlinCreateProcedureService(
             $this->logger,
             $parameterBag,
             $router,
+            $requestContext,
             $meinBerlinProcedureCommunicator,
             $this->messageBag,
             $meinBerlinProcedurePictureFileHandler,
@@ -149,8 +155,8 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             RelevantProcedurePropertiesForMeinBerlinCommunication::description->name => 'externalDesc',
             RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication::url->name => 'mein.berlin/test',
             RelevantProcedurePropertiesForMeinBerlinCommunication::office_worker_email->name => 'agencyEmail',
-            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name => '2024-11-14',
-            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name => '2099-12-31',
+            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name => '2024-11-14T00:00',
+            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name => '2099-12-31T00:00',
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name => 'phaseName',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name => '',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name => 'coordinate',
