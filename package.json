@@ -8,7 +8,7 @@
     "@demos-europe/demosplan-ui": "0.3.45"
   },
   "devDependencies": {
-    "@demos-europe/demosplan-addon-client-builder": "^0.0.9",
+    "@demos-europe/demosplan-addon-client-builder": "^0.0.10",
     "webpack": "5.88.2",
     "webpack-cli": "^5.1.4"
   },
