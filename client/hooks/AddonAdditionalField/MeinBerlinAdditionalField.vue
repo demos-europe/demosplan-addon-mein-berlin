@@ -1,7 +1,8 @@
 <template>
-  <dp-input
+  <component
     v-if="isInput"
-    id="addonAdditionalField"
+    :is="demosplanUi.DpInput"
+    id="addonAdditionalField-input"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
@@ -11,11 +12,13 @@
     v-model="currentValue"
     pattern="^.*\S-\S.*$"
     @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-    @focus="handleFocus" />
+    @focus="handleFocus"
+  />
 
-  <dp-select
+  <component
     v-else
-    id="addonAdditionalField"
+    :is="demosplanUi.DpSelect"
+    id="addonAdditionalField-select"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
@@ -23,25 +26,24 @@
     }"
     :options="options"
     v-model="currentValue"
-    @select="onChange" />
+    @select="onChange"
+  />
 </template>
 
 <script>
-import { dpApi, DpInput, DpSelect } from '@demos-europe/demosplan-ui'
-
 export default {
   name: 'MeinBerlinAdditionalField',
-
-  components: {
-    DpInput,
-    DpSelect
-  },
 
   props: {
     additionalFieldOptions: {
       type: Array,
       required: false,
       default: () => []
+    },
+
+    demosplanUi: {
+      type: Object,
+      required: true
     },
 
     isInput: {
@@ -161,7 +163,7 @@ export default {
     fetchResourceList () {
       const url = Routing.generate('api_resource_list', { resourceType: this.resourceType })
 
-      return dpApi.get(url, { include: [this.relationshipKey].join() })
+      return this.demosplanUi.dpApi.get(url, { include: [this.relationshipKey].join() })
         .then(response => {
           this.list = response.data.data.map(item => {
             const { attributes, id, relationships } = item
@@ -191,7 +193,7 @@ export default {
     },
 
     handleFocus () {
-      const input = document.getElementById('addonAdditionalField')
+      const input = document.getElementById('addonAdditionalField-input')
 
       if (input.classList.contains('is-invalid')) {
         input.classList.remove('is-invalid')
