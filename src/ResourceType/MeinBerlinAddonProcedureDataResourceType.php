@@ -86,6 +86,24 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         );
 
         $configBuilder->id->setReadableByPath()->setSortable()->setFilterable();
+
+        // Configure isInterfaceActivated field - readable and updatable
+        $configBuilder->isInterfaceActivated->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
+            ->addUpdateBehavior(
+                new CallbackAttributeSetBehaviorFactory(
+                    [],
+                    function (MeinBerlinAddonEntity $meinBerlinAddonEntity, bool $isInterfaceActivated): array {
+                        $this->logger->info('demosplan-mein-berlin-addon registered an isInterfaceActivated update',
+                            ['isInterfaceActivated' => $isInterfaceActivated, 'entity' => $meinBerlinAddonEntity->getId()]
+                        );
+                        $meinBerlinAddonEntity->setIsInterfaceActivated($isInterfaceActivated);
+                        return [];
+                    },
+                    OptionalField::NO
+                )
+            )
+            ->addPathCreationBehavior();
+
         $configBuilder->procedureShortName->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
             ->addUpdateBehavior(
                 new CallbackAttributeSetBehaviorFactory(
