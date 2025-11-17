@@ -24,7 +24,7 @@
       text: label,
       tooltip
     }"
-    :options="options"
+    :options="selectOptions"
     v-model="currentValue"
     @select="onChange"
   />
@@ -33,6 +33,8 @@
 <script>
 export default {
   name: 'MeinBerlinAdditionalField',
+
+  emits: ['addonEvent:emit'],
 
   props: {
     additionalFieldOptions: {
@@ -74,6 +76,18 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+
+    userMeinBerlinOrgId: {
+      type: [String, Number],
+      required: false,
+      default: ''
+    },
+
+    userOrgaId: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
 
@@ -99,6 +113,40 @@ export default {
         { label: Translator.trans('mein.berlin.district.office.tempelhof_schoeneberg'), value: '24' },
         { label: Translator.trans('mein.berlin.district.office.treptow_koepenick'), value: '15' }
       ],
+
+      // District codes for procedure mode
+      districtOptions: [
+        { label: Translator.trans('mein.berlin.district.gesamtstädtisch'), value: 'be' },
+        { label: Translator.trans('mein.berlin.district.mitte'), value: 'mi' },
+        { label: Translator.trans('mein.berlin.district.friedrichshain_kreuzberg'), value: 'fk' },
+        { label: Translator.trans('mein.berlin.district.pankow'), value: 'pa' },
+        { label: Translator.trans('mein.berlin.district.charlottenburg_wilmersdorf'), value: 'cw' },
+        { label: Translator.trans('mein.berlin.district.spandau'), value: 'sp' },
+        { label: Translator.trans('mein.berlin.district.steglitz_zehlendorf'), value: 'sz' },
+        { label: Translator.trans('mein.berlin.district.tempelhof_schoeneberg'), value: 'ts' },
+        { label: Translator.trans('mein.berlin.district.neukoelln'), value: 'nk' },
+        { label: Translator.trans('mein.berlin.district.treptow_koepenick'), value: 'tk' },
+        { label: Translator.trans('mein.berlin.district.marzahn_hellersdorf'), value: 'mh' },
+        { label: Translator.trans('mein.berlin.district.lichtenberg'), value: 'li' },
+        { label: Translator.trans('mein.berlin.district.reinickendorf'), value: 'rd' }
+      ],
+
+      // Mapping mein.berlin org ID -> district short code
+      orgIdToDistrictCode: {
+        '16': 'mi',
+        '28': 'fk',
+        '20': 'pa',
+        '27': 'cw',
+        '26': 'sp',
+        '32': 'sz',
+        '24': 'ts',
+        '30': 'nk',
+        '15': 'tk',
+        '25': 'mh',
+        '29': 'li',
+        '31': 'rd'
+      },
+
       relationshipKeyMapping: {
         orga: {
           attribute: 'meinBerlinOrganisationId',
@@ -107,10 +155,10 @@ export default {
           tooltip: Translator.trans('mein.berlin.organisation.id.tooltip')
         },
         procedure: {
-          attribute: 'procedureShortName',
-          label: Translator.trans('mein.berlin.procedure.short.name'),
+          attribute: 'district',
+          label: Translator.trans('mein.berlin.district.label'),
           resourceType: 'MeinBerlinAddonProcedureData',
-          tooltip: Translator.trans('mein.berlin.procedure.short.name.tooltip')
+          tooltip: Translator.trans('mein.berlin.district.tooltip')
         }
       }
     }
@@ -156,10 +204,77 @@ export default {
 
     tooltip () {
       return this.relationshipKeyMapping[this.relationshipKey]?.tooltip || ''
+    },
+
+    selectOptions () {
+      return this.relationshipKey === 'procedure'
+        ? this.districtOptions
+        : this.options
     }
   },
 
   methods: {
+    async autoSelectDistrict () {
+      let meinBerlinOrgId = this.userMeinBerlinOrgId
+
+      if (!meinBerlinOrgId && this.userOrgaId) {
+        meinBerlinOrgId = await this.fetchMeinBerlinOrgId(this.userOrgaId)
+      }
+
+      if (!meinBerlinOrgId) {
+        return
+      }
+
+      const key = String(meinBerlinOrgId).trim()
+      const districtCode = this.orgIdToDistrictCode[key]
+
+      if (districtCode) {
+        this.$nextTick(() => {
+          this.onChange(districtCode)
+        })
+      }
+    },
+
+    async autoSelectOrga () {
+      let meinBerlinOrgId = this.userMeinBerlinOrgId
+
+      if (!meinBerlinOrgId && this.userOrgaId) {
+        meinBerlinOrgId = await this.fetchMeinBerlinOrgId(this.userOrgaId)
+      }
+
+      if (!meinBerlinOrgId) {
+        return
+      }
+
+      const value = String(meinBerlinOrgId)
+
+      this.$nextTick(() => {
+        this.onChange(value)
+      })
+    },
+
+    async fetchMeinBerlinOrgId (orgaId) {
+      try {
+        const url = Routing.generate('api_resource_list', {
+          resourceType: 'MeinBerlinAddonOrganisation'
+        })
+
+        const response = await this.demosplanUi.dpApi.get(url, { include: 'orga' })
+
+        if (response.data?.data) {
+          const orgaRelation = response.data.data.find(item =>
+            item.relationships?.orga?.data?.id === orgaId
+          )
+
+          return orgaRelation?.attributes?.meinBerlinOrganisationId || null
+        }
+      } catch (err) {
+        console.error('[MeinBerlin] Failed to fetch mein.berlin organisation ID:', err)
+      }
+
+      return null
+    },
+
     fetchResourceList () {
       const url = Routing.generate('api_resource_list', { resourceType: this.resourceType })
 
@@ -179,7 +294,9 @@ export default {
     },
 
     getItemByRelationshipId () {
-      this.item = Object.values(this.list).find(el => el.relationships[this.relationshipKey].data.id === this.relationshipId) || null
+      this.item = Object.values(this.list || []).find(
+        el => el.relationships[this.relationshipKey].data.id === this.relationshipId
+      ) || null
 
       // Reset if no item
       this.currentValue = ''
@@ -187,24 +304,58 @@ export default {
 
       // Only set a value if one exists, otherwise keep it null/empty
       if (this.item?.attributes[this.attribute]) {
-        this.currentValue = this.item.attributes[this.attribute]
-        this.initValue = this.item.attributes[this.attribute]
+        const storedValue = this.item.attributes[this.attribute]
+        this.currentValue = storedValue
+        this.initValue = storedValue
+
+        // Make sure the underlying <select> reflects the restored value
+        this.syncNativeSelect()
       }
     },
 
     handleFocus () {
       const input = document.getElementById('addonAdditionalField-input')
 
-      if (input.classList.contains('is-invalid')) {
+      if (input && input.classList.contains('is-invalid')) {
         input.classList.remove('is-invalid')
       }
+    },
+    /**
+     * Force DpSelect to display the correct value via DOM manipulation
+     *
+     * This method directly manipulates the native <select> element to ensure the correct
+     * option is displayed. This workaround is necessary because:
+     *
+     * 1. Addons cannot import @demos-europe/demosplan-ui components directly (externalized)
+     * 2. Must use dynamic components: <component :is="demosplanUi.DpSelect">
+     * 3. Vue's v-model with dynamic components has known reactivity issues
+     * 4. DpSelect maintains internal state that gets out of sync when values are set programmatically
+     * 5. No amount of prop/event manipulation fixes this due to runtime component resolution
+     *
+     * Alternative approaches that were tried and failed:
+     * - Controlled component pattern (:value + @update:modelValue)
+     * - Conditional rendering with v-if and readiness flags
+     * - Various event handling strategies
+     *
+     * TODO: This can be removed if/when DpSelect's internal state management is improved
+     * to handle programmatic value updates with dynamic component resolution.
+     */
+    syncNativeSelect () {
+      this.$nextTick(() => {
+        const select = this.$el.querySelector('select')
+
+        if (select && this.currentValue !== null && this.currentValue !== '') {
+          select.value = this.currentValue
+        }
+      })
     },
 
     onChange (value) {
       // Explicitly update currentValue when input changes
       this.currentValue = value
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
-    },
+      this.syncNativeSelect()
+    }
   },
 
   mounted () {
@@ -213,10 +364,22 @@ export default {
         .then(() => {
           this.$emit('addonEvent:emit', { name: 'resourceList:loaded', payload: this.list })
           this.getItemByRelationshipId()
+
+          if (!this.currentValue && this.relationshipKey === 'procedure') {
+            this.autoSelectDistrict()
+          } else if (!this.currentValue && this.relationshipKey === 'orga') {
+            this.autoSelectOrga()
+          }
         })
     } else {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
+
+      if (!this.currentValue && this.relationshipKey === 'procedure') {
+        this.autoSelectDistrict()
+      } else if (!this.currentValue && this.relationshipKey === 'orga') {
+        this.autoSelectOrga()
+      }
     }
   }
 }
