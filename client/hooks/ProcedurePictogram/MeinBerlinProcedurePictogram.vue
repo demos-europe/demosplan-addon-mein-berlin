@@ -43,7 +43,7 @@
 
     <template v-else>
       <p class="lbl__hint u-mb">
-        {{ Translator.trans('mein.berlin.pictogram.requirements.detailed') }}
+        {{ Translator.trans('text.procedure.edit.external.pictogram') }}
       </p>
 
       <component
