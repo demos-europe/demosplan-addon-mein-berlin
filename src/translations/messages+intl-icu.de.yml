@@ -1,5 +1,5 @@
 mein.berlin.district:
-    label: "Verortung mein.berlin.de"
+    label: "Verortung mein.berlin.de (Kierzradar)"
     tooltip: "Bitte wählen Sie den Bezirk aus, in dem sich das Verfahren befindet. Die Auswahl wird für die Verortung im Kiezradar auf mein.berlin.de verwendet."
     gesamtstädtisch: "Gesamtstädtisch"
     mitte: "Mitte"
