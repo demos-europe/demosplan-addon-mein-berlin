@@ -1,33 +1,37 @@
 <template>
-  <div class="mein-berlin-pictogram u-mb">
-    <label class="inline-block u-mb-0">
-      {{ label.text }}
-      <span v-if="isRequired" class="color--warning">*</span>
-    </label>
+  <div class="u-mb">
+    <component
+      :is="demosplanUi.DpLabel"
+      for="r_pictogram"
+      :required="isRequired"
+      :text="label.text"
+      class="inline-block u-mb" />
 
-    <div v-if="hasPictogram && !markedForDeletion" class="u-mt-0_5">
-      <div class="flex items-start space-x-2 u-mb-0_5">
-        <img
-          :src="pictogramUrl"
-          :alt="pictogramAltText || 'Verfahrenspiktogramm'"
-          class="layout__item u-1-of-6 u-pl-0 u-mb">
-
-        <button
-          v-if="!isMeinBerlinActive"
-          type="button"
-          class="btn btn--blank o-link--default"
-          :title="Translator.trans('procedure.pictogram.delete')"
+    <template v-if="hasPictogram && !markedForDeletion">
+      <img
+        :src="pictogramUrl"
+        :alt="pictogramAltText || 'Verfahrenspiktogramm'"
+        class="layout__item u-1-of-6 u-pl-0 u-mb">
+      <span
+        v-if="!isMeinBerlinActive"
+        class="layout__item u-1-of-3">
+        <component
+          :is="demosplanUi.DpButton"
+          :text="Translator.trans('delete')"
+          icon="trash"
+          variant="subtle"
           @click="handleDelete">
-          <i class="fa fa-trash" aria-hidden="true"></i>
-          {{ Translator.trans('delete') }}
-        </button>
-
-        <p v-else class="flash flash-info inline-block u-mb-0 u-ml-0_5">
-          <i class="fa fa-info-circle" aria-hidden="true"></i>
-          {{ Translator.trans('mein.berlin.pictogram.delete.blocked') }}
-        </p>
-      </div>
-
+        </component>
+      </span>
+      <span
+        v-else
+        class="layout__item u-1-of-3">
+        <component
+          :is="demosplanUi.DpInlineNotification"
+          type="info"
+          :message="Translator.trans('mein.berlin.pictogram.delete.blocked')">
+        </component>
+      </span>
       <a
         :href="pictogramDownloadUrl"
         target="_blank"
@@ -35,34 +39,45 @@
         class="o-link--default">
         {{ currentPictogramName }}
       </a>
-    </div>
+    </template>
 
-    <div v-else class="u-mt-0_5">
-      <p class="lbl__hint">
-        {{ Translator.trans('mein.berlin.pictogram.requirements') }}
+    <template v-else>
+      <p class="lbl__hint u-mb">
+        {{ Translator.trans('mein.berlin.pictogram.requirements.detailed') }}
       </p>
 
-      <input
-        type="file"
+      <component
+        :is="demosplanUi.DpUploadFiles"
+        ref="uploadComponent"
+        id="r_pictogram"
+        allowed-file-types="img"
+        :max-file-size="5242880"
+        :max-number-of-files="1"
         name="r_pictogram"
-        accept="image/png,image/jpeg,image/gif"
-        :required="isRequired"
-        @change="handleFileSelect"
-        class="o-form__control-input">
+        needs-hidden-input
+        :translations="{ dropHereOr: Translator.trans('form.button.upload.file', { browse: '{browse}', maxUploadSize: '5 MB' }) }"
+        :basic-auth="dplan.settings.basicAuth"
+        :tus-endpoint="dplan.paths.tusEndpoint"
+        @file-remove="handleFileRemoved"
+        @upload-success="handleUploadSuccess"
+      />
 
-      <div v-if="validationError" class="flash flash-error u-mt-0_5">
-        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-        {{ validationError }}
-      </div>
+      <component
+        :is="demosplanUi.DpInlineNotification"
+        v-if="validationError"
+        type="error"
+        :message="validationError"
+        class="u-mt-0_5">
+      </component>
 
-      <div v-if="uploadPreview" class="u-mt-0_5">
-        <p class="weight--bold">{{ Translator.trans('preview') }}:</p>
-        <img :src="uploadPreview" alt="Preview" class="layout__item u-1-of-6 u-mb-0_5">
-        <p class="color--grey u-mb-0">
-          {{ uploadFileName }} ({{ formatFileSize(uploadFileSize) }})
-        </p>
-      </div>
-    </div>
+      <component
+        :is="demosplanUi.DpInlineNotification"
+        v-if="validationError"
+        type="warning"
+        :message="Translator.trans('mein.berlin.pictogram.remove.instruction')"
+        class="u-mt-0_5">
+      </component>
+    </template>
 
     <input
       v-if="markedForDeletion"
@@ -122,9 +137,6 @@ export default {
     return {
       markedForDeletion: false,
       validationError: null,
-      uploadPreview: null,
-      uploadFileName: null,
-      uploadFileSize: null,
       validFile: null
     }
   },
@@ -180,128 +192,80 @@ export default {
       }
     },
 
-    async handleFileSelect (event) {
-      const file = event.target.files[0]
+    async handleUploadSuccess (fileInfo) {
+      console.log('[MeinBerlin] File uploaded successfully:', fileInfo)
 
-      if (!file) {
-        this.clearUpload()
-        return
-      }
-
-      // Reset previous state
       this.validationError = null
-      this.uploadPreview = null
 
-      // Validate file
-      const validation = await this.validateBerlinPictogram(file)
+      try {
+        const validFormats = ['image/png', 'image/jpeg', 'image/gif']
+        if (fileInfo.type && !validFormats.includes(fileInfo.type)) {
+          this.validationError = Translator.trans('mein.berlin.pictogram.error.format')
+          this.$emit('pictogram:validated', { valid: false })
+          return
+        }
 
-      if (!validation.valid) {
-        this.validationError = validation.error
-        this.clearUpload()
-        // Clear the file input
-        event.target.value = ''
+        const imageUrl = Routing.generate('core_logo', { hash: fileInfo.hash })
+
+        const validation = await this.validateImageDimensions(imageUrl, fileInfo.type)
+
+        if (!validation.valid) {
+          this.validationError = validation.error
+          this.$emit('pictogram:validated', { valid: false })
+        } else {
+          this.validFile = fileInfo
+          this.$emit('pictogram:validated', { valid: true, file: fileInfo })
+        }
+      } catch (error) {
+        console.error('[MeinBerlin] Validation error:', error)
+        this.validationError = Translator.trans('mein.berlin.pictogram.error.invalid')
         this.$emit('pictogram:validated', { valid: false })
-        return
       }
+    },
 
-      // File is valid - create preview using FileReader (CSP-safe data URL)
-      this.validFile = file
-      this.uploadFileName = file.name
-      this.uploadFileSize = file.size
-
-      // Use FileReader to create data URL (allowed by CSP)
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        this.uploadPreview = e.target.result
-      }
-      reader.readAsDataURL(file)
-
-      this.$emit('pictogram:validated', { valid: true, file })
+    handleFileRemoved () {
+      this.validFile = null
+      this.validationError = null
+      this.$emit('pictogram:validated', { valid: false })
     },
 
     /**
-     * Requirements:
-     * - Minimum dimensions: 500×300 px
-     * - Formats: PNG, JPEG, GIF
-     * - Max file size: 5 MB
+     * Validate image dimensions by loading it from URL
+     * fileType is used for additional context in error messages
      */
-    async validateBerlinPictogram (file) {
-      // 1. Check format
-      const validFormats = ['image/png', 'image/jpeg', 'image/gif']
-      if (!validFormats.includes(file.type)) {
-        return {
-          valid: false,
-          error: Translator.trans('mein.berlin.pictogram.error.format')
-        }
-      }
-
-      // 2. Check file size (5MB = 5 * 1024 * 1024)
-      const maxSize = 5 * 1024 * 1024
-      if (file.size > maxSize) {
-        return {
-          valid: false,
-          error: Translator.trans('mein.berlin.pictogram.error.filesize')
-        }
-      }
-
-      // 3. Check dimensions (async - need to load image)
+    async validateImageDimensions (imageUrl, fileType = null) {
       return new Promise((resolve) => {
-        const reader = new FileReader()
         const img = new Image()
 
-        reader.onload = (e) => {
-          img.onload = () => {
-            if (img.width < 500 || img.height < 300) {
-              resolve({
-                valid: false,
-                error: Translator.trans('mein.berlin.pictogram.error.dimensions', {
-                  minWidth: 500,
-                  minHeight: 300,
-                  actualWidth: img.width,
-                  actualHeight: img.height
-                })
-              })
-            } else {
-              resolve({ valid: true })
-            }
-          }
+        img.onload = () => {
 
-          img.onerror = () => {
+          if (img.width < 500 || img.height < 300) {
             resolve({
               valid: false,
-              error: Translator.trans('mein.berlin.pictogram.error.invalid')
+              error: Translator.trans('mein.berlin.pictogram.error.dimensions', {
+                minWidth: 500,
+                minHeight: 300,
+                actualWidth: img.width,
+                actualHeight: img.height
+              })
             })
+          } else {
+            resolve({ valid: true })
           }
-
-          // Use data URL instead of blob URL (CSP-safe)
-          img.src = e.target.result
         }
 
-        reader.onerror = () => {
+        img.onerror = (error) => {
+          console.error('[MeinBerlin] Failed to load image:', error)
           resolve({
             valid: false,
             error: Translator.trans('mein.berlin.pictogram.error.invalid')
           })
         }
 
-        reader.readAsDataURL(file)
+        img.src = imageUrl
       })
     },
 
-    clearUpload () {
-      this.uploadPreview = null
-      this.uploadFileName = null
-      this.uploadFileSize = null
-      this.validFile = null
-    },
-
-    formatFileSize (bytes) {
-      if (bytes === 0) return '0 Bytes'
-      const k = 1024
-      const sizes = ['Bytes', 'KB', 'MB']
-      const i = Math.floor(Math.log(bytes) / Math.log(k))
-      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
-    }
   }
 }
 </script>
