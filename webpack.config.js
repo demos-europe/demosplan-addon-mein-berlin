@@ -5,6 +5,9 @@ const config = DemosPlanAddon.build(
   {
     MeinBerlinAdditionalField: DemosPlanAddon.resolve(
       'client/hooks/AddonAdditionalField/MeinBerlinAdditionalField.vue'
+    ),
+    MeinBerlinProcedurePictogram: DemosPlanAddon.resolve(
+      'client/hooks/ProcedurePictogram/MeinBerlinProcedurePictogram.vue'
     )
   }
 )
