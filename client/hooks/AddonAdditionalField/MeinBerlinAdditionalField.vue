@@ -42,16 +42,16 @@
   </div>
 
   <component
-    v-else
     :is="demosplanUi.DpSelect"
+    v-else
     id="addonAdditionalField-select"
+    v-model="currentValue"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
       tooltip
     }"
     :options="options"
-    v-model="currentValue"
     @select="onChange"
   />
 </template>
