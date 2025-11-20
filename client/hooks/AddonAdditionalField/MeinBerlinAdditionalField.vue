@@ -28,6 +28,17 @@
       @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
       @focus="handleFocus"
     />
+
+    <!-- Pictogram section -->
+    <component
+      :is="$.components.MeinBerlinProcedurePictogram"
+      :demosplan-ui="demosplanUi"
+      :existing-pictogram="existingPictogram"
+      :is-interface-activated="isInterfaceActivated"
+      :pictogram-alt-text="pictogramAltText"
+      :pictogram-copyright="pictogramCopyright"
+      :relationship-id="relationshipId"
+    />
   </div>
 
   <component
@@ -46,10 +57,15 @@
 </template>
 
 <script>
+import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
 import { prefixClassMixin } from '@demos-europe/demosplan-ui'
 
 export default {
   name: 'MeinBerlinAdditionalField',
+
+  components: {
+    MeinBerlinProcedurePictogram
+  },
 
   mixins: [prefixClassMixin],
 
@@ -65,6 +81,12 @@ export default {
       required: true
     },
 
+    existingPictogram: {
+      type: Object,
+      required: false,
+      default: null
+    },
+
     isProcedureSettingsPage: {
       type: Boolean,
       required: false,
@@ -75,6 +97,18 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+
+    pictogramAltText: {
+      type: String,
+      required: false,
+      default: ''
+    },
+
+    pictogramCopyright: {
+      type: String,
+      required: false,
+      default: ''
     },
 
     relationshipId: {
