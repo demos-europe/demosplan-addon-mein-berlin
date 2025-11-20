@@ -1,19 +1,34 @@
 <template>
-  <component
-    v-if="isInput"
-    :is="demosplanUi.DpInput"
-    id="addonAdditionalField-input"
-    :data-cy="`${resourceType}:field`"
-    :label="{
-      text: label,
-      tooltip
-    }"
-    :required="required || (Boolean(initValue) && !isValueRemovable)"
-    v-model="currentValue"
-    pattern="^.*\S-\S.*$"
-    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-    @focus="handleFocus"
-  />
+  <div v-if="isProcedureSettingsPage">
+    <h3 :class="prefixClass('font-bold')">
+      {{ Translator.trans('mein.berlin.interface') }}
+    </h3>
+
+    <component
+      :is="demosplanUi.DpCheckbox"
+      id="addonAdditionalField-checkbox"
+      v-model="isInterfaceActivated"
+      :class="prefixClass('mt-4 mb-4')"
+      :checked="isInterfaceActivated"
+      :label="{ text: Translator.trans('mein.berlin.interface.activation.label'), tooltip: Translator.trans('mein.berlin.interface.activation.tooltip') }"
+      @change="onCheckboxChange"
+    />
+
+    <component
+      :is="demosplanUi.DpInput"
+      id="addonAdditionalField-input"
+      v-model="currentValue"
+      :data-cy="`${resourceType}:field`"
+      :label="{
+        text: label,
+        tooltip
+      }"
+      :required="isInterfaceActivated"
+      pattern="^.*\S-\S.*$"
+      @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
+      @focus="handleFocus"
+    />
+  </div>
 
   <component
     v-else
@@ -31,8 +46,12 @@
 </template>
 
 <script>
+import { prefixClassMixin } from '@demos-europe/demosplan-ui'
+
 export default {
   name: 'MeinBerlinAdditionalField',
+
+  mixins: [prefixClassMixin],
 
   props: {
     additionalFieldOptions: {
@@ -46,7 +65,7 @@ export default {
       required: true
     },
 
-    isInput: {
+    isProcedureSettingsPage: {
       type: Boolean,
       required: false,
       default: false
@@ -82,6 +101,7 @@ export default {
       // Initialize without a default value
       currentValue: null,
       initValue: null,
+      isInterfaceActivated: false,
       item: null,
       list: null,
       options: [ /* Organization / Authority ID on mein.berlin.de */
@@ -130,6 +150,11 @@ export default {
           // Don't set a value if nothing is selected
           attributes[this.attribute] = ''
         }
+      }
+
+      // Add isInterfaceActivated attribute for procedure relationship
+      if (this.relationshipKey === 'procedure') {
+        attributes.isInterfaceActivated = this.isInterfaceActivated
       }
 
       return {
@@ -184,11 +209,19 @@ export default {
       // Reset if no item
       this.currentValue = ''
       this.initValue = null
+      this.isInterfaceActivated = false
 
       // Only set a value if one exists, otherwise keep it null/empty
       if (this.item?.attributes[this.attribute]) {
         this.currentValue = this.item.attributes[this.attribute]
         this.initValue = this.item.attributes[this.attribute]
+      }
+
+      // Load checkbox state for procedure relationship
+      if (this.relationshipKey === 'procedure') {
+        if (this.item?.attributes?.isInterfaceActivated !== undefined) {
+          this.isInterfaceActivated = this.item.attributes.isInterfaceActivated
+        }
       }
     },
 
@@ -198,6 +231,11 @@ export default {
       if (input.classList.contains('is-invalid')) {
         input.classList.remove('is-invalid')
       }
+    },
+
+    onCheckboxChange (value) {
+      this.isInterfaceActivated = value
+      this.$emit('addonEvent:emit', { name: 'change', payload: this.addonPayload })
     },
 
     onChange (value) {
