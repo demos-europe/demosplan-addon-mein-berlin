@@ -1,6 +1,12 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **feat BEAA2-27**: Add explicit interface activation control for mein.berlin.de data transmission
+  - Add `isInterfaceActivated` boolean field to `MeinBerlinAddonEntity` to control data transmission
+  - Replace pictogram requirement with explicit activation flag
+  - Migration automatically activates interface for already transmitted procedures (with dplan_id)
+  - Add UI checkbox with German translations for activation control
+
 - added/merged minor version content of v0.15.1
 
 ## v0.16 (2025-10-15)
