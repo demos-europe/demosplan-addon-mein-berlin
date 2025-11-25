@@ -7,6 +7,10 @@
   - Migration automatically activates interface for already transmitted procedures (with dplan_id)
   - Add UI checkbox with German translations for activation control
 
+- **chore**: Add release.sh script to automate version releases
+  - Updates CHANGELOG.md, composer.json, and package.json with new version
+  - Creates git tag and pushes to remote
+
 - added/merged minor version content of v0.15.1
 
 ## v0.16 (2025-10-15)
