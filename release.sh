@@ -11,7 +11,7 @@ package_file="package.json"
 release_version=$1
 
 # Check if the release version is provided
-if [ -z "$release_version" ]; then
+if [[ -z "$release_version" ]]; then
     echo "Usage: $0 <release_version>"
     exit 1
 fi
@@ -24,7 +24,7 @@ head -n 20 "$changelog_file"
 
 # Prompt the user to proceed or exit
 read -p "Do you want to proceed with updating the changelog? (y/n): " choice
-if [ "$choice" != "y" ]; then
+if [[ "$choice" != "y" ]]; then
     echo "Aborted."
     exit 0
 fi
