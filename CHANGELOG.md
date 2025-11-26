@@ -5,6 +5,7 @@
   - Add `isInterfaceActivated` boolean field to `MeinBerlinAddonEntity` to control data transmission
   - Replace pictogram requirement with explicit activation flag
   - Migration automatically activates interface for already transmitted procedures (with dplan_id)
+  - Remove obsolete `field_procedure_pictogram` permission entries from access control
   - Add UI checkbox with German translations for activation control
 
 - **chore**: Add release.sh script to automate version releases

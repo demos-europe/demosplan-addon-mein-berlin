@@ -251,17 +251,9 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
         Assert::notNull($organisation);
         $roleCodes = $this->parameterBag->get('mein_berlin_pictogram_roles');
         Assert::isArray($roleCodes);
-        $pictogramPermissionName = $this->parameterBag->get('mein_berlin_pictogram_permission_name');
         $pictogramResolutionPermissionName = $this->parameterBag->get('mein_berlin_pictogram_resolution_restriction_permission_name');
-        Assert::string($pictogramPermissionName);
         Assert::string($pictogramResolutionPermissionName);
         foreach ($roleCodes as $roleCode) {
-            $this->accessControlRepository->addManually(
-                $organisation,
-                $customer,
-                $roleCode,
-                $pictogramPermissionName
-            );
             $this->accessControlRepository->addManually(
                 $organisation,
                 $customer,
