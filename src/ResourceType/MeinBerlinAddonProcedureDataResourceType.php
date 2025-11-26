@@ -154,6 +154,8 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             )
         );
 
+        $configBuilder->dplanId->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable();
+
         return $configBuilder;
     }
 
