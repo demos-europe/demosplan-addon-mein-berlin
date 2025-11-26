@@ -17,24 +17,25 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Add is_interface_activated field to addon_mein_berlin_entity table
+ * Migrate existing transmitted procedures to activated status
  */
-final class Version20251113154626 extends AbstractMigration
+final class Version20251125152256 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Add is_interface_activated field to addon_mein_berlin_entity table';
+        return 'Set is_interface_activated to true for procedures that have already been transmitted to mein.berlin.de';
     }
 
     public function up(Schema $schema): void
     {
         $this->abortIfNotMysql();
 
-        // Add the new column with default value false
+        // Set is_interface_activated to true for all procedures that have already been transmitted
+        // (i.e., have a non-empty dplan_id)
         $this->addSql(
-            'ALTER TABLE addon_mein_berlin_entity
-             ADD COLUMN is_interface_activated TINYINT(1) NOT NULL DEFAULT 0
-             COMMENT \'Whether the mein.berlin.de interface is activated for this procedure\''
+            'UPDATE addon_mein_berlin_entity
+             SET is_interface_activated = 1
+             WHERE dplan_id != \'\' AND dplan_id IS NOT NULL'
         );
     }
 
@@ -42,8 +43,12 @@ final class Version20251113154626 extends AbstractMigration
     {
         $this->abortIfNotMysql();
 
-        // Remove the column
-        $this->addSql('ALTER TABLE addon_mein_berlin_entity DROP COLUMN is_interface_activated');
+        // Reset is_interface_activated to false for previously transmitted procedures
+        $this->addSql(
+            'UPDATE addon_mein_berlin_entity
+             SET is_interface_activated = 0
+             WHERE dplan_id != \'\' AND dplan_id IS NOT NULL'
+        );
     }
 
     /**

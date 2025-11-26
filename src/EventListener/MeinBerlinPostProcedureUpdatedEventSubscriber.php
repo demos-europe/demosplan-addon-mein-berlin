@@ -61,8 +61,10 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($newProcedure);
         $hasProcedureShortNameSet = $this->communicationHelper->hasProcedureShortNameSet($newProcedure);
         $dplanIdIsPresent = $this->communicationHelper->hasDplanIdSet($newProcedure);
-        $hasPictogram = $newProcedure->getPictogram() !== null && $newProcedure->getPictogram() !== '';
-        if ($isPublishedVal && $hasProcedureShortNameSet && $hasPictogram && !$dplanIdIsPresent) {
+        $isInterfaceActivated =
+            $this->communicationHelper->getCorrespondingAddonEntity($newProcedure)?->getIsInterfaceActivated();
+
+        if ($isPublishedVal && $hasProcedureShortNameSet && !$dplanIdIsPresent && $isInterfaceActivated) {
             $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - create new procedure entry at MeinBerlin');
             // create new Procedure entry at MeinBerlin if procedure is publicly visible, has an procedureShortName set
             // and has a pictogram set, but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
@@ -81,7 +83,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
 
             return;
         }
-        if ($dplanIdIsPresent) {
+        if ($dplanIdIsPresent && $isInterfaceActivated) {
             $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - update existing procedure entry at MeinBerlin');
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
             $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
