@@ -34,7 +34,6 @@
       :is="$.components.MeinBerlinProcedurePictogram"
       :demosplan-ui="demosplanUi"
       :existing-pictogram="existingPictogram"
-      :is-interface-activated="isInterfaceActivated"
       :pictogram-alt-text="pictogramAltText"
       :pictogram-copyright="pictogramCopyright"
       :relationship-id="relationshipId"

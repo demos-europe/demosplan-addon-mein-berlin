@@ -4,7 +4,6 @@
       :is="demosplanUi.DpLabel"
       :class="prefixClass('inline-block mb-0')"
       :text="Translator.trans('procedure.pictogram')"
-      :required="isInterfaceActivated"
       for="r_pictogram"
     />
 
@@ -47,7 +46,6 @@
         :get-file-by-hash="hash => Routing.generate('core_file', { hash: hash })"
         :max-file-size="5242880"
         :max-number-of-files="1"
-        :required="isInterfaceActivated"
         :translations="{
           dropHereOr: Translator.trans('form.button.upload.file', { browse: '{browse}', maxUploadSize: '5MB' })
         }"
@@ -63,11 +61,10 @@
       :is="demosplanUi.DpInput"
       id="r_pictogramCopyright"
       v-model="pictogramCopyrightValue"
+      :class="prefixClass('my-2')"
       :label="{
         text: Translator.trans('procedure.pictogram.copyright')
       }"
-      :required="isInterfaceActivated"
-      :class="prefixClass('my-2')"
       data-cy="procedure:pictogramCopyright"
       name="r_pictogramCopyright"
     />
@@ -76,12 +73,11 @@
       :is="demosplanUi.DpInput"
       id="r_pictogramAltText"
       v-model="pictogramAltTextValue"
+      :class="prefixClass('my-2')"
       :label="{
         text: Translator.trans('procedure.pictogram.altText'),
         tooltip: Translator.trans('procedure.pictogram.altText.toolTipp')
       }"
-      :required="isInterfaceActivated"
-      :class="prefixClass('my-2')"
       data-cy="procedure:pictogramAltText"
       name="r_pictogramAltText"
     />
@@ -106,12 +102,6 @@ export default {
       type: Object,
       required: false,
       default: null
-    },
-
-    isInterfaceActivated: {
-      type: Boolean,
-      required: false,
-      default: false
     },
 
     pictogramAltText: {
