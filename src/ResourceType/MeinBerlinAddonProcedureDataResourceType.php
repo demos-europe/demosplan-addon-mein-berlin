@@ -86,6 +86,24 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         );
 
         $configBuilder->id->setReadableByPath()->setSortable()->setFilterable();
+
+        // Configure isInterfaceActivated field - readable and updatable
+        $configBuilder->isInterfaceActivated->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
+            ->addUpdateBehavior(
+                new CallbackAttributeSetBehaviorFactory(
+                    [],
+                    function (MeinBerlinAddonEntity $meinBerlinAddonEntity, bool $isInterfaceActivated): array {
+                        $this->logger->info('demosplan-mein-berlin-addon registered an isInterfaceActivated update',
+                            ['isInterfaceActivated' => $isInterfaceActivated, 'entity' => $meinBerlinAddonEntity->getId()]
+                        );
+                        $meinBerlinAddonEntity->setIsInterfaceActivated($isInterfaceActivated);
+                        return [];
+                    },
+                    OptionalField::NO
+                )
+            )
+            ->addPathCreationBehavior();
+
         $configBuilder->procedureShortName->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
             ->addUpdateBehavior(
                 new CallbackAttributeSetBehaviorFactory(
@@ -135,6 +153,8 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 }
             )
         );
+
+        $configBuilder->dplanId->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable();
 
         return $configBuilder;
     }
@@ -222,24 +242,25 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         }
         // creation is allowed from here on.
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
-        // check if create message should be sent by checking the procedurePhase and an existing pictogram
+        // check if create message should be sent by checking the procedurePhase
         // lastly check if a dplanId (communicationId) is already set - this would be an error here - unique constraint
         // we do not want to send a message before the database says nope.
-        $hasPictogram = $currentProcedure->getPictogram() !== null && $currentProcedure->getPictogram() !== '';
         if (!$this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure) &&
-            $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure) &&
-            $hasPictogram
+            $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
         ) {
             $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper
                 ->getCorrespondingOrgaRelation($currentProcedure);
             Assert::notNull($correspondingAddonOrgaRelation);
             $meinBerlinAddonEntity->setProcedureShortName($entityData->getAttributes()['procedureShortName']);
-            $this->createProcedureService->createMeinBerlinProcedure(
-                $currentProcedure,
-                $meinBerlinAddonEntity,
-                $correspondingAddonOrgaRelation,
-                true
-            );
+            if (array_key_exists('isInterfaceActivated', $entityData->getAttributes())
+                && true === $entityData->getAttributes()['isInterfaceActivated']){
+                $this->createProcedureService->createMeinBerlinProcedure(
+                    $currentProcedure,
+                    $meinBerlinAddonEntity,
+                    $correspondingAddonOrgaRelation,
+                    true
+                );
+            }
         }
     }
 
@@ -281,10 +302,10 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             // to allow this field as a sort of retrigger if a previous create request failed
             // if a prev update failed is a different question - would be a real problem as its content is lost.
             $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
-            $hasPictogram = $currentProcedure->getPictogram() !== null && $currentProcedure->getPictogram() !== '';
             Assert::notNull($currentProcedure);
             if ($this->meinBerlinCommunicationHelper
-                ->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure) && $hasPictogram
+                ->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
+                && $meinBerlinAddonEntity->getIsInterfaceActivated()
             ) {
                 $this->logger->warning(
                     'demosplan-mein-berlin-addon registered an update of a procedure that should have been

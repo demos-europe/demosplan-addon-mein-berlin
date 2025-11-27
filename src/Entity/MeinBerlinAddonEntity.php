@@ -40,6 +40,9 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     #[ORM\Column(name: 'procedure_short_name', length: 255, type: 'string', nullable: false)]
     private string $procedureShortName = '';
 
+    #[ORM\Column(name: 'is_interface_activated', type: 'boolean', nullable: false, options: ['default' => false])]
+    private bool $isInterfaceActivated = false;
+
     public function getId(): ?string
     {
         return $this->id;
@@ -78,5 +81,15 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     public function setProcedureShortName(string $procedureShortName): void
     {
         $this->procedureShortName = $procedureShortName;
+    }
+
+    public function getIsInterfaceActivated(): bool
+    {
+        return $this->isInterfaceActivated;
+    }
+
+    public function setIsInterfaceActivated(bool $isInterfaceActivated): void
+    {
+        $this->isInterfaceActivated = $isInterfaceActivated;
     }
 }

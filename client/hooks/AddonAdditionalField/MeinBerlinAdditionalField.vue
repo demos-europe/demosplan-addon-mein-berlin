@@ -1,38 +1,73 @@
 <template>
-  <component
-    v-if="isInput"
-    :is="demosplanUi.DpInput"
-    id="addonAdditionalField-input"
-    :data-cy="`${resourceType}:field`"
-    :label="{
-      text: label,
-      tooltip
-    }"
-    :required="required || (Boolean(initValue) && !isValueRemovable)"
-    v-model="currentValue"
-    pattern="^.*\S-\S.*$"
-    @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-    @focus="handleFocus"
-  />
+  <div v-if="isProcedureSettingsPage">
+    <h3 :class="prefixClass('font-bold')">
+      {{ Translator.trans('mein.berlin.interface') }}
+    </h3>
+
+    <component
+      :is="demosplanUi.DpCheckbox"
+      id="addonAdditionalField-checkbox"
+      v-model="isInterfaceActivated"
+      :class="prefixClass('mt-4 mb-4')"
+      :checked="isInterfaceActivated"
+      :disabled="isProcedureTransmitted || !hasBerlinOrgaId"
+      :label="{ text: Translator.trans('mein.berlin.interface.activation.label') }"
+      @change="onCheckboxChange"
+    />
+
+    <component
+      :is="demosplanUi.DpInput"
+      id="addonAdditionalField-input"
+      v-model="currentValue"
+      :data-cy="`${resourceType}:field`"
+      :label="{
+        text: label,
+        tooltip
+      }"
+      :required="isInterfaceActivated"
+      pattern="^.*\S-\S.*$"
+      @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
+      @focus="handleFocus"
+    />
+
+    <!-- Pictogram section -->
+    <component
+      :is="$.components.MeinBerlinProcedurePictogram"
+      :demosplan-ui="demosplanUi"
+      :existing-pictogram="existingPictogram"
+      :pictogram-alt-text="pictogramAltText"
+      :pictogram-copyright="pictogramCopyright"
+      :relationship-id="relationshipId"
+    />
+  </div>
 
   <component
-    v-else
     :is="demosplanUi.DpSelect"
+    v-else
     id="addonAdditionalField-select"
+    v-model="currentValue"
     :data-cy="`${resourceType}:field`"
     :label="{
       text: label,
       tooltip
     }"
     :options="options"
-    v-model="currentValue"
     @select="onChange"
   />
 </template>
 
 <script>
+import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
+import { prefixClassMixin } from '@demos-europe/demosplan-ui'
+
 export default {
   name: 'MeinBerlinAdditionalField',
+
+  components: {
+    MeinBerlinProcedurePictogram
+  },
+
+  mixins: [prefixClassMixin],
 
   props: {
     additionalFieldOptions: {
@@ -46,16 +81,34 @@ export default {
       required: true
     },
 
-    isInput: {
+    existingPictogram: {
+      type: Object,
+      required: false,
+      default: null
+    },
+
+    isProcedureSettingsPage: {
       type: Boolean,
       required: false,
       default: false
     },
 
-    isValueRemovable: {
-      type: Boolean,
+    organisationId: {
+      type: String,
       required: false,
-      default: false
+      default: ''
+    },
+
+    pictogramAltText: {
+      type: String,
+      required: false,
+      default: ''
+    },
+
+    pictogramCopyright: {
+      type: String,
+      required: false,
+      default: ''
     },
 
     relationshipId: {
@@ -69,19 +122,15 @@ export default {
       required: true,
       validator: (prop) => ['orga', 'procedure'].includes(prop)
     },
-
-    required: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
   },
 
   data () {
     return {
       // Initialize without a default value
       currentValue: null,
+      hasBerlinOrgaId: false,
       initValue: null,
+      isInterfaceActivated: false,
       item: null,
       list: null,
       options: [ /* Organization / Authority ID on mein.berlin.de */
@@ -132,6 +181,11 @@ export default {
         }
       }
 
+      // Add isInterfaceActivated attribute for procedure relationship
+      if (this.relationshipKey === 'procedure') {
+        attributes.isInterfaceActivated = this.isInterfaceActivated
+      }
+
       return {
         attributes,
         id: this.item ? this.item.id : '',
@@ -144,6 +198,11 @@ export default {
 
     attribute () {
       return this.relationshipKeyMapping[this.relationshipKey]?.attribute || ''
+    },
+
+    isProcedureTransmitted () {
+      const dplanId = this.item?.attributes?.dplanId
+      return Boolean(dplanId)
     },
 
     label () {
@@ -184,11 +243,19 @@ export default {
       // Reset if no item
       this.currentValue = ''
       this.initValue = null
+      this.isInterfaceActivated = false
 
       // Only set a value if one exists, otherwise keep it null/empty
       if (this.item?.attributes[this.attribute]) {
         this.currentValue = this.item.attributes[this.attribute]
         this.initValue = this.item.attributes[this.attribute]
+      }
+
+      // Load checkbox state for procedure relationship
+      if (this.relationshipKey === 'procedure') {
+        if (this.item?.attributes?.isInterfaceActivated !== undefined) {
+          this.isInterfaceActivated = this.item.attributes.isInterfaceActivated
+        }
       }
     },
 
@@ -200,23 +267,69 @@ export default {
       }
     },
 
+    onCheckboxChange (value) {
+      this.isInterfaceActivated = value
+      this.$emit('addonEvent:emit', { name: 'change', payload: this.addonPayload })
+    },
+
     onChange (value) {
       // Explicitly update currentValue when input changes
       this.currentValue = value
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
     },
+
+    /**
+     * Check if the organisation has a Berlin org ID configured
+     * Only relevant for procedure settings page
+     */
+    async checkBerlinOrgId () {
+      // Skip check if not procedure page or no org ID
+      if (this.relationshipKey !== 'procedure' || !this.organisationId) {
+        this.hasBerlinOrgaId = false
+        return
+      }
+
+      try {
+        const url = Routing.generate('api_resource_list', {
+          resourceType: 'MeinBerlinAddonOrganisation'
+        })
+
+        const response = await this.demosplanUi.dpApi.get(url, {
+          include: 'orga'
+        })
+
+        // Find the addon data for this organisation
+        const orgaAddon = response.data.data.find(
+          item => item.relationships?.orga?.data?.id === this.organisationId
+        )
+
+        // Check if Berlin org ID is set (not null/empty)
+        this.hasBerlinOrgaId = Boolean(
+          orgaAddon?.attributes?.meinBerlinOrganisationId
+        )
+      } catch (error) {
+        this.hasBerlinOrgaId = false
+      }
+    }
   },
 
   mounted () {
     if (!this.additionalFieldOptions.length) {
-      this.fetchResourceList()
-        .then(() => {
-          this.$emit('addonEvent:emit', { name: 'resourceList:loaded', payload: this.list })
-          this.getItemByRelationshipId()
+      // Fetch resource list AND check Berlin org ID in parallel
+      Promise.all([
+        this.fetchResourceList(),
+        this.checkBerlinOrgId()
+      ]).then(() => {
+        this.$emit('addonEvent:emit', {
+          name: 'resourceList:loaded',
+          payload: this.list
         })
+        this.getItemByRelationshipId()
+      })
     } else {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
+      this.checkBerlinOrgId()
     }
   }
 }
