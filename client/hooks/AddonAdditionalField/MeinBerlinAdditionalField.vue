@@ -138,6 +138,7 @@ export default {
       currentValue: null,
       hasBerlinOrgaId: false,
       initValue: null,
+      isCheckingBerlinOrgaId: true,
       isInterfaceActivated: false,
       item: null,
       list: null,
