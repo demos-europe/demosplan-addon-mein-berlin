@@ -5,6 +5,15 @@
     </h3>
 
     <component
+      :is="demosplanUi.DpInlineNotification"
+      v-if="isProcedureTransmitted || !hasBerlinOrgaId"
+      :class="prefixClass('mb-4')"
+
+      :message="isProcedureTransmitted ? Translator.trans('mein.berlin.procedure.already.transmitted') : Translator.trans('mein.berlin.orga.id.missing.transmission.not.possible')"
+      type="info"
+    />
+
+    <component
       :is="demosplanUi.DpCheckbox"
       id="addonAdditionalField-checkbox"
       v-model="isInterfaceActivated"
