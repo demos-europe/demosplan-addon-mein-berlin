@@ -6,7 +6,7 @@
 
     <component
       :is="demosplanUi.DpInlineNotification"
-      v-if="isProcedureTransmitted || !hasBerlinOrgaId"
+      v-if="!isCheckingBerlinOrgaId && (isProcedureTransmitted || !hasBerlinOrgaId)"
       :class="prefixClass('mb-4')"
       :message="isProcedureTransmitted ? Translator.trans('mein.berlin.procedure.already.transmitted') : Translator.trans('mein.berlin.orga.id.missing.transmission.not.possible')"
       type="info"
@@ -294,6 +294,7 @@ export default {
       // Skip check if not procedure page or no orga ID
       if (this.relationshipKey !== 'procedure' || !this.organisationId) {
         this.hasBerlinOrgaId = false
+        this.isCheckingBerlinOrgaId = false
         return
       }
 
@@ -318,6 +319,8 @@ export default {
       } catch (error) {
         console.error('Error checking addon organisation ID:', error)
         this.hasBerlinOrgaId = false
+      } finally {
+        this.isCheckingBerlinOrgaId = false
       }
     }
   },
