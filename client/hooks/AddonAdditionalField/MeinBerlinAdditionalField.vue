@@ -8,7 +8,6 @@
       :is="demosplanUi.DpInlineNotification"
       v-if="isProcedureTransmitted || !hasBerlinOrgaId"
       :class="prefixClass('mb-4')"
-
       :message="isProcedureTransmitted ? Translator.trans('mein.berlin.procedure.already.transmitted') : Translator.trans('mein.berlin.orga.id.missing.transmission.not.possible')"
       type="info"
     />
@@ -291,8 +290,8 @@ export default {
      * Check if the organisation has a Berlin org ID configured
      * Only relevant for procedure settings page
      */
-    async checkBerlinOrgId () {
-      // Skip check if not procedure page or no org ID
+    async checkBerlinOrgaId () {
+      // Skip check if not procedure page or no orga ID
       if (this.relationshipKey !== 'procedure' || !this.organisationId) {
         this.hasBerlinOrgaId = false
         return
@@ -312,11 +311,12 @@ export default {
           item => item.relationships?.orga?.data?.id === this.organisationId
         )
 
-        // Check if Berlin org ID is set (not null/empty)
+        // Check if Berlin orga ID is set (not null/empty)
         this.hasBerlinOrgaId = Boolean(
           orgaAddon?.attributes?.meinBerlinOrganisationId
         )
       } catch (error) {
+        console.error('Error checking addon organisation ID:', error)
         this.hasBerlinOrgaId = false
       }
     }
@@ -327,7 +327,7 @@ export default {
       // Fetch resource list AND check Berlin org ID in parallel
       Promise.all([
         this.fetchResourceList(),
-        this.checkBerlinOrgId()
+        this.checkBerlinOrgaId()
       ]).then(() => {
         this.$emit('addonEvent:emit', {
           name: 'resourceList:loaded',
@@ -338,7 +338,7 @@ export default {
     } else {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
-      this.checkBerlinOrgId()
+      this.checkBerlinOrgaId()
     }
   }
 }
