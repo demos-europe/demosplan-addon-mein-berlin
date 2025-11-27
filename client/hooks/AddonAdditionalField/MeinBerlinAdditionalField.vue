@@ -10,7 +10,8 @@
       v-model="isInterfaceActivated"
       :class="prefixClass('mt-4 mb-4')"
       :checked="isInterfaceActivated"
-      :label="{ text: Translator.trans('mein.berlin.interface.activation.label'), tooltip: Translator.trans('mein.berlin.interface.activation.tooltip') }"
+      :disabled="isProcedureTransmitted || !hasBerlinOrgaId"
+      :label="{ text: Translator.trans('mein.berlin.interface.activation.label') }"
       @change="onCheckboxChange"
     />
 
@@ -92,10 +93,10 @@ export default {
       default: false
     },
 
-    isValueRemovable: {
-      type: Boolean,
+    organisationId: {
+      type: String,
       required: false,
-      default: false
+      default: ''
     },
 
     pictogramAltText: {
@@ -121,18 +122,13 @@ export default {
       required: true,
       validator: (prop) => ['orga', 'procedure'].includes(prop)
     },
-
-    required: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
   },
 
   data () {
     return {
       // Initialize without a default value
       currentValue: null,
+      hasBerlinOrgaId: false,
       initValue: null,
       isInterfaceActivated: false,
       item: null,
@@ -202,6 +198,11 @@ export default {
 
     attribute () {
       return this.relationshipKeyMapping[this.relationshipKey]?.attribute || ''
+    },
+
+    isProcedureTransmitted () {
+      const dplanId = this.item?.attributes?.dplanId
+      return Boolean(dplanId)
     },
 
     label () {
@@ -276,18 +277,59 @@ export default {
       this.currentValue = value
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
     },
+
+    /**
+     * Check if the organisation has a Berlin org ID configured
+     * Only relevant for procedure settings page
+     */
+    async checkBerlinOrgId () {
+      // Skip check if not procedure page or no org ID
+      if (this.relationshipKey !== 'procedure' || !this.organisationId) {
+        this.hasBerlinOrgaId = false
+        return
+      }
+
+      try {
+        const url = Routing.generate('api_resource_list', {
+          resourceType: 'MeinBerlinAddonOrganisation'
+        })
+
+        const response = await this.demosplanUi.dpApi.get(url, {
+          include: 'orga'
+        })
+
+        // Find the addon data for this organisation
+        const orgaAddon = response.data.data.find(
+          item => item.relationships?.orga?.data?.id === this.organisationId
+        )
+
+        // Check if Berlin org ID is set (not null/empty)
+        this.hasBerlinOrgaId = Boolean(
+          orgaAddon?.attributes?.meinBerlinOrganisationId
+        )
+      } catch (error) {
+        this.hasBerlinOrgaId = false
+      }
+    }
   },
 
   mounted () {
     if (!this.additionalFieldOptions.length) {
-      this.fetchResourceList()
-        .then(() => {
-          this.$emit('addonEvent:emit', { name: 'resourceList:loaded', payload: this.list })
-          this.getItemByRelationshipId()
+      // Fetch resource list AND check Berlin org ID in parallel
+      Promise.all([
+        this.fetchResourceList(),
+        this.checkBerlinOrgId()
+      ]).then(() => {
+        this.$emit('addonEvent:emit', {
+          name: 'resourceList:loaded',
+          payload: this.list
         })
+        this.getItemByRelationshipId()
+      })
     } else {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
+      this.checkBerlinOrgId()
     }
   }
 }
