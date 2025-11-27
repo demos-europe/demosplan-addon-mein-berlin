@@ -10,5 +10,3 @@ demosplan_addon:
     hooks:
      addon.additional.field:
         entry: MeinBerlinAdditionalField
-     addon.procedure.pictogram:
-        entry: MeinBerlinProcedurePictogram
