@@ -37,7 +37,7 @@ mein.berlin.pictogram.error.invalid: "Die Datei konnte nicht als Bild geladen we
 mein.berlin.pictogram.delete.blocked: "Das Bild kann nicht gelöscht werden, solange die mein.berlin.de-Kommunikation aktiv ist."
 mein.berlin.pictogram.required: "Ein Verfahrenspiktogramm ist erforderlich, wenn die mein.berlin.de-Kommunikation aktiv ist."
 mein.berlin.pictogram.remove.instruction: "Bitte entfernen Sie die hochgeladene Datei und laden Sie ein Bild mit den richtigen Abmessungen hoch."
-check.procedure.pictogram.delete: "Möchten Sie das Verfahrenspiktogramm wirklich löschen?"
+check.procedure.pictogram.delete: "Möchten Sie die Übersichtskarte/Bild wirklich löschen?"
 mein.berlin.procedure.short.name: "Bebauungsplannummer"
 mein.berlin.procedure.already.transmitted: "Das Verfahren wurde bereits an <strong>mein.berlin.de</strong> übermittelt"
 mein.berlin.procedure.short.name.tooltip: "Die Bebauungsplannummer beinhaltet NUR die Ziffern des Bebauungsplans, z.B. 4-123a oder VI-123/4 . Dieses Feld ist wichtig für die Informationen auf der Karte auf mein.berlin.de. Die Eintragung in diesem Feld kann nach dem erstmaligen Speichern wieder geändert werden. Das Feld darf nicht leer sein."
