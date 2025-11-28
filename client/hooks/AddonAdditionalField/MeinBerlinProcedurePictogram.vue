@@ -196,6 +196,7 @@ export default {
           this.removeInvalidFile(fileInfo)
         }
       } catch (error) {
+        console.error('Pictogram validation error:', error)
         dplan.notify.error(Translator.trans('mein.berlin.pictogram.error.invalid'))
         await this.$nextTick()
         this.removeInvalidFile(fileInfo)
