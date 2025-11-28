@@ -128,17 +128,17 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             )
             ->addPathCreationBehavior();
 
-        $configBuilder->procedureShortName->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
+        $configBuilder->district->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
             ->addUpdateBehavior(
                 new CallbackAttributeSetBehaviorFactory(
                     [],
-                    function (MeinBerlinAddonEntity $meinBerlinAddonEntity, ?string $procedureShortName): array {
-                        $this->logger->info('demosplan-mein-berlin-addon registered a procedureShortName update
+                    function (MeinBerlinAddonEntity $meinBerlinAddonEntity, ?string $district): array {
+                        $this->logger->info('demosplan-mein-berlin-addon registered a district update
                          - check if this change needs to be communicated to meinBerlin',
-                            [$procedureShortName, $meinBerlinAddonEntity]
+                            [$district, $meinBerlinAddonEntity]
                         );
                         try {
-                            $this->handleProcedureShortNameUpdateAttempt($meinBerlinAddonEntity, $procedureShortName);
+                            $this->handleDistrictUpdateAttempt($meinBerlinAddonEntity, $district);
                         } catch (InvalidArgumentException $e) {
                             $this->logger->error(
                                 'demosplan-mein-berlin-addon is missing mandatory properties/relations',
@@ -166,12 +166,12 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         $configBuilder->addCreationBehavior(
             new FixedSetBehavior(
                 function (MeinBerlinAddonEntity $meinBerlinAddonEntity, EntityDataInterface $entityData): array {
-                    $this->logger->info('demosplan-mein-berlin-addon registered a new procedureShortName
+                    $this->logger->info('demosplan-mein-berlin-addon registered a new district
                          - check if a necessary MeinBerlin OrganisationId to allow this create ist set
                           and if all conditions for a create procedure entry at MeinBerlin are met.',
                         [$meinBerlinAddonEntity, $entityData]
                     );
-                    $this->handleProcedureShortNameCreateAttempt($meinBerlinAddonEntity, $entityData);
+                    $this->handleDistrictCreateAttempt($meinBerlinAddonEntity, $entityData);
 
                     return [];
                 }
@@ -219,7 +219,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
      * @throws InvalidArgumentException
      * @throws MeinBerlinCommunicationException
      */
-    private function handleProcedureShortNameCreateAttempt(
+    private function handleDistrictCreateAttempt(
         MeinBerlinAddonEntity $meinBerlinAddonEntity,
         EntityDataInterface $entityData
     ): void {
@@ -242,7 +242,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         }
 
         if (!$this->meinBerlinCommunicationHelper->hasOrganisationIdSet($currentProcedure)) {
-            $this->logger->info('FP-A tried to set a procedureShortName, but his organisation has not
+            $this->logger->info('FP-A tried to set a district, but his organisation has not
             MeinBerlinOrganisationId set yet - therefore this action is not allowed');
             $this->messageBag->add(
                 'error',
@@ -253,16 +253,16 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 'Can not create a MeinBerlinAddonEntity as no MeinBerlinAddonOrgaRelation has been set yet'
             );
         }
-        if (!array_key_exists('procedureShortName', $entityData->getAttributes())
-            || '' === $entityData->getAttributes()['procedureShortName']
+        if (!array_key_exists('district', $entityData->getAttributes())
+            || '' === $entityData->getAttributes()['district']
         ) {
-            $this->logger->info('FP-A tried saving an empty meinBerlin procedureShortName');
+            $this->logger->info('FP-A tried saving an empty meinBerlin district');
             $this->messageBag->add(
                 'error',
-                'mein.berlin.error.create.empty.procedure.short.name'
+                'mein.berlin.error.create.empty.district'
             );
 
-            throw new AddonResourceNotFoundException('create with empty procedureShortName is invalid');
+            throw new AddonResourceNotFoundException('create with empty district is invalid');
         }
         // creation is allowed from here on.
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
@@ -275,7 +275,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper
                 ->getCorrespondingOrgaRelation($currentProcedure);
             Assert::notNull($correspondingAddonOrgaRelation);
-            $meinBerlinAddonEntity->setProcedureShortName($entityData->getAttributes()['procedureShortName']);
+            $meinBerlinAddonEntity->setDistrict($entityData->getAttributes()['district']);
             if (array_key_exists('isInterfaceActivated', $entityData->getAttributes())
                 && true === $entityData->getAttributes()['isInterfaceActivated']){
                 $this->createProcedureService->createMeinBerlinProcedure(
@@ -292,20 +292,20 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
      * @throws InvalidArgumentException
      * @throws MeinBerlinCommunicationException
      */
-    private function handleProcedureShortNameUpdateAttempt(
+    private function handleDistrictUpdateAttempt(
         MeinBerlinAddonEntity $meinBerlinAddonEntity,
-        ?string $procedureShortName
+        ?string $district
     ): void {
-        if ('' === $procedureShortName) {
-            $this->logger->info('FP-A tried saving an empty meinBerlin procedureShortName');
+        if ('' === $district) {
+            $this->logger->info('FP-A tried saving an empty meinBerlin district');
             $this->messageBag->add(
                 'error',
-                'mein.berlin.error.create.empty.procedure.short.name'
+                'mein.berlin.error.create.empty.district'
             );
 
-            throw new AddonResourceNotFoundException('create with empty procedureShortName is invalid');
+            throw new AddonResourceNotFoundException('create with empty district is invalid');
         }
-        $meinBerlinAddonEntity->setProcedureShortName($procedureShortName);
+        $meinBerlinAddonEntity->setDistrict($district);
         $oragnisationRelation = $this->meinBerlinCommunicationHelper
             ->getCorrespondingOrgaRelation(
                 $this->currentContextProviderInterface->getCurrentProcedure()
@@ -339,7 +339,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                         $currentProcedure->getName() => $currentProcedure->getId(),
                         'PublicParticipationPhasePermissionsetNotHidden' => true,
                         'meinBerlinOrganisationId' => $organisationId,
-                        'meinBerlinprocedureShortName' => $procedureShortName,
+                        'meinBerlinDistrict' => $district,
                     ]
                 );
                 $this->createProcedureService->createMeinBerlinProcedure(
@@ -353,11 +353,11 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             return;
         }
         $this->logger->info(
-            'meinBerlin procedureShortName update is relevant to communicate as
+            'meinBerlin district update is relevant to communicate as
                 this procedure is known to / has been transferred to -meinBerlin',
-            ['newShortName' => $procedureShortName, 'assignedCommunicationId' => $meinBerlinAddonEntity->getDplanId()]
+            ['newDistrict' => $district, 'assignedCommunicationId' => $meinBerlinAddonEntity->getDplanId()]
         );
-        $this->updateProcedureService->updateProcedureShortNameByResourceType(
+        $this->updateProcedureService->updateDistrictByResourceType(
             $meinBerlinAddonEntity,
             $organisationId,
             $meinBerlinAddonEntity->getDplanId(),

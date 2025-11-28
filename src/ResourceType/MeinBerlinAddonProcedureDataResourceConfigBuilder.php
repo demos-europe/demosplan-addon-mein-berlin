@@ -24,7 +24,7 @@ use EDT\JsonApi\ResourceConfig\Builder\MagicResourceConfigBuilder;
  *
  * @property-read ToOneRelationshipConfigBuilderInterface<ClauseFunctionInterface<bool>,OrderBySortMethodInterface, MeinBerlinAddonEntity, ProcedureInterface> $procedure
  * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonEntity> $dplanId
- * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonEntity> $procedureShortName
+ * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonEntity> $district
  * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonEntity> $isInterfaceActivated
  */
 class MeinBerlinAddonProcedureDataResourceConfigBuilder extends MagicResourceConfigBuilder

@@ -48,7 +48,7 @@ class MeinBerlinUpdateProcedureService
     /**
      * @throws MeinBerlinCommunicationException
      */
-    public function updateProcedureShortNameByResourceType(
+    public function updateDistrictByResourceType(
         MeinBerlinAddonEntity $changedEntity,
         string $meinBerlinOrganisationId,
         string $dplanId,
@@ -57,8 +57,8 @@ class MeinBerlinUpdateProcedureService
     {
         $fieldsToUpdate = [];
         $fieldsToUpdate[
-            MeinBerlinAddonEntity::MEIN_BERLIN_PROCEDURE_SHORT_NAME
-        ] = $changedEntity->getProcedureShortName();
+            MeinBerlinAddonEntity::MEIN_BERLIN_DISTRICT
+        ] = $changedEntity->getDistrict();
 
         try {
             $this->procedureCommunicator->updateProcedure(
@@ -77,7 +77,7 @@ class MeinBerlinUpdateProcedureService
 
     }
 
-    /** This Method will not include the { @link MeinBerlinAddonEntity::$procedureShortName }
+    /** This Method will not include the { @link MeinBerlinAddonEntity::$district }
      * as those changes will be sent in a separate PATCH request triggert by the corresponding
      * { @link MeinBerlinAddonProcedureDataResourceType }
      *

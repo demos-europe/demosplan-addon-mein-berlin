@@ -21,7 +21,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'addon_mein_berlin_entity')]
 class MeinBerlinAddonEntity implements UuidEntityInterface
 {
-    public const MEIN_BERLIN_PROCEDURE_SHORT_NAME = 'bplan_id';
+    public const MEIN_BERLIN_DISTRICT = 'district';
     public const MEIN_BERLIN_IS_DRAFT = 'is_draft';
 
     #[ORM\Column(type: 'string', length: 36, nullable: false, options:['fixed' => true])]
@@ -37,8 +37,8 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     #[ORM\Column(name: 'dplan_id', length: 255, type: 'string', nullable: false)]
     private string $dplanId = '';
 
-    #[ORM\Column(name: 'procedure_short_name', length: 255, type: 'string', nullable: false)]
-    private string $procedureShortName = '';
+    #[ORM\Column(name: 'district', length: 2, type: 'string', nullable: false)]
+    private string $district = '';
 
     #[ORM\Column(name: 'is_interface_activated', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $isInterfaceActivated = false;
@@ -73,14 +73,14 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
         $this->dplanId = $dplanId;
     }
 
-    public function getProcedureShortName(): string
+    public function getDistrict(): string
     {
-        return $this->procedureShortName;
+        return $this->district;
     }
 
-    public function setProcedureShortName(string $procedureShortName): void
+    public function setDistrict(string $district): void
     {
-        $this->procedureShortName = $procedureShortName;
+        $this->district = $district;
     }
 
     public function getIsInterfaceActivated(): bool
