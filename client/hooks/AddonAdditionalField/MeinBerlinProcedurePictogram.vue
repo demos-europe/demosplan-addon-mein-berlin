@@ -189,15 +189,15 @@ export default {
 
         const validation = await this.validateImageDimensions(imageUrl, fileInfo.type)
 
-        if (!validation.valid) {
-          console.log('[MeinBerlin] Validation failed:', validation.error)
-          dplan.notify.error(validation.error)
-          dplan.notify.warning(Translator.trans('mein.berlin.pictogram.remove.instruction'))
-        } else {
+        if (validation.valid) {
           this.validFile = fileInfo
           // Clear deletion flag since we have a new valid file
           this.deletePictogram = false
           console.log('[MeinBerlin] Validation passed - image dimensions OK')
+        } else {
+          console.log('[MeinBerlin] Validation failed:', validation.error)
+          dplan.notify.error(validation.error)
+          dplan.notify.warning(Translator.trans('mein.berlin.pictogram.remove.instruction'))
         }
       } catch (error) {
         console.error('[MeinBerlin] Validation error:', error)
