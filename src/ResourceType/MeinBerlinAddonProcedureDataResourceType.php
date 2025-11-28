@@ -93,9 +93,33 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 new CallbackAttributeSetBehaviorFactory(
                     [],
                     function (MeinBerlinAddonEntity $meinBerlinAddonEntity, bool $isInterfaceActivated): array {
-                        $this->logger->info('demosplan-mein-berlin-addon registered an isInterfaceActivated update',
-                            ['isInterfaceActivated' => $isInterfaceActivated, 'entity' => $meinBerlinAddonEntity->getId()]
+                        $this->logger->info(
+                            'demosplan-mein-berlin-addon registered an isInterfaceActivated update',
+                            [
+                                'isInterfaceActivated' => $isInterfaceActivated,
+                                'entity' => $meinBerlinAddonEntity->getId(),
+                            ]
                         );
+
+                        // Prevent deactivation if communication has already been established
+                        $dplanId = $meinBerlinAddonEntity->getDplanId();
+                        if (false === $isInterfaceActivated
+                            && null !== $dplanId
+                            && '' !== $dplanId) {
+                            $this->logger->warning(
+                                'demosplan-mein-berlin-addon: Cannot deactivate interface - '
+                                .'communication already established',
+                                [
+                                    'dplanId' => $dplanId,
+                                    'entity' => $meinBerlinAddonEntity->getId(),
+                                ]
+                            );
+                            throw new InvalidArgumentException(
+                                'Cannot deactivate mein.berlin interface: '
+                                .'communication has already been established with this procedure'
+                            );
+                        }
+
                         $meinBerlinAddonEntity->setIsInterfaceActivated($isInterfaceActivated);
                         return [];
                     },
