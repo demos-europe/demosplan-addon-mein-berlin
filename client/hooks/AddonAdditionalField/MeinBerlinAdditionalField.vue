@@ -228,6 +228,44 @@ export default {
   },
 
   methods: {
+    /**
+     * Check if the organisation has a Berlin org ID configured
+     * Only relevant for procedure settings page
+     */
+    async checkBerlinOrgaId () {
+      // Skip check if not procedure page or no orga ID
+      if (this.relationshipKey !== 'procedure' || !this.organisationId) {
+        this.hasBerlinOrgaId = false
+        this.isCheckingBerlinOrgaId = false
+        return
+      }
+
+      try {
+        const url = Routing.generate('api_resource_list', {
+          resourceType: 'MeinBerlinAddonOrganisation'
+        })
+
+        const response = await this.demosplanUi.dpApi.get(url, {
+          include: 'orga'
+        })
+
+        // Find the addon data for this organisation
+        const orgaAddon = response.data.data.find(
+          item => item.relationships?.orga?.data?.id === this.organisationId
+        )
+
+        // Check if Berlin orga ID is set (not null/empty)
+        this.hasBerlinOrgaId = Boolean(
+          orgaAddon?.attributes?.meinBerlinOrganisationId
+        )
+      } catch (error) {
+        console.error('Error checking addon organisation ID:', error)
+        this.hasBerlinOrgaId = false
+      } finally {
+        this.isCheckingBerlinOrgaId = false
+      }
+    },
+
     fetchResourceList () {
       const url = Routing.generate('api_resource_list', { resourceType: this.resourceType })
 
@@ -276,53 +314,15 @@ export default {
       }
     },
 
-    onCheckboxChange (value) {
-      this.isInterfaceActivated = value
-      this.$emit('addonEvent:emit', { name: 'change', payload: this.addonPayload })
-    },
-
     onChange (value) {
       // Explicitly update currentValue when input changes
       this.currentValue = value
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
     },
 
-    /**
-     * Check if the organisation has a Berlin org ID configured
-     * Only relevant for procedure settings page
-     */
-    async checkBerlinOrgaId () {
-      // Skip check if not procedure page or no orga ID
-      if (this.relationshipKey !== 'procedure' || !this.organisationId) {
-        this.hasBerlinOrgaId = false
-        this.isCheckingBerlinOrgaId = false
-        return
-      }
-
-      try {
-        const url = Routing.generate('api_resource_list', {
-          resourceType: 'MeinBerlinAddonOrganisation'
-        })
-
-        const response = await this.demosplanUi.dpApi.get(url, {
-          include: 'orga'
-        })
-
-        // Find the addon data for this organisation
-        const orgaAddon = response.data.data.find(
-          item => item.relationships?.orga?.data?.id === this.organisationId
-        )
-
-        // Check if Berlin orga ID is set (not null/empty)
-        this.hasBerlinOrgaId = Boolean(
-          orgaAddon?.attributes?.meinBerlinOrganisationId
-        )
-      } catch (error) {
-        console.error('Error checking addon organisation ID:', error)
-        this.hasBerlinOrgaId = false
-      } finally {
-        this.isCheckingBerlinOrgaId = false
-      }
+    onCheckboxChange (value) {
+      this.isInterfaceActivated = value
+      this.$emit('addonEvent:emit', { name: 'change', payload: this.addonPayload })
     }
   },
 
