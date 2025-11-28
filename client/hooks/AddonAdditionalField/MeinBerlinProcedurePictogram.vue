@@ -53,7 +53,7 @@
         id="r_pictogram"
         :basic-auth="dplan.settings.basicAuth"
         :get-file-by-hash="hash => Routing.generate('core_file', { hash: hash })"
-        :max-file-size="5242880"
+        :max-file-size="maxFileSize"
         :max-number-of-files="1"
         :translations="{
           dropHereOr: Translator.trans('form.button.upload.file', { browse: '{browse}', maxUploadSize: '5MB' })
@@ -105,6 +105,11 @@
 <script>
 import { prefixClassMixin } from '@demos-europe/demosplan-ui'
 
+// Pictogram validation constants
+const MIN_WIDTH = 500
+const MIN_HEIGHT = 300
+const MAX_FILE_SIZE = 5242880
+
 export default {
   name: 'MeinBerlinProcedurePictogram',
 
@@ -144,9 +149,10 @@ export default {
   data () {
     return {
       deletePictogram: false,
+      existingPictogramData: this.existingPictogram,
+      maxFileSize: MAX_FILE_SIZE,
       pictogramAltTextValue: this.pictogramAltText || '',
       pictogramCopyrightValue: this.pictogramCopyright || '',
-      existingPictogramData: this.existingPictogram,
       validFile: null
     }
   },
@@ -179,12 +185,12 @@ export default {
           dplan.notify.error(Translator.trans('mein.berlin.pictogram.error.format'))
           dplan.notify.warning(Translator.trans('mein.berlin.pictogram.remove.instruction'))
           await this.$nextTick()
-          this.removeInvalidFile(fileInfo)
+          this.removeInvalidFile()
           return
         }
 
         const imageUrl = Routing.generate('core_logo', { hash: fileInfo.hash })
-        const validation = await this.validateImageDimensions(imageUrl, fileInfo.type)
+        const validation = await this.validateImageDimensions(imageUrl)
 
         if (validation.valid) {
           this.validFile = fileInfo
@@ -193,17 +199,17 @@ export default {
           dplan.notify.error(validation.error)
           dplan.notify.warning(Translator.trans('mein.berlin.pictogram.remove.instruction'))
           await this.$nextTick()
-          this.removeInvalidFile(fileInfo)
+          this.removeInvalidFile()
         }
       } catch (error) {
         console.error('Pictogram validation error:', error)
         dplan.notify.error(Translator.trans('mein.berlin.pictogram.error.invalid'))
         await this.$nextTick()
-        this.removeInvalidFile(fileInfo)
+        this.removeInvalidFile()
       }
     },
 
-    removeInvalidFile (fileInfo) {
+    removeInvalidFile () {
       try {
         // Find the hidden input that stores file hashes for form submission
         const hiddenInput = document.querySelector('input[name="uploadedFiles[r_pictogram]"]')
@@ -213,7 +219,7 @@ export default {
         }
 
         // Remove the visual file display
-        const fileListItems = document.querySelectorAll('[data-cy="uploadFile"] .uploaded-file-item, [data-cy="uploadFile"] li')
+        const fileListItems = document.querySelectorAll('[data-cy="uploadFile:uploadedFileItem"]')
         fileListItems.forEach(item => item.remove())
       } catch (error) {
         console.error('Error removing invalid file:', error)
@@ -226,19 +232,18 @@ export default {
 
     /**
      * Validate image dimensions by loading it from URL
-     * fileType is used for additional context in error messages
      */
-    async validateImageDimensions (imageUrl, fileType = null) {
+    async validateImageDimensions (imageUrl) {
       return new Promise((resolve) => {
         const img = new Image()
 
         img.onload = () => {
-          if (img.width < 500 || img.height < 300) {
+          if (img.width < MIN_WIDTH || img.height < MIN_HEIGHT) {
             resolve({
               valid: false,
               error: Translator.trans('mein.berlin.pictogram.error.dimensions', {
-                minWidth: 500,
-                minHeight: 300,
+                minWidth: MIN_WIDTH,
+                minHeight: MIN_HEIGHT,
                 actualWidth: img.width,
                 actualHeight: img.height
               })
