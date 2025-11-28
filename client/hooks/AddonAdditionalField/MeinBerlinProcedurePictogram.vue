@@ -62,7 +62,6 @@
         allowed-file-types="img"
         name="r_pictogram"
         needs-hidden-input
-        ref="pictogramUpload"
         @upload-success="handleUploadSuccess"
         @file-remove="handleFileRemoved"
       />
@@ -173,40 +172,54 @@ export default {
     },
 
     async handleUploadSuccess (fileInfo) {
-      console.log('[MeinBerlin] File uploaded successfully:', fileInfo)
-
       try {
         // First check if the file type is valid
         const validFormats = ['image/png', 'image/jpeg', 'image/gif']
         if (fileInfo.type && !validFormats.includes(fileInfo.type)) {
-          console.log('[MeinBerlin] Invalid format detected:', fileInfo.type)
           dplan.notify.error(Translator.trans('mein.berlin.pictogram.error.format'))
           dplan.notify.warning(Translator.trans('mein.berlin.pictogram.remove.instruction'))
+          await this.$nextTick()
+          this.removeInvalidFile(fileInfo)
           return
         }
 
         const imageUrl = Routing.generate('core_logo', { hash: fileInfo.hash })
-
         const validation = await this.validateImageDimensions(imageUrl, fileInfo.type)
 
         if (validation.valid) {
           this.validFile = fileInfo
-          // Clear deletion flag since we have a new valid file
           this.deletePictogram = false
-          console.log('[MeinBerlin] Validation passed - image dimensions OK')
         } else {
-          console.log('[MeinBerlin] Validation failed:', validation.error)
           dplan.notify.error(validation.error)
           dplan.notify.warning(Translator.trans('mein.berlin.pictogram.remove.instruction'))
+          await this.$nextTick()
+          this.removeInvalidFile(fileInfo)
         }
       } catch (error) {
-        console.error('[MeinBerlin] Validation error:', error)
         dplan.notify.error(Translator.trans('mein.berlin.pictogram.error.invalid'))
+        await this.$nextTick()
+        this.removeInvalidFile(fileInfo)
+      }
+    },
+
+    removeInvalidFile (fileInfo) {
+      try {
+        // Find the hidden input that stores file hashes for form submission
+        const hiddenInput = document.querySelector('input[name="uploadedFiles[r_pictogram]"]')
+
+        if (hiddenInput) {
+          hiddenInput.value = ''
+        }
+
+        // Remove the visual file display
+        const fileListItems = document.querySelectorAll('[data-cy="uploadFile"] .uploaded-file-item, [data-cy="uploadFile"] li')
+        fileListItems.forEach(item => item.remove())
+      } catch (error) {
+        console.error('Error removing invalid file:', error)
       }
     },
 
     handleFileRemoved () {
-      console.log('[MeinBerlin] File removed')
       this.validFile = null
     },
 
@@ -219,8 +232,6 @@ export default {
         const img = new Image()
 
         img.onload = () => {
-          console.log('[MeinBerlin] Image loaded - dimensions:', img.width, 'x', img.height)
-
           if (img.width < 500 || img.height < 300) {
             resolve({
               valid: false,
@@ -236,10 +247,7 @@ export default {
           }
         }
 
-        img.onerror = (error) => {
-          console.error('[MeinBerlin] Failed to load image:', error)
-          // If image fails to load, it could be corrupted or network error
-          // Format errors are caught earlier in handleUploadSuccess
+        img.onerror = () => {
           resolve({
             valid: false,
             error: Translator.trans('mein.berlin.pictogram.error.invalid')
