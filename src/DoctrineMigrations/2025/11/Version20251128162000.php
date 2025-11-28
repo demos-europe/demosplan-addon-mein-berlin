@@ -1,0 +1,87 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * This file is part of the package demosplan.
+ *
+ * (c) 2010-present DEMOS plan GmbH, for more information see the license file.
+ *
+ * All rights reserved
+ */
+
+namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\DoctrineMigrations;
+
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+/**
+ * Replace procedure_short_name with district field
+ */
+final class Version20251128162000 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return 'Replace procedure_short_name field with district field (varchar 2) for mein.berlin.de district codes';
+    }
+
+    public function up(Schema $schema): void
+    {
+        $this->abortIfNotMysql();
+
+        // Check if table exists before altering
+        if (!$schema->hasTable('addon_mein_berlin_entity')) {
+            $this->write('Table addon_mein_berlin_entity does not exist, skipping migration');
+            return;
+        }
+
+        // Check if column exists before renaming
+        $table = $schema->getTable('addon_mein_berlin_entity');
+        if (!$table->hasColumn('procedure_short_name')) {
+            $this->write('Column procedure_short_name does not exist, skipping migration');
+            return;
+        }
+
+        // Rename and resize column from procedure_short_name (varchar 255) to district (varchar 2)
+        $this->addSql(
+            'ALTER TABLE addon_mein_berlin_entity
+             CHANGE procedure_short_name district VARCHAR(2) NOT NULL DEFAULT \'\''
+        );
+    }
+
+    public function down(Schema $schema): void
+    {
+        $this->abortIfNotMysql();
+
+        // Check if table exists before reverting
+        if (!$schema->hasTable('addon_mein_berlin_entity')) {
+            $this->write('Table addon_mein_berlin_entity does not exist, skipping rollback');
+            return;
+        }
+
+        // Check if column exists before reverting
+        $table = $schema->getTable('addon_mein_berlin_entity');
+        if (!$table->hasColumn('district')) {
+            $this->write('Column district does not exist, skipping rollback');
+            return;
+        }
+
+        // Revert: rename and resize column back to procedure_short_name (varchar 255)
+        $this->addSql(
+            'ALTER TABLE addon_mein_berlin_entity
+             CHANGE district procedure_short_name VARCHAR(255) NOT NULL DEFAULT \'\''
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function abortIfNotMysql(): void
+    {
+        $this->abortIf(
+            !$this->connection->getDatabasePlatform() instanceof MySQLPlatform,
+            "Migration can only be executed safely on 'mysql'."
+        );
+    }
+}
