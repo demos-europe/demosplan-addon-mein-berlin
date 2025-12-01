@@ -10,8 +10,6 @@
     <!-- Display existing pictogram -->
     <div
       v-if="existingPictogramData && !deletePictogram"
-      :class="prefixClass('mt-4')"
-      v-if="existingPictogramData"
       class="mt-4"
     >
       <img
@@ -19,23 +17,23 @@
         :src="getPictogramUrl(existingPictogramData.hash)"
         class="layout__item w-1/6 pl-0 mb-4"
       >
-      <span :class="prefixClass('layout__item w-1/3')">
+      <span class="layout__item w-1/3">
         <a
           :href="getFileUrl(existingPictogramData.hash)"
           target="_blank"
           rel="noopener"
-          :class="prefixClass('o-link--default')"
+          class="o-link--default"
         >
           {{ existingPictogramData.name }}
         </a>
         <button
           type="button"
-          :class="prefixClass('btn-icns u-m-0 u-ml-0_5')"
+          class="btn-icns u-m-0 u-ml-0_5"
           :aria-label="Translator.trans('delete')"
           @click="handleDelete"
         >
           <i
-            :class="prefixClass('fa fa-trash')"
+            class="fa fa-trash"
             aria-hidden="true"
           />
         </button>
@@ -103,8 +101,6 @@
 </template>
 
 <script>
-import { prefixClassMixin } from '@demos-europe/demosplan-ui'
-
 // Pictogram validation constants
 const MIN_WIDTH = 500
 const MIN_HEIGHT = 300
