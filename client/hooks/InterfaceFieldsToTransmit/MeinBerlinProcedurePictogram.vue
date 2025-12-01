@@ -1,9 +1,9 @@
 <template>
-  <div :class="prefixClass('mt-4 mb-4')">
+  <div class="mt-4 mb-4">
     <component
       :is="demosplanUi.DpLabel"
-      :class="prefixClass('inline-block mb-0')"
       :text="Translator.trans('procedure.pictogram')"
+      class="inline-block mb-0"
       for="r_pictogram"
     />
 
@@ -11,11 +11,13 @@
     <div
       v-if="existingPictogramData && !deletePictogram"
       :class="prefixClass('mt-4')"
+      v-if="existingPictogramData"
+      class="mt-4"
     >
       <img
         :alt="pictogramAltTextValue || Translator.trans('procedure.pictogram')"
-        :class="prefixClass('layout__item w-1/6 pl-0 mb-4')"
         :src="getPictogramUrl(existingPictogramData.hash)"
+        class="layout__item w-1/6 pl-0 mb-4"
       >
       <span :class="prefixClass('layout__item w-1/3')">
         <a
@@ -41,11 +43,8 @@
     </div>
 
     <!-- File upload -->
-    <div
-      v-else
-      :class="prefixClass('mt-2')"
-    >
-      <p :class="prefixClass('lbl__hint mb-3')">
+    <div v-else>
+      <p class="lbl__hint">
         {{ Translator.trans('text.procedure.edit.external.pictogram') }}
       </p>
       <component
@@ -72,10 +71,10 @@
       :is="demosplanUi.DpInput"
       id="r_pictogramCopyright"
       v-model="pictogramCopyrightValue"
-      :class="prefixClass('my-2')"
       :label="{
         text: Translator.trans('procedure.pictogram.copyright')
       }"
+      class="my-2"
       data-cy="procedure:pictogramCopyright"
       name="r_pictogramCopyright"
     />
@@ -84,11 +83,11 @@
       :is="demosplanUi.DpInput"
       id="r_pictogramAltText"
       v-model="pictogramAltTextValue"
-      :class="prefixClass('my-2')"
       :label="{
         text: Translator.trans('procedure.pictogram.altText'),
         tooltip: Translator.trans('procedure.pictogram.altText.toolTipp')
       }"
+      class="my-2"
       data-cy="procedure:pictogramAltText"
       name="r_pictogramAltText"
     />
@@ -113,8 +112,6 @@ const MAX_FILE_SIZE = 5242880
 
 export default {
   name: 'MeinBerlinProcedurePictogram',
-
-  mixins: [prefixClassMixin],
 
   props: {
     demosplanUi: {
