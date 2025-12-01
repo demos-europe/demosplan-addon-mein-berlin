@@ -34,8 +34,8 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     #[ORM\JoinColumn(name: 'procedure_id', referencedColumnName: '_p_id', nullable: false)]
     private ?ProcedureInterface $procedure = null;
 
-    #[ORM\Column(name: 'dplan_id', length: 255, type: 'string', nullable: false)]
-    private string $dplanId = '';
+    #[ORM\Column(name: 'bplan_id', length: 255, type: 'string', nullable: false)]
+    private string $bplanId = '';
 
     #[ORM\Column(name: 'district', length: 2, type: 'string', nullable: false)]
     private string $district = '';
@@ -63,14 +63,14 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
         $this->procedure = $procedure;
     }
 
-    public function getDplanId(): string
+    public function getBplanId(): string
     {
-        return $this->dplanId;
+        return $this->bplanId;
     }
 
-    public function setDplanId(string $dplanId): void
+    public function setBplanId(string $bplanId): void
     {
-        $this->dplanId = $dplanId;
+        $this->bplanId = $bplanId;
     }
 
     public function getDistrict(): string

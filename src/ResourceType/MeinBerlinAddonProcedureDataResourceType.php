@@ -102,15 +102,15 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                         );
 
                         // Prevent deactivation if communication has already been established
-                        $dplanId = $meinBerlinAddonEntity->getDplanId();
+                        $bplanId = $meinBerlinAddonEntity->getBplanId();
                         if (false === $isInterfaceActivated
-                            && null !== $dplanId
-                            && '' !== $dplanId) {
+                            && null !== $bplanId
+                            && '' !== $bplanId) {
                             $this->logger->warning(
                                 'demosplan-mein-berlin-addon: Cannot deactivate interface - '
                                 .'communication already established',
                                 [
-                                    'dplanId' => $dplanId,
+                                    'bplanId' => $bplanId,
                                     'entity' => $meinBerlinAddonEntity->getId(),
                                 ]
                             );
@@ -178,7 +178,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             )
         );
 
-        $configBuilder->dplanId->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable();
+        $configBuilder->bplanId->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable();
 
         return $configBuilder;
     }
@@ -267,9 +267,9 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         // creation is allowed from here on.
         $this->meinBerlinAddonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
         // check if create message should be sent by checking the procedurePhase
-        // lastly check if a dplanId (communicationId) is already set - this would be an error here - unique constraint
+        // lastly check if a bplanId (communicationId) is already set - this would be an error here - unique constraint
         // we do not want to send a message before the database says nope.
-        if (!$this->meinBerlinCommunicationHelper->hasDplanIdSet($currentProcedure) &&
+        if (!$this->meinBerlinCommunicationHelper->hasBplanIdSet($currentProcedure) &&
             $this->meinBerlinCommunicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($currentProcedure)
         ) {
             $correspondingAddonOrgaRelation = $this->meinBerlinCommunicationHelper
@@ -316,7 +316,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         // you can only create this Addon entity in the first place with an existing id
         Assert::stringNotEmpty($organisationId);
         // check if update message should be sent by checking an existent communicationId
-        if ('' === $meinBerlinAddonEntity->getDplanId()) {
+        if ('' === $meinBerlinAddonEntity->getBplanId()) {
             $this->logger->info(
                 'this procedure has not been transmitted to meinBerlin yet.
                 No update message will be sent to meinBerlin'
@@ -355,12 +355,12 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
         $this->logger->info(
             'meinBerlin district update is relevant to communicate as
                 this procedure is known to / has been transferred to -meinBerlin',
-            ['newDistrict' => $district, 'assignedCommunicationId' => $meinBerlinAddonEntity->getDplanId()]
+            ['newDistrict' => $district, 'assignedCommunicationId' => $meinBerlinAddonEntity->getBplanId()]
         );
         $this->updateProcedureService->updateDistrictByResourceType(
             $meinBerlinAddonEntity,
             $organisationId,
-            $meinBerlinAddonEntity->getDplanId(),
+            $meinBerlinAddonEntity->getBplanId(),
             $this->currentContextProviderInterface->getCurrentProcedure()?->getId(),
         );
     }

@@ -47,14 +47,14 @@ class MeinBerlinProcedureCommunicator
     public function updateProcedure(
         array $preparedProcedureData,
         string $organisationId,
-        string $dplanId,
+        string $bplanId,
         string $procedureId
     ): void {
         try {
             $method = 'PATCH';
             $url = str_replace(
                 ['<organisation-id>', '<bplan-id>'],
-                [$organisationId, $dplanId],
+                [$organisationId, $bplanId],
                 $this->parameterBag->get('mein_berlin_procedure_update_url')
             );
             $this->logger->info('demosplan-mein-berlin-addon sends PATCH to update Procedure now!', [$url]);
@@ -75,7 +75,7 @@ class MeinBerlinProcedureCommunicator
                         'statusCode' => $statusCode,
                         'procedureId' => $procedureId,
                         'meinBerlinOrganisationId' => $organisationId,
-                        'meinBerlinProcedureCommunicationId' => $dplanId,
+                        'meinBerlinProcedureCommunicationId' => $bplanId,
                         'PATCH url' => $url,
                         'payload' => $preparedProcedureData,
                         'content' => $response->getContent(false)
@@ -173,8 +173,8 @@ class MeinBerlinProcedureCommunicator
             }
             $responseContent = $response->getContent();
             $this->logger->info('demosplan-mein-berlin-addon got create response content: ', [$responseContent]);
-            $dplanCommunicationId = $this->extractDplanCommunicationId($responseContent);
-            $this->attachDplanCommunicationId($dplanCommunicationId, $correspondingAddonEntity, $flushIsInQueued);
+            $bplanCommunicationId = $this->extractBplanCommunicationId($responseContent);
+            $this->attachBplanCommunicationId($bplanCommunicationId, $correspondingAddonEntity, $flushIsInQueued);
             $this->logger->info(
                 'demosplan-mein-berlin-addon successfully transmitted a new procedure',
                 [
@@ -271,7 +271,7 @@ class MeinBerlinProcedureCommunicator
      * @throws JsonException
      * @throws InvalidArgumentException
      */
-    private function extractDplanCommunicationId(string $responseContent): string
+    private function extractBplanCommunicationId(string $responseContent): string
     {
         /** @var array{ id: non-empty-string, embed_code: string } $responseContentArray */
         $responseContentArray = json_decode(
@@ -291,15 +291,15 @@ class MeinBerlinProcedureCommunicator
         return (string)$responseContentArray['id'];
     }
 
-    private function attachDplanCommunicationId(
-        string $dplanId,
+    private function attachBplanCommunicationId(
+        string $bplanId,
         MeinBerlinAddonEntity $meinBerlinAddonEntity,
         bool $flushIsQueued
     ): void {
-        $meinBerlinAddonEntity->setDplanId($dplanId);
+        $meinBerlinAddonEntity->setBplanId($bplanId);
         $this->logger->info(
-            'demosplan-mein-berlin-addon peristing new procedure related dplanCommunicationId',
-            [$dplanId]
+            'demosplan-mein-berlin-addon peristing new procedure related bplanCommunicationId',
+            [$bplanId]
         );
         $this->addonEntityRepository->persistMeinBerlinAddonEntity($meinBerlinAddonEntity);
         if (!$flushIsQueued) {

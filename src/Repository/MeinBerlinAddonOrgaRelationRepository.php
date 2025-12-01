@@ -75,9 +75,9 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
         return $queryBuilder->select('addonEntity')
             ->from(MeinBerlinAddonEntity::class, 'addonEntity')
             ->where('addonEntity.procedure IN (:procedureIds)')
-            ->andWhere('addonEntity.dplanId != :emptyDplanId')
+            ->andWhere('addonEntity.bplanId != :emptyBplanId')
             ->setParameter('procedureIds', $proceduresOfOrga)
-            ->setParameter('emptyDplanId', '')
+            ->setParameter('emptyBplanId', '')
             ->getQuery()
             ->getResult();
     }

@@ -51,7 +51,7 @@ class MeinBerlinUpdateProcedureService
     public function updateDistrictByResourceType(
         MeinBerlinAddonEntity $changedEntity,
         string $meinBerlinOrganisationId,
-        string $dplanId,
+        string $bplanId,
         string $procedureId
     ): void
     {
@@ -64,7 +64,7 @@ class MeinBerlinUpdateProcedureService
             $this->procedureCommunicator->updateProcedure(
                 $fieldsToUpdate,
                 $meinBerlinOrganisationId,
-                $dplanId,
+                $bplanId,
                 $procedureId
             );
             $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');
@@ -87,7 +87,7 @@ class MeinBerlinUpdateProcedureService
         array $changeSet,
         ?bool $isPublished,
         string $meinBerlinOrganisationId,
-        string $dplanId,
+        string $bplanId,
         string $procedureId
     ): void
     {
@@ -118,7 +118,7 @@ class MeinBerlinUpdateProcedureService
                 $this->procedureCommunicator->updateProcedure(
                     $fieldsToUpdate,
                     $meinBerlinOrganisationId,
-                    $dplanId,
+                    $bplanId,
                     $procedureId
                 );
                 $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');

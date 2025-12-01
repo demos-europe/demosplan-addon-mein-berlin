@@ -128,8 +128,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
         $this->communicationHelper->method('hasOrganisationIdSet')->willReturn(true);
         $this->communicationHelper->method('checkProcedurePublicPhasePermissionsetNotHidden')
             ->willReturn(true);
-        $this->communicationHelper->method('hasProcedureShortNameSet')->willReturn(true);
-        $this->communicationHelper->method('hasDplanIdSet')->willReturn(true);
+        $this->communicationHelper->method('hasDistrictSet')->willReturn(true);
+        $this->communicationHelper->method('hasBplanIdSet')->willReturn(true);
         $this->communicationHelper->method('getCorrespondingAddonEntity')->willReturn($addonEntity);
         $this->communicationHelper->method('getCorrespondingOrgaRelation')->willReturn($orgaRelation);
 
@@ -139,7 +139,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
                 $changeSet,
                 true,
                 $orgaRelation->getMeinBerlinOrganisationId(),
-                $addonEntity->getDplanId(),
+                $addonEntity->getBplanId(),
                 $procedure->getId()
             );
 
