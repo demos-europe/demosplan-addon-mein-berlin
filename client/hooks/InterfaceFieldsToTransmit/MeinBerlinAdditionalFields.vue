@@ -23,19 +23,29 @@
       @change="onCheckboxChange"
     />
 
+    <!-- If district field → show dropdown -->
     <component
-      :is="demosplanUi.DpInput"
-      id="interfaceFieldsToTransmit-input"
-      v-model="currentValue"
-      :data-cy="`${resourceType}:field`"
-      :label="{
-        text: label,
-        tooltip
-      }"
-      :required="isInterfaceActivated"
-      pattern="^.*\S-\S.*$"
-      @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
-      @focus="handleFocus"
+        v-if="relationshipKey === 'procedure'"
+        :is="demosplanUi.DpSelect"
+        id="interfaceFieldsToTransmit-select"
+        v-model="currentValue"
+        :label="{ text: label, tooltip }"
+        :options="selectOptions"
+        :required="isInterfaceActivated"
+        @select="onChange"
+    />
+
+    <!-- Otherwise fallback to original input -->
+    <component
+        v-else
+        :is="demosplanUi.DpInput"
+        id="interfaceFieldsToTransmit-input"
+        v-model="currentValue"
+        :label="{ text: label, tooltip }"
+        :required="isInterfaceActivated"
+        pattern="^.*\\S-\\S.*$"
+        @blur="$emit('addonEvent:emit', { name: 'blur', payload: addonPayload })"
+        @focus="handleFocus"
     />
 
     <!-- Pictogram section -->
