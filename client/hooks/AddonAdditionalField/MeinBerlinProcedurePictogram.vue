@@ -49,6 +49,7 @@
         {{ Translator.trans('text.procedure.edit.external.pictogram') }}
       </p>
       <component
+        :key="uploadKey"
         :is="demosplanUi.DpUploadFiles"
         id="r_pictogram"
         :basic-auth="dplan.settings.basicAuth"
@@ -153,7 +154,8 @@ export default {
       maxFileSize: MAX_FILE_SIZE,
       pictogramAltTextValue: this.pictogramAltText || '',
       pictogramCopyrightValue: this.pictogramCopyright || '',
-      validFile: null
+      validFile: null,
+      uploadKey: 0
     }
   },
 
@@ -211,16 +213,8 @@ export default {
 
     removeInvalidFile () {
       try {
-        // Find the hidden input that stores file hashes for form submission
-        const hiddenInput = document.querySelector('input[name="uploadedFiles[r_pictogram]"]')
-
-        if (hiddenInput) {
-          hiddenInput.value = ''
-        }
-
-        // Remove the visual file display
-        const fileListItems = document.querySelectorAll('[data-cy="uploadFile:uploadedFileItem"]')
-        fileListItems.forEach(item => item.remove())
+        this.uploadKey++
+        this.validFile = null
       } catch (error) {
         console.error('Error removing invalid file:', error)
       }
