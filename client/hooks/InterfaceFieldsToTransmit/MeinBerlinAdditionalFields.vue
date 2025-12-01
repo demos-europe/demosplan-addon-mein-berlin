@@ -14,7 +14,7 @@
 
     <component
       :is="demosplanUi.DpCheckbox"
-      id="addonAdditionalField-checkbox"
+      id="interfaceFieldsToTransmit-checkbox"
       v-model="isInterfaceActivated"
       :class="prefixClass('mt-4 mb-4')"
       :checked="isInterfaceActivated"
@@ -25,7 +25,7 @@
 
     <component
       :is="demosplanUi.DpInput"
-      id="addonAdditionalField-input"
+      id="interfaceFieldsToTransmit-input"
       v-model="currentValue"
       :data-cy="`${resourceType}:field`"
       :label="{
@@ -52,7 +52,7 @@
   <component
     :is="demosplanUi.DpSelect"
     v-else
-    id="addonAdditionalField-select"
+    id="interfaceFieldsToTransmit-select"
     v-model="currentValue"
     :data-cy="`${resourceType}:field`"
     :label="{
@@ -69,7 +69,7 @@ import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
 import { prefixClassMixin } from '@demos-europe/demosplan-ui'
 
 export default {
-  name: 'MeinBerlinAdditionalField',
+  name: 'MeinBerlinAdditionalFields',
 
   components: {
     MeinBerlinProcedurePictogram
@@ -307,7 +307,7 @@ export default {
     },
 
     handleFocus () {
-      const input = document.getElementById('addonAdditionalField-input')
+      const input = document.getElementById('interfaceFieldsToTransmit-input')
 
       if (input.classList.contains('is-invalid')) {
         input.classList.remove('is-invalid')
