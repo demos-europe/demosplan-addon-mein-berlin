@@ -64,13 +64,13 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
             return;
         }
         $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($newProcedure);
-        $hasProcedureShortNameSet = $this->communicationHelper->hasProcedureShortNameSet($newProcedure);
-        $dplanIdIsPresent = $this->communicationHelper->hasDplanIdSet($newProcedure);
+        $hasDistrictSet = $this->communicationHelper->hasDistrictSet($newProcedure);
+        $bplanIdIsPresent = $this->communicationHelper->hasBplanIdSet($newProcedure);
 
-        if ($isPublishedVal && $hasProcedureShortNameSet && !$dplanIdIsPresent) {
+        if ($isPublishedVal && $hasDistrictSet && !$bplanIdIsPresent) {
             $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - create new procedure entry at MeinBerlin');
-            // create new Procedure entry at MeinBerlin if procedure is publicly visible, has an procedureShortName set
-            // and has a pictogram set, but was not communicated to MeinBerlin previously (dplanIdIsPresent = false)
+            // create new Procedure entry at MeinBerlin if procedure is publicly visible, has a district set
+            // and has a pictogram set, but was not communicated to MeinBerlin previously (bplanIdIsPresent = false)
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
             $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
             // those can not be null as indirectly checked by methods beforehand
@@ -86,7 +86,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
 
             return;
         }
-        if ($dplanIdIsPresent) {
+        if ($bplanIdIsPresent) {
             $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - update existing procedure entry at MeinBerlin');
             $correspondingAddonEntity = $this->communicationHelper->getCorrespondingAddonEntity($newProcedure);
             $correspondingAddonOrgaRelation = $this->communicationHelper->getCorrespondingOrgaRelation($newProcedure);
@@ -103,7 +103,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $changeSet,
                 $isPublishedVal,
                 $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
-                $correspondingAddonEntity->getDplanId(),
+                $correspondingAddonEntity->getBplanId(),
                 $newProcedure->getId()
             );
 

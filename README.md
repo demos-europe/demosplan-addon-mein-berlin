@@ -80,7 +80,7 @@ A procedure is communicated to mein.berlin when **ALL** of the following conditi
 ### Initial Creation
 1. Procedure meets all communication conditions
 2. `MeinBerlinCreateProcedureService` sends POST request to mein.berlin
-3. mein.berlin returns a `dplanId` which is stored for future updates
+3. mein.berlin returns a `bplanId` which is stored for future updates
 4. Procedure is marked as communicated
 
 ### Updates

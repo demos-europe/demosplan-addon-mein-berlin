@@ -112,7 +112,7 @@ class MeinBerlinCreateProcedureService
                 $procedure->getSettings()->getPictogramCopyright(),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name =>
                 $procedure->getSettings()->getPictogramAltText(),
-            MeinBerlinAddonEntity::MEIN_BERLIN_PROCEDURE_SHORT_NAME => $correspondingAddonEntity->getProcedureShortName(),
+            MeinBerlinAddonEntity::MEIN_BERLIN_DISTRICT => $correspondingAddonEntity->getDistrict(),
             MeinBerlinAddonOrgaRelation::MEIN_BERLIN_ORGANISATION_ID => $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
             MeinBerlinAddonEntity::MEIN_BERLIN_IS_DRAFT => false,
         ];

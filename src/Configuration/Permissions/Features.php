@@ -43,11 +43,11 @@ class Features extends AbstractPermissionMeta
     }
 
     /**
-     * Allows to set a procedure related name used at meinBerlin to
-     * locate the procedure by mapping these names to linked districts
+     * Allows to set a district code used at meinBerlin to
+     * locate the procedure geographically in Berlin districts
      */
-    public static function feature_set_mein_berlin_procedure_short_name(): self
+    public static function feature_set_mein_berlin_district(): self
     {
-        return new self('feature_set_mein_berlin_procedure_short_name');
+        return new self('feature_set_mein_berlin_district');
     }
 }

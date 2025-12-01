@@ -61,7 +61,7 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
      * meinBerlin organisation id. If the old organisation id is in use already, an update should be prohibited.
      * @return MeinBerlinAddonEntity[]
      */
-    public function getProceduresOfOrgaWithExistingDplanId(MeinBerlinAddonOrgaRelation $orgaRelation): array
+    public function getProceduresOfOrgaWithExistingBplanId(MeinBerlinAddonOrgaRelation $orgaRelation): array
     {
         $orgaId = $orgaRelation->getOrga()?->getId();
         $procedureRepository = $this->getEntityManager()->getRepository(ProcedureInterface::class);
@@ -75,9 +75,9 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
         return $queryBuilder->select('addonEntity')
             ->from(MeinBerlinAddonEntity::class, 'addonEntity')
             ->where('addonEntity.procedure IN (:procedureIds)')
-            ->andWhere('addonEntity.dplanId != :emptyDplanId')
+            ->andWhere('addonEntity.bplanId != :emptyBplanId')
             ->setParameter('procedureIds', $proceduresOfOrga)
-            ->setParameter('emptyDplanId', '')
+            ->setParameter('emptyBplanId', '')
             ->getQuery()
             ->getResult();
     }
