@@ -19,11 +19,11 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Replace procedure_short_name with district field
  */
-final class Version20251128162000 extends AbstractMigration
+final class Version20251201130900 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Replace procedure_short_name field with district field (varchar 2) for mein.berlin.de district codes';
+        return 'Replace procedure_short_name field with district field (varchar 2) - schema change only';
     }
 
     public function up(Schema $schema): void
@@ -36,17 +36,18 @@ final class Version20251128162000 extends AbstractMigration
             return;
         }
 
-        // Check if column exists before renaming
+        // Check if old column exists
         $table = $schema->getTable('addon_mein_berlin_entity');
         if (!$table->hasColumn('procedure_short_name')) {
             $this->write('Column procedure_short_name does not exist, skipping migration');
             return;
         }
 
-        // Rename and resize column from procedure_short_name (varchar 255) to district (varchar 2)
+        // Drop old column and add new district column
+        $this->addSql('ALTER TABLE addon_mein_berlin_entity DROP COLUMN procedure_short_name');
         $this->addSql(
             'ALTER TABLE addon_mein_berlin_entity
-             CHANGE procedure_short_name district VARCHAR(2) NOT NULL DEFAULT \'\''
+             ADD COLUMN district VARCHAR(2) NOT NULL DEFAULT \'\' AFTER dplan_id'
         );
     }
 
@@ -60,17 +61,18 @@ final class Version20251128162000 extends AbstractMigration
             return;
         }
 
-        // Check if column exists before reverting
+        // Check if new column exists
         $table = $schema->getTable('addon_mein_berlin_entity');
         if (!$table->hasColumn('district')) {
             $this->write('Column district does not exist, skipping rollback');
             return;
         }
 
-        // Revert: rename and resize column back to procedure_short_name (varchar 255)
+        // Drop new column and restore old column
+        $this->addSql('ALTER TABLE addon_mein_berlin_entity DROP COLUMN district');
         $this->addSql(
             'ALTER TABLE addon_mein_berlin_entity
-             CHANGE district procedure_short_name VARCHAR(255) NOT NULL DEFAULT \'\''
+             ADD COLUMN procedure_short_name VARCHAR(255) NOT NULL DEFAULT \'\' AFTER dplan_id'
         );
     }
 
