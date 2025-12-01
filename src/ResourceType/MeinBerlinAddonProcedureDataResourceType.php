@@ -65,7 +65,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
     public function isCreateAllowed(): bool
     {
         return $this->permissionEvaluator
-            ->isPermissionEnabled(Features::feature_set_mein_berlin_procedure_short_name());
+            ->isPermissionEnabled(Features::feature_set_mein_berlin_district());
     }
 
     public function isDeleteAllowed(): bool
@@ -196,7 +196,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
     public function isAvailable(): bool
     {
         return $this->permissionEvaluator
-            ->isPermissionEnabled(Features::feature_set_mein_berlin_procedure_short_name());
+            ->isPermissionEnabled(Features::feature_set_mein_berlin_district());
     }
 
     public function isListAllowed(): bool
