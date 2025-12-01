@@ -86,7 +86,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             $changeSet,
             null,
             'meinBerlinOrganisationId',
-            'testDplanId',
+            'testBplanId',
             'testProcedureId',
         );
         self::assertCount(4, $expectedMessages);
@@ -106,7 +106,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             $changeSet,
             null,
             'meinBerlinOrganisationId',
-            'testDplanId',
+            'testBplanId',
             'testProcedureId',
         );
     }

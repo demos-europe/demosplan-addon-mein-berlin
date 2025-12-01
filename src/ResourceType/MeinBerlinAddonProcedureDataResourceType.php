@@ -322,7 +322,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 No update message will be sent to meinBerlin'
             );
             // still check if all conditions for a create message are fulfilled
-            // (viable shortName, publicPhase, pictogram and organisationRelation, but no dplanId)
+            // (viable district, publicPhase, pictogram and organisationRelation, but no bplanId)
             // to allow this field as a sort of retrigger if a previous create request failed
             // if a prev update failed is a different question - would be a real problem as its content is lost.
             $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();

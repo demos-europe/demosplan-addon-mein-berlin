@@ -110,7 +110,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                             [$meinBerlinAddonOrgaRelation, ['newMeinBerlinOrganisationId' => $meinBerlinOrganisationId]]
                         );
                         $alreadyEstablishedCommunications = $this->meinBerlinAddonOrgaRelationRepository
-                            ->getProceduresOfOrgaWithExistingDplanId($meinBerlinAddonOrgaRelation);
+                            ->getProceduresOfOrgaWithExistingBplanId($meinBerlinAddonOrgaRelation);
                         if (0 < count($alreadyEstablishedCommunications)) {
                             $alreadyEstablishedCommunicationProcedureIds = array_map(
                                 static fn(MeinBerlinAddonEntity $addonEntity) => $addonEntity->getProcedure()?->getId(),

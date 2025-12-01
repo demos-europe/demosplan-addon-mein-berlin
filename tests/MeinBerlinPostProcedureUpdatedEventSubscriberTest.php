@@ -70,7 +70,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
             ->method('checkProcedurePublicPhasePermissionsetNotHidden');
     }
 
-    public function testOnProcedureUpdateWithNoProcedureShortNameAndNoDplanId(): void
+    public function testOnProcedureUpdateWithNoDistrictAndNoBplanId(): void
     {
         $event = $this->createMock(PostProcedureUpdatedEventInterface::class);
         $procedure = $this->createMock(ProcedureInterface::class);
@@ -78,8 +78,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
         $event->method('getProcedureAfterUpdate')->willReturn($procedure);
         $this->communicationHelper->method('hasOrganisationIdSet')->willReturn(true);
         $this->communicationHelper->method('checkProcedurePublicPhasePermissionsetNotHidden')->willReturn(true);
-        $this->communicationHelper->method('hasProcedureShortNameSet')->willReturn(false);
-        $this->communicationHelper->method('hasDplanIdSet')->willReturn(false);
+        $this->communicationHelper->method('hasDistrictSet')->willReturn(false);
+        $this->communicationHelper->method('hasBplanIdSet')->willReturn(false);
 
         $this->createProcedureService->expects(self::never())->method('createMeinBerlinProcedure');
         $this->updateProcedureService->expects(self::never())->method('updateMeinBerlinProcedureEntry');
@@ -97,8 +97,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
         $this->communicationHelper->method('hasOrganisationIdSet')->willReturn(true);
         $this->communicationHelper->method('checkProcedurePublicPhasePermissionsetNotHidden')
             ->willReturn(true);
-        $this->communicationHelper->method('hasProcedureShortNameSet')->willReturn(true);
-        $this->communicationHelper->method('hasDplanIdSet')->willReturn(false);
+        $this->communicationHelper->method('hasDistrictSet')->willReturn(true);
+        $this->communicationHelper->method('hasBplanIdSet')->willReturn(false);
         $this->communicationHelper->method('getCorrespondingAddonEntity')->willReturn($addonEntity);
         $this->communicationHelper->method('getCorrespondingOrgaRelation')->willReturn($orgaRelation);
 
