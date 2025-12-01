@@ -1,14 +1,14 @@
 <template>
   <div v-if="isProcedureSettingsPage">
-    <h3 :class="prefixClass('font-bold')">
+    <h3>
       {{ Translator.trans('mein.berlin.interface') }}
     </h3>
 
     <component
       :is="demosplanUi.DpInlineNotification"
       v-if="!isCheckingBerlinOrgaId && (isProcedureTransmitted || !hasBerlinOrgaId)"
-      :class="prefixClass('mb-4')"
       :message="isProcedureTransmitted ? Translator.trans('mein.berlin.procedure.already.transmitted') : Translator.trans('mein.berlin.orga.id.missing.transmission.not.possible')"
+      class="mb-4"
       type="info"
     />
 
@@ -16,10 +16,10 @@
       :is="demosplanUi.DpCheckbox"
       id="interfaceFieldsToTransmit-checkbox"
       v-model="isInterfaceActivated"
-      :class="prefixClass('mt-4 mb-4')"
       :checked="isInterfaceActivated"
       :disabled="isProcedureTransmitted || !hasBerlinOrgaId"
       :label="{ text: Translator.trans('mein.berlin.interface.activation.label') }"
+      class="mt-4 mb-4"
       @change="onCheckboxChange"
     />
 
@@ -66,7 +66,6 @@
 
 <script>
 import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
-import { prefixClassMixin } from '@demos-europe/demosplan-ui'
 
 export default {
   name: 'MeinBerlinAdditionalFields',
@@ -74,8 +73,6 @@ export default {
   components: {
     MeinBerlinProcedurePictogram
   },
-
-  mixins: [prefixClassMixin],
 
   props: {
     additionalFieldOptions: {

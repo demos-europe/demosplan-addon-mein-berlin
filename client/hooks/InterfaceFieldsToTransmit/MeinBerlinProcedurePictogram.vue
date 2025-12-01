@@ -1,28 +1,28 @@
 <template>
-  <div :class="prefixClass('mt-4 mb-4')">
+  <div class="mt-4 mb-4">
     <component
       :is="demosplanUi.DpLabel"
-      :class="prefixClass('inline-block mb-0')"
       :text="Translator.trans('procedure.pictogram')"
+      class="inline-block mb-0"
       for="r_pictogram"
     />
 
     <!-- Display existing pictogram -->
     <div
       v-if="existingPictogramData"
-      :class="prefixClass('mt-4')"
+      class="mt-4"
     >
       <img
         :alt="pictogramAltTextValue || Translator.trans('procedure.pictogram')"
-        :class="prefixClass('layout__item w-1/6 pl-0 mb-4')"
         :src="getPictogramUrl(existingPictogramData.hash)"
+        class="layout__item w-1/6 pl-0 mb-4"
       >
       <component
         :is="demosplanUi.DpCheckbox"
         id="r_deletePictogram"
         v-model="deletePictogram"
         :label="{ text: Translator.trans('procedure.pictogram.delete') }"
-        :class="prefixClass('layout__item w-1/3 cursor-pointer weight--normal')"
+        class="layout__item w-1/3 cursor-pointer weight--normal"
         name="r_deletePictogram"
       />
       <a
@@ -36,7 +36,7 @@
 
     <!-- File upload -->
     <div v-else>
-      <p :class="prefixClass('lbl__hint')">
+      <p class="lbl__hint">
         {{ Translator.trans('text.procedure.edit.external.pictogram') }}
       </p>
       <component
@@ -61,10 +61,10 @@
       :is="demosplanUi.DpInput"
       id="r_pictogramCopyright"
       v-model="pictogramCopyrightValue"
-      :class="prefixClass('my-2')"
       :label="{
         text: Translator.trans('procedure.pictogram.copyright')
       }"
+      class="my-2"
       data-cy="procedure:pictogramCopyright"
       name="r_pictogramCopyright"
     />
@@ -73,11 +73,11 @@
       :is="demosplanUi.DpInput"
       id="r_pictogramAltText"
       v-model="pictogramAltTextValue"
-      :class="prefixClass('my-2')"
       :label="{
         text: Translator.trans('procedure.pictogram.altText'),
         tooltip: Translator.trans('procedure.pictogram.altText.toolTipp')
       }"
+      class="my-2"
       data-cy="procedure:pictogramAltText"
       name="r_pictogramAltText"
     />
@@ -85,12 +85,8 @@
 </template>
 
 <script>
-import { prefixClassMixin } from '@demos-europe/demosplan-ui'
-
 export default {
   name: 'MeinBerlinProcedurePictogram',
-
-  mixins: [prefixClassMixin],
 
   props: {
     demosplanUi: {
