@@ -7,7 +7,9 @@
     <component
       :is="demosplanUi.DpInlineNotification"
       v-if="!isCheckingBerlinOrgaId && (isProcedureTransmitted || !hasBerlinOrgaId)"
-      :message="isProcedureTransmitted ? Translator.trans('mein.berlin.procedure.already.transmitted') : Translator.trans('mein.berlin.orga.id.missing.transmission.not.possible')"
+      :message="isProcedureTransmitted
+        ? Translator.trans('mein.berlin.procedure.already.transmitted')
+        : Translator.trans('mein.berlin.orga.id.missing.transmission.not.possible')"
       class="mb-4"
       type="info"
     />
@@ -46,6 +48,7 @@
 
 <script>
 import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
+import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
 
 export default {
   name: 'MeinBerlinProcedureFields',
@@ -221,12 +224,9 @@ export default {
           item => item.relationships?.orga?.data?.id === this.organisationId
         )
 
-        // Check if Berlin orga ID is set (not null/empty)
-        this.hasBerlinOrgaId = Boolean(
-          orgaAddon?.attributes?.meinBerlinOrganisationId
-        )
-      } catch (error) {
-        console.error('Error checking addon organisation ID:', error)
+        this.hasBerlinOrgaId = Boolean(orgaAddon?.attributes?.meinBerlinOrganisationId)
+      } catch (e) {
+        console.error(e)
         this.hasBerlinOrgaId = false
       } finally {
         this.isCheckingBerlinOrgaId = false
@@ -237,43 +237,19 @@ export default {
       let meinBerlinOrgId = this.userMeinBerlinOrgId
 
       if (!meinBerlinOrgId && this.userOrgaId) {
-        meinBerlinOrgId = await this.fetchMeinBerlinOrgId(this.userOrgaId)
+        meinBerlinOrgId = await fetchMeinBerlinOrganisationId(
+          this.demosplanUi,
+          this.userOrgaId
+        )
       }
 
-      if (!meinBerlinOrgId) {
-        return
+      if (!meinBerlinOrgId) return
+
+      const code = this.orgIdToDistrictCode[String(meinBerlinOrgId).trim()]
+
+      if (code) {
+        this.$nextTick(() => this.onChange(code))
       }
-
-      const key = String(meinBerlinOrgId).trim()
-      const districtCode = this.orgIdToDistrictCode[key]
-
-      if (districtCode) {
-        this.$nextTick(() => {
-          this.onChange(districtCode)
-        })
-      }
-    },
-
-    async fetchMeinBerlinOrgId (orgaId) {
-      try {
-        const url = Routing.generate('api_resource_list', {
-          resourceType: 'MeinBerlinAddonOrganisation'
-        })
-
-        const response = await this.demosplanUi.dpApi.get(url, { include: 'orga' })
-
-        if (response.data?.data) {
-          const orgaRelation = response.data.data.find(item =>
-            item.relationships?.orga?.data?.id === orgaId
-          )
-
-          return orgaRelation?.attributes?.meinBerlinOrganisationId || null
-        }
-      } catch (err) {
-        console.error('[MeinBerlin] Failed to fetch mein.berlin organisation ID:', err)
-      }
-
-      return null
     },
 
     fetchResourceList () {
@@ -372,6 +348,6 @@ export default {
         this.autoSelectDistrict()
       }
     })
-  },
+  }
 }
 </script>

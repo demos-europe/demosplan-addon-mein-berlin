@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
+
 export default {
   name: 'MeinBerlinOrgaField',
 
@@ -123,7 +125,10 @@ export default {
       let meinBerlinOrgId = this.userMeinBerlinOrgId
 
       if (!meinBerlinOrgId && this.userOrgaId) {
-        meinBerlinOrgId = await this.fetchMeinBerlinOrgId(this.userOrgaId)
+        meinBerlinOrgId = await fetchMeinBerlinOrganisationId(
+          this.demosplanUi,
+          this.userOrgaId
+        )
       }
 
       if (!meinBerlinOrgId) {
@@ -135,28 +140,6 @@ export default {
       this.$nextTick(() => {
         this.onChange(value)
       })
-    },
-
-    async fetchMeinBerlinOrgId (orgaId) {
-      try {
-        const url = Routing.generate('api_resource_list', {
-          resourceType: 'MeinBerlinAddonOrganisation'
-        })
-
-        const response = await this.demosplanUi.dpApi.get(url, { include: 'orga' })
-
-        if (response.data?.data) {
-          const orgaRelation = response.data.data.find(item =>
-            item.relationships?.orga?.data?.id === orgaId
-          )
-
-          return orgaRelation?.attributes?.meinBerlinOrganisationId || null
-        }
-      } catch (err) {
-        console.error('[MeinBerlin] Failed to fetch mein.berlin organisation ID:', err)
-      }
-
-      return null
     },
 
     fetchResourceList () {
