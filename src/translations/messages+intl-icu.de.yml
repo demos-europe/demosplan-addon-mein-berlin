@@ -25,7 +25,7 @@ mein.berlin.communication.create.error: "Beim Versuch, Informationen zu diesem V
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
 mein.berlin.communication.create.success: "Dieses Verfahren wurde erfolgreich an mein-berlin übertragen."
 mein.berlin.interface: "Schnittstelle mein.berlin.de"
-mein.berlin.interface.activation.label: "B-Plan-Verfahren auf mein.berlin.de verlinken"
+mein.berlin.interface.activation: "Verfahren auf mein.berlin.de verlinken"
 mein.berlin.pictogram.file.to.large: "Das Verfahrenspiktogramm konnte nicht an mein-berlin übertragen werden, da die maximale Datei-Größe von 5 MB überschritten wurde."
 mein.berlin.procedure.short.name: "Bebauungsplannummer"
 mein.berlin.procedure.already.transmitted: "Das Verfahren wurde bereits an <strong>mein.berlin.de</strong> übermittelt"
