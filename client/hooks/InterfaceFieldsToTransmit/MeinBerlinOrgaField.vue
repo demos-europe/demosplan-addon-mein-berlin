@@ -214,24 +214,37 @@ export default {
     }
   },
 
-  mounted () {
-    if (!this.additionalFieldOptions.length) {
-      this.fetchResourceList().then(() => {
-        this.$emit('addonEvent:emit', { name: 'resourceList:loaded', payload: this.list })
-        this.getItemByRelationshipId()
+  mounted() {
+    const hasProvidedOptions = this.additionalFieldOptions.length > 0
+    const hasNoCurrentValue =
+      this.currentValue === null ||
+      this.currentValue === ''
 
-        if (!this.currentValue) {
-          this.autoSelectOrga()
-        }
-      })
-    } else {
+    // Case: options already provided
+    if (hasProvidedOptions) {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
 
-      if (!this.currentValue) {
+      if (hasNoCurrentValue) {
         this.autoSelectOrga()
       }
+
+      return
     }
+
+    // Case: options NOT provided → fetch list
+    this.fetchResourceList().then(() => {
+      this.$emit('addonEvent:emit', {
+        name: 'resourceList:loaded',
+        payload: this.list
+      })
+
+      this.getItemByRelationshipId()
+
+      if (hasNoCurrentValue) {
+        this.autoSelectOrga()
+      }
+    })
   }
 }
 </script>

@@ -342,21 +342,9 @@ export default {
     }
   },
 
-  mounted () {
-    if (!this.additionalFieldOptions.length) {
-      // Fetch resource list AND check Berlin org ID in parallel
-      Promise.all([
-        this.fetchResourceList(),
-        this.checkBerlinOrgaId()
-      ]).then(() => {
-        this.$emit('addonEvent:emit', { name: 'resourceList:loaded', payload: this.list })
-        this.getItemByRelationshipId()
-
-        if (!this.currentValue) {
-          this.autoSelectDistrict()
-        }
-      })
-    } else {
+  mounted() {
+    // Case: options are already provided → no need to fetch from backend
+    if (this.additionalFieldOptions.length > 0) {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
       this.checkBerlinOrgaId()
@@ -364,7 +352,26 @@ export default {
       if (!this.currentValue) {
         this.autoSelectDistrict()
       }
+
+      return
     }
-  }
+
+    // Case: options NOT provided → fetch list + orgaId state
+    Promise.all([
+      this.fetchResourceList(),
+      this.checkBerlinOrgaId()
+    ]).then(() => {
+      this.$emit('addonEvent:emit', {
+        name: 'resourceList:loaded',
+        payload: this.list
+      })
+
+      this.getItemByRelationshipId()
+
+      if (!this.currentValue) {
+        this.autoSelectDistrict()
+      }
+    })
+  },
 }
 </script>
