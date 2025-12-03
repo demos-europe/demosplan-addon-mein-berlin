@@ -65,7 +65,7 @@ parameters:
 A procedure is communicated to mein.berlin when **ALL** of the following conditions are met:
 
 1. **Organization ID**: An mein.berlin organization ID has been assigned to the procedure's organization
-2. **Procedure Short Name**: A "Bebauungsplannummer" (procedure short name) has been set
+2. **District**: A Berlin district has been selected for the procedure
 3. **Public Phase**: The procedure is in a publicly visible phase (permission set read/write, not hidden)
 4. **Pictogram**: A valid pictogram has been uploaded and meets size/resolution requirements
 
