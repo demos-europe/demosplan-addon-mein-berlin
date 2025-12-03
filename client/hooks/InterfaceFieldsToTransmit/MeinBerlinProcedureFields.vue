@@ -20,7 +20,7 @@
       v-model="isInterfaceActivated"
       :checked="isInterfaceActivated"
       :disabled="isProcedureTransmitted || !hasBerlinOrgaId"
-      :label="{ text: Translator.trans('mein.berlin.interface.activation.label') }"
+      :label="{ text: Translator.trans('mein.berlin.interface.activation') }"
       class="mt-4 mb-4"
       @change="onCheckboxChange"
     />
