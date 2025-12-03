@@ -162,7 +162,7 @@ export default {
         },
         procedure: {
           attribute: 'district',
-          label: Translator.trans('mein.berlin.district'),
+          label: Translator.trans('mein.berlin.district.label'),
           resourceType: 'MeinBerlinAddonProcedureData',
           tooltip: Translator.trans('mein.berlin.district.tooltip')
         }

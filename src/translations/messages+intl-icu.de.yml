@@ -2,7 +2,7 @@ mein.berlin.communication.create.error: "Beim Versuch, Informationen zu diesem V
 mein.berlin.communication.create.success: "Dieses Verfahren wurde erfolgreich an mein-berlin übertragen."
 mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-berlin übermittelt werden."
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
-mein.berlin.district: "Bezirk"
+mein.berlin.district.label: "Verortung mein.berlin.de (Kierzradar)"
 mein.berlin.district.office:
     administration: "Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen"
     charlottenburg_wilmersdorf: "Bezirksamt Charlottenburg-Wilmersdorf"
