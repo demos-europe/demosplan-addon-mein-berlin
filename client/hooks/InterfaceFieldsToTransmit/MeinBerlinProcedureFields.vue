@@ -186,8 +186,8 @@ export default {
     },
 
     isProcedureTransmitted () {
-      const dplanId = this.item?.attributes?.dplanId
-      return Boolean(dplanId)
+      const bplanId = this.item?.attributes?.bplanId
+      return Boolean(bplanId)
     },
 
     label () {
