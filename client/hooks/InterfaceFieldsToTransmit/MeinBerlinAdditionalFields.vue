@@ -234,6 +234,7 @@ export default {
       if (this.relationshipKey !== 'procedure' || !this.organisationId) {
         this.hasBerlinOrgaId = false
         this.isCheckingBerlinOrgaId = false
+
         return
       }
 
