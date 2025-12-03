@@ -15,7 +15,6 @@
     <component
       :is="demosplanUi.DpCheckbox"
       id="interfaceFieldsToTransmit-checkbox"
-      v-model="isInterfaceActivated"
       :checked="isInterfaceActivated"
       :disabled="isProcedureTransmitted || !hasBerlinOrgaId"
       :label="{ text: Translator.trans('mein.berlin.interface.activation') }"
