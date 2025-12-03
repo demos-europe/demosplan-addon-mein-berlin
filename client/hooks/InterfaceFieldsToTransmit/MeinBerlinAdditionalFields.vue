@@ -162,10 +162,10 @@ export default {
           tooltip: Translator.trans('mein.berlin.organisation.id.tooltip')
         },
         procedure: {
-          attribute: 'procedureShortName',
-          label: Translator.trans('mein.berlin.procedure.short.name'),
+          attribute: 'district',
+          label: Translator.trans('mein.berlin.district'),
           resourceType: 'MeinBerlinAddonProcedureData',
-          tooltip: Translator.trans('mein.berlin.procedure.short.name.tooltip')
+          tooltip: Translator.trans('mein.berlin.district.tooltip')
         }
       }
     }

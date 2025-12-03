@@ -48,23 +48,23 @@ class MeinBerlinUpdateProcedureService
     /**
      * @throws MeinBerlinCommunicationException
      */
-    public function updateProcedureShortNameByResourceType(
+    public function updateDistrictByResourceType(
         MeinBerlinAddonEntity $changedEntity,
         string $meinBerlinOrganisationId,
-        string $dplanId,
+        string $bplanId,
         string $procedureId
     ): void
     {
         $fieldsToUpdate = [];
         $fieldsToUpdate[
-            MeinBerlinAddonEntity::MEIN_BERLIN_PROCEDURE_SHORT_NAME
-        ] = $changedEntity->getProcedureShortName();
+            MeinBerlinAddonEntity::MEIN_BERLIN_DISTRICT
+        ] = $changedEntity->getDistrict();
 
         try {
             $this->procedureCommunicator->updateProcedure(
                 $fieldsToUpdate,
                 $meinBerlinOrganisationId,
-                $dplanId,
+                $bplanId,
                 $procedureId
             );
             $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');
@@ -77,7 +77,7 @@ class MeinBerlinUpdateProcedureService
 
     }
 
-    /** This Method will not include the { @link MeinBerlinAddonEntity::$procedureShortName }
+    /** This Method will not include the { @link MeinBerlinAddonEntity::$district }
      * as those changes will be sent in a separate PATCH request triggert by the corresponding
      * { @link MeinBerlinAddonProcedureDataResourceType }
      *
@@ -87,7 +87,7 @@ class MeinBerlinUpdateProcedureService
         array $changeSet,
         ?bool $isPublished,
         string $meinBerlinOrganisationId,
-        string $dplanId,
+        string $bplanId,
         string $procedureId
     ): void
     {
@@ -118,7 +118,7 @@ class MeinBerlinUpdateProcedureService
                 $this->procedureCommunicator->updateProcedure(
                     $fieldsToUpdate,
                     $meinBerlinOrganisationId,
-                    $dplanId,
+                    $bplanId,
                     $procedureId
                 );
                 $this->messageBag->add('confirm', 'mein.berlin.communication.update.success');

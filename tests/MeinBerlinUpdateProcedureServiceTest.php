@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
 
+use DateTime;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
@@ -86,7 +87,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             $changeSet,
             null,
             'meinBerlinOrganisationId',
-            'testDplanId',
+            'testBplanId',
             'testProcedureId',
         );
         self::assertCount(4, $expectedMessages);
@@ -106,7 +107,7 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
             $changeSet,
             null,
             'meinBerlinOrganisationId',
-            'testDplanId',
+            'testBplanId',
             'testProcedureId',
         );
     }
@@ -141,8 +142,8 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
         $exptectedRsult = [
             RelevantProcedurePropertiesForMeinBerlinCommunication::name->name => 'newName',
             RelevantProcedurePropertiesForMeinBerlinCommunication::description->name => 'newDesc',
-            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name => (new DateTime())->format('Y-m-d'),
-            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name => (new DateTime())->format('Y-m-d'),
+            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name => (new \DateTime())->format('Y-m-d'),
+            RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name => (new \DateTime())->format('Y-m-d'),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name => 'newStatus',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name => '',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name => 'newAlt'
