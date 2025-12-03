@@ -45,18 +45,18 @@ class MeinBerlinCommunicationHelper
         return false;
     }
 
-    public function hasDplanIdSet(ProcedureInterface $procedure): bool
+    public function hasBplanIdSet(ProcedureInterface $procedure): bool
     {
         $addonEntity = $this->addonEntityRepository->getByProceduerId($procedure->getId());
 
-        return null !== $addonEntity && '' !== $addonEntity->getDplanId();
+        return null !== $addonEntity && '' !== $addonEntity->getBplanId();
     }
 
-    public function hasProcedureShortNameSet(ProcedureInterface $procedure): bool
+    public function hasDistrictSet(ProcedureInterface $procedure): bool
     {
         $addonEntity = $this->addonEntityRepository->getByProceduerId($procedure->getId());
 
-        return null !== $addonEntity && '' !== $addonEntity->getProcedureShortName();
+        return null !== $addonEntity && '' !== $addonEntity->getDistrict();
     }
 
     public function getCorrespondingAddonEntity(ProcedureInterface $procedure): ?MeinBerlinAddonEntity

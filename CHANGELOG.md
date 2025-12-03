@@ -1,6 +1,16 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **feat BEAA2-28**: Replace B-Plan number field with district dropdown
+  - Replace `procedureShortName` (VARCHAR 255) with `district` (VARCHAR 2) field
+  - Add migration to rename column and populate district from organisation mapping
+  - Map 12 Berlin districts + 1 city-wide option using organisation IDs
+  - Add special migration for 3 production procedures requiring manual district mapping
+  - Rename `dplanId` to `bplanId` for API consistency with mein.berlin URL parameter
+  - Update Vue component to use district field instead of procedureShortName
+  - Remove obsolete translation keys and update to district-based translations
+  - Fix test suite bootstrap configuration and update tests for new field names
+
 - **feat BEAA2-27**: Add explicit interface activation control for mein.berlin.de data transmission
   - Add `isInterfaceActivated` boolean field to `MeinBerlinAddonEntity` to control data transmission
   - Replace pictogram requirement with explicit activation flag

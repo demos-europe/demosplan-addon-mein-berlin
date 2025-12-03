@@ -21,7 +21,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'addon_mein_berlin_entity')]
 class MeinBerlinAddonEntity implements UuidEntityInterface
 {
-    public const MEIN_BERLIN_PROCEDURE_SHORT_NAME = 'bplan_id';
+    public const MEIN_BERLIN_DISTRICT = 'district';
     public const MEIN_BERLIN_IS_DRAFT = 'is_draft';
 
     #[ORM\Column(type: 'string', length: 36, nullable: false, options:['fixed' => true])]
@@ -34,11 +34,11 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
     #[ORM\JoinColumn(name: 'procedure_id', referencedColumnName: '_p_id', nullable: false)]
     private ?ProcedureInterface $procedure = null;
 
-    #[ORM\Column(name: 'dplan_id', length: 255, type: 'string', nullable: false)]
-    private string $dplanId = '';
+    #[ORM\Column(name: 'bplan_id', length: 255, type: 'string', nullable: false)]
+    private string $bplanId = '';
 
-    #[ORM\Column(name: 'procedure_short_name', length: 255, type: 'string', nullable: false)]
-    private string $procedureShortName = '';
+    #[ORM\Column(name: 'district', length: 2, type: 'string', nullable: false)]
+    private string $district = '';
 
     #[ORM\Column(name: 'is_interface_activated', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $isInterfaceActivated = false;
@@ -63,24 +63,24 @@ class MeinBerlinAddonEntity implements UuidEntityInterface
         $this->procedure = $procedure;
     }
 
-    public function getDplanId(): string
+    public function getBplanId(): string
     {
-        return $this->dplanId;
+        return $this->bplanId;
     }
 
-    public function setDplanId(string $dplanId): void
+    public function setBplanId(string $bplanId): void
     {
-        $this->dplanId = $dplanId;
+        $this->bplanId = $bplanId;
     }
 
-    public function getProcedureShortName(): string
+    public function getDistrict(): string
     {
-        return $this->procedureShortName;
+        return $this->district;
     }
 
-    public function setProcedureShortName(string $procedureShortName): void
+    public function setDistrict(string $district): void
     {
-        $this->procedureShortName = $procedureShortName;
+        $this->district = $district;
     }
 
     public function getIsInterfaceActivated(): bool
