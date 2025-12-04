@@ -15,7 +15,13 @@
   - Add `isInterfaceActivated` boolean field to `MeinBerlinAddonEntity` to control data transmission
   - Replace pictogram requirement with explicit activation flag
   - Migration automatically activates interface for already transmitted procedures (with dplan_id)
+  - Group mein-berlin fields together in the 'Verfahrensschritt Öffentlichkeit' section
   - Add UI checkbox with German translations for activation control
+  - Disable checkbox if procedure has already been transmitted, add notification 
+  - Disable checkbox if Berlin OrgaId is missing, add notification 
+  - Add pictogram-Vue component (not a required field anymore)
+  - Rename the addon.additional.field hook to interface.fields.to.transmit
+  - Rename MeinBerlinAdditionalField to MeinBerlinAdditionalFields (there are more than 1 field now)
 
 - **chore**: Add release.sh script to automate version releases
   - Updates CHANGELOG.md, composer.json, and package.json with new version
