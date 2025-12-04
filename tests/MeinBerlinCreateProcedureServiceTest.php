@@ -69,8 +69,8 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
         $this->procedure->method('getCurrentSlug')->willReturn($currentSlug);
 
         $this->correspondingAddonEntity = $this->createMock(MeinBerlinAddonEntity::class);
-        $this->correspondingAddonEntity->method('getDplanId')->willReturn('dplanId');
-        $this->correspondingAddonEntity->method('getProcedureShortName')->willReturn('shortName');
+        $this->correspondingAddonEntity->method('getBplanId')->willReturn('bplanId');
+        $this->correspondingAddonEntity->method('getDistrict')->willReturn('mi');
 
         $this->correspondingOrgaRelation = $this->createMock(MeinBerlinAddonOrgaRelation::class);
         $this->correspondingOrgaRelation->method('getMeinBerlinOrganisationId')->willReturn('organisationId');
@@ -162,7 +162,7 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name => 'coordinate',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_copyright->name => 'copyright',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name => 'altText',
-            MeinBerlinAddonEntity::MEIN_BERLIN_PROCEDURE_SHORT_NAME => 'shortName',
+            MeinBerlinAddonEntity::MEIN_BERLIN_DISTRICT => 'mi',
             MeinBerlinAddonOrgaRelation::MEIN_BERLIN_ORGANISATION_ID => 'organisationId',
             MeinBerlinAddonEntity::MEIN_BERLIN_IS_DRAFT => false,
         ];

@@ -15,10 +15,9 @@
     <component
       :is="demosplanUi.DpCheckbox"
       id="interfaceFieldsToTransmit-checkbox"
-      v-model="isInterfaceActivated"
       :checked="isInterfaceActivated"
       :disabled="isProcedureTransmitted || !hasBerlinOrgaId"
-      :label="{ text: Translator.trans('mein.berlin.interface.activation.label') }"
+      :label="{ text: Translator.trans('mein.berlin.interface.activation') }"
       class="mt-4 mb-4"
       @change="onCheckboxChange"
     />
@@ -162,10 +161,10 @@ export default {
           tooltip: Translator.trans('mein.berlin.organisation.id.tooltip')
         },
         procedure: {
-          attribute: 'procedureShortName',
-          label: Translator.trans('mein.berlin.procedure.short.name'),
+          attribute: 'district',
+          label: Translator.trans('mein.berlin.district.label'),
           resourceType: 'MeinBerlinAddonProcedureData',
-          tooltip: Translator.trans('mein.berlin.procedure.short.name.tooltip')
+          tooltip: Translator.trans('mein.berlin.district.tooltip')
         }
       }
     }
@@ -207,8 +206,8 @@ export default {
     },
 
     isProcedureTransmitted () {
-      const dplanId = this.item?.attributes?.dplanId
-      return Boolean(dplanId)
+      const bplanId = this.item?.attributes?.bplanId
+      return Boolean(bplanId)
     },
 
     label () {
@@ -234,6 +233,7 @@ export default {
       if (this.relationshipKey !== 'procedure' || !this.organisationId) {
         this.hasBerlinOrgaId = false
         this.isCheckingBerlinOrgaId = false
+
         return
       }
 

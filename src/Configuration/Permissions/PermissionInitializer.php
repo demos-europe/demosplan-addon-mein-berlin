@@ -54,7 +54,7 @@ class PermissionInitializer implements PermissionInitializerInterface
         );
 
         $permissionCollection->configurePermissionInstance(
-            Features::feature_set_mein_berlin_procedure_short_name(),
+            Features::feature_set_mein_berlin_district(),
             PermissionConditionBuilder::start()
                 ->enableIfProcedureOwnedViaOrganisation(
                 self::PLANNING_ROLES_SET, $this->procedureRestricedAccess
