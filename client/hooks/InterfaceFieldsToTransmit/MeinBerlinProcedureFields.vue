@@ -49,6 +49,39 @@
 import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
 import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
 
+// District options for Berlin districts
+const DISTRICT_OPTIONS = [
+  { label: Translator.trans('mein.berlin.district.gesamtstädtisch'), value: 'be' },
+  { label: Translator.trans('mein.berlin.district.mitte'), value: 'mi' },
+  { label: Translator.trans('mein.berlin.district.friedrichshain_kreuzberg'), value: 'fk' },
+  { label: Translator.trans('mein.berlin.district.pankow'), value: 'pa' },
+  { label: Translator.trans('mein.berlin.district.charlottenburg_wilmersdorf'), value: 'cw' },
+  { label: Translator.trans('mein.berlin.district.spandau'), value: 'sp' },
+  { label: Translator.trans('mein.berlin.district.steglitz_zehlendorf'), value: 'sz' },
+  { label: Translator.trans('mein.berlin.district.tempelhof_schoeneberg'), value: 'ts' },
+  { label: Translator.trans('mein.berlin.district.neukoelln'), value: 'nk' },
+  { label: Translator.trans('mein.berlin.district.treptow_koepenick'), value: 'tk' },
+  { label: Translator.trans('mein.berlin.district.marzahn_hellersdorf'), value: 'mh' },
+  { label: Translator.trans('mein.berlin.district.lichtenberg'), value: 'li' },
+  { label: Translator.trans('mein.berlin.district.reinickendorf'), value: 'rd' }
+]
+
+// Mapping mein.berlin organization ID to district short code
+const ORG_ID_TO_DISTRICT_CODE = {
+  '16': 'mi',
+  '28': 'fk',
+  '20': 'pa',
+  '27': 'cw',
+  '26': 'sp',
+  '32': 'sz',
+  '24': 'ts',
+  '30': 'nk',
+  '15': 'tk',
+  '25': 'mh',
+  '29': 'li',
+  '31': 'rd'
+}
+
 export default {
   name: 'MeinBerlinProcedureFields',
 
@@ -122,39 +155,8 @@ export default {
       isInterfaceActivated: false,
       item: null,
       list: null,
-
-      // District codes for procedure mode
-      districtOptions: [
-        { label: Translator.trans('mein.berlin.district.gesamtstädtisch'), value: 'be' },
-        { label: Translator.trans('mein.berlin.district.mitte'), value: 'mi' },
-        { label: Translator.trans('mein.berlin.district.friedrichshain_kreuzberg'), value: 'fk' },
-        { label: Translator.trans('mein.berlin.district.pankow'), value: 'pa' },
-        { label: Translator.trans('mein.berlin.district.charlottenburg_wilmersdorf'), value: 'cw' },
-        { label: Translator.trans('mein.berlin.district.spandau'), value: 'sp' },
-        { label: Translator.trans('mein.berlin.district.steglitz_zehlendorf'), value: 'sz' },
-        { label: Translator.trans('mein.berlin.district.tempelhof_schoeneberg'), value: 'ts' },
-        { label: Translator.trans('mein.berlin.district.neukoelln'), value: 'nk' },
-        { label: Translator.trans('mein.berlin.district.treptow_koepenick'), value: 'tk' },
-        { label: Translator.trans('mein.berlin.district.marzahn_hellersdorf'), value: 'mh' },
-        { label: Translator.trans('mein.berlin.district.lichtenberg'), value: 'li' },
-        { label: Translator.trans('mein.berlin.district.reinickendorf'), value: 'rd' }
-      ],
-
-      // Mapping mein.berlin org ID -> district short code
-      orgIdToDistrictCode: {
-        '16': 'mi',
-        '28': 'fk',
-        '20': 'pa',
-        '27': 'cw',
-        '26': 'sp',
-        '32': 'sz',
-        '24': 'ts',
-        '30': 'nk',
-        '15': 'tk',
-        '25': 'mh',
-        '29': 'li',
-        '31': 'rd'
-      }
+      districtOptions: DISTRICT_OPTIONS,
+      orgIdToDistrictCode: ORG_ID_TO_DISTRICT_CODE
     }
   },
 
@@ -162,14 +164,9 @@ export default {
     addonPayload () {
       const attributes = {}
 
-      // Only send a value if it's actually set
-      if (this.currentValue !== null && this.currentValue !== '') {
-        attributes.district = this.currentValue.toString()
-      } else if (this.initValue !== null && this.initValue !== '') {
-        attributes.district = this.initValue.toString()
-      } else {
-        attributes.district = ''
-      }
+      // Use current value, fallback to init value, or empty string
+      const value = this.currentValue ?? this.initValue ?? ''
+      attributes.district = value ? String(value) : ''
 
       // Add isInterfaceActivated attribute for procedure relationship
       attributes.isInterfaceActivated = this.isInterfaceActivated
