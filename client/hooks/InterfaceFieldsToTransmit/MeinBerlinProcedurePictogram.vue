@@ -17,18 +17,19 @@
         :src="getPictogramUrl(existingPictogramData.hash)"
         class="layout__item w-1/6 pl-0 mb-4"
       >
-      <span class="layout__item w-1/3">
+      <span class="layout__item w-1/3 inline-flex items-center">
         <a
           :href="getFileUrl(existingPictogramData.hash)"
           target="_blank"
           rel="noopener"
-          class="o-link--default"
+          class="o-link--default truncate max-w-full"
+          :title="existingPictogramData.name"
         >
           {{ existingPictogramData.name }}
         </a>
         <button
           type="button"
-          class="btn-icns m-0 ml-2"
+          class="btn-icns m-0 ml-2 flex-shrink-0"
           :aria-label="Translator.trans('delete')"
           @click="handleDelete"
         >
