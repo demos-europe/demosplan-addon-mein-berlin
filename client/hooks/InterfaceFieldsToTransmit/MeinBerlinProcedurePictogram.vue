@@ -28,7 +28,7 @@
         </a>
         <button
           type="button"
-          class="btn-icns u-m-0 u-ml-0_5"
+          class="btn-icns m-0 ml-2"
           :aria-label="Translator.trans('delete')"
           @click="handleDelete"
         >
