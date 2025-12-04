@@ -24,7 +24,7 @@ mein.berlin.error.update.organisation.id.for.established.communication: "Die Org
 mein.berlin.error.create.access.control.permission: "Eine für mein-berlin notwendige Erweiterung konnte nicht aktiviert werden."
 mein.berlin.interface: "Schnittstelle mein.berlin.de"
 mein.berlin.interface.activation: "Verfahren auf mein.berlin.de verlinken"
-mein.berlin.orga.id.missing.transmission.not.possible: "Ihrer Organisation wurde von der Mandanten-Administration noch keine ID zugeteilt. Wenden Sie sich bitte an diese, damit Sie Verfahren an <strong>mein.berlin.de</strong> übermitteln können."
+mein.berlin.organisation.id.missing.transmission.not.possible: "Ihrer Organisation wurde von der Mandanten-Administration noch keine ID zugeteilt. Wenden Sie sich bitte an diese, damit Sie Verfahren an <strong>mein.berlin.de</strong> übermitteln können."
 mein.berlin.organisation.id: "mein.berlin.de Organisations-ID"
 mein.berlin.organisation.id.missing: "Ihrer Organisation wurde von der Mandanten-Administration noch keine ID zugeteilt."
 mein.berlin.organisation.id.tooltip: "Bitte wählen Sie aus der Liste den Bezirk aus, in dem sich der Bebauungsplan befindet"

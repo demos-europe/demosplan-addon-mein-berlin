@@ -7,7 +7,7 @@
     <component
       :is="demosplanUi.DpInlineNotification"
       v-if="!isCheckingBerlinOrgaId && (isProcedureTransmitted || !hasBerlinOrgaId)"
-      :message="isProcedureTransmitted ? Translator.trans('mein.berlin.procedure.already.transmitted') : Translator.trans('mein.berlin.orga.id.missing.transmission.not.possible')"
+      :message="isProcedureTransmitted ? Translator.trans('mein.berlin.procedure.already.transmitted') : Translator.trans('mein.berlin.organisation.id.missing.transmission.not.possible')"
       class="mb-4"
       type="info"
     />
