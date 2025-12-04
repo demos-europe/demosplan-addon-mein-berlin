@@ -1,7 +1,7 @@
 <template>
   <component
     :is="demosplanUi.DpSelect"
-    id="meinBerlinOrga-orgSelect"
+    id="interfaceFieldsToTransmit-orgSelect"
     v-model="currentValue"
     :data-cy="`${resourceType}:field`"
     :label="{

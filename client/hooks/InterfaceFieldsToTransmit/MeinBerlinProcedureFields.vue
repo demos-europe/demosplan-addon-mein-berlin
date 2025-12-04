@@ -16,7 +16,7 @@
 
     <component
       :is="demosplanUi.DpCheckbox"
-      id="meinBerlinProcedure-checkbox"
+      id="interfaceFieldsToTransmit-checkbox"
       v-model="isInterfaceActivated"
       :checked="isInterfaceActivated"
       :disabled="isProcedureTransmitted || !hasBerlinOrgaId"
@@ -27,7 +27,7 @@
 
     <component
       :is="demosplanUi.DpSelect"
-      id="meinBerlinProcedure-districtSelect"
+      id="interfaceFieldsToTransmit-districtSelect"
       v-model="currentValue"
       :label="{ text: label, tooltip }"
       :options="districtOptions"

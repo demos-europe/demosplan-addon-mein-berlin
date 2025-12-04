@@ -74,12 +74,6 @@ export default {
       validator: (prop) => ['orga', 'procedure'].includes(prop)
     },
 
-    required: {
-      type: Boolean,
-      required: false,
-      default: false
-    },
-
     userMeinBerlinOrgId: {
       type: [String, Number],
       required: false,
