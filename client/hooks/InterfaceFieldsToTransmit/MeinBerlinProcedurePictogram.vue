@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-4 mb-4">
+  <div class="my-4">
     <component
       :is="demosplanUi.DpLabel"
       :text="Translator.trans('procedure.pictogram')"
