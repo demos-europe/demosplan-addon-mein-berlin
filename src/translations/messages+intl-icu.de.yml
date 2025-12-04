@@ -52,7 +52,7 @@ mein.berlin.pictogram.error.dimensions: "Die Bildabmessungen sind zu klein. Mini
 mein.berlin.pictogram.error.invalid: "Die Datei konnte nicht als Bild geladen werden."
 mein.berlin.pictogram.delete.blocked: "Das Bild kann nicht gelöscht werden, solange die mein.berlin.de-Kommunikation aktiv ist."
 mein.berlin.pictogram.required: "Ein Verfahrenspiktogramm ist erforderlich, wenn die mein.berlin.de-Kommunikation aktiv ist."
-mein.berlin.pictogram.remove.instruction: "Bitte entfernen Sie die hochgeladene Datei und laden Sie ein Bild mit den richtigen Abmessungen hoch."
+mein.berlin.pictogram.remove.instruction: "Bitte laden Sie ein Bild mit den richtigen Abmessungen hoch."
 mein.berlin.procedure.already.transmitted: "Das Verfahren wurde bereits an <strong>mein.berlin.de</strong> übermittelt"
 mein.berlin.rss.feed.title: "Beteiligen Sie sich an unseren aktuellen Bebauungsplanverfahren!"
 mein.berlin.rss.feed.description: "Aktuelle Bebauungsplanverfahren { organisation }"
