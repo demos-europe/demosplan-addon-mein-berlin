@@ -38,6 +38,7 @@
       :is="$options.components.MeinBerlinProcedurePictogram"
       :demosplan-ui="demosplanUi"
       :existing-pictogram="existingPictogram"
+      :has-berlin-orga-id="hasBerlinOrgaId"
       :pictogram-alt-text="pictogramAltText"
       :pictogram-copyright="pictogramCopyright"
       :relationship-id="relationshipId"

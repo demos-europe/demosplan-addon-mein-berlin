@@ -73,9 +73,11 @@
       :label="{
         text: Translator.trans('procedure.pictogram.copyright')
       }"
+      :readonly="!hasBerlinOrgaId"
       class="my-2"
       data-cy="procedure:pictogramCopyright"
       name="r_pictogramCopyright"
+      @focus="handleInputFocus"
     />
 
     <component
@@ -86,9 +88,11 @@
         text: Translator.trans('procedure.pictogram.altText'),
         tooltip: Translator.trans('procedure.pictogram.altText.toolTipp')
       }"
+      :readonly="!hasBerlinOrgaId"
       class="my-2"
       data-cy="procedure:pictogramAltText"
       name="r_pictogramAltText"
+      @focus="handleInputFocus"
     />
 
     <!-- Hidden input for form submission when pictogram is marked for deletion -->
@@ -120,6 +124,12 @@ export default {
       type: Object,
       required: false,
       default: null
+    },
+
+    hasBerlinOrgaId: {
+      type: Boolean,
+      required: true,
+      default: false
     },
 
     pictogramAltText: {
@@ -173,7 +183,20 @@ export default {
       }
     },
 
+    handleInputFocus () {
+      if (!this.hasBerlinOrgaId) {
+        dplan.notify.error(Translator.trans('mein.berlin.organisation.id.missing'))
+      }
+    },
+
     async handleUploadSuccess (fileInfo) {
+      if (!this.hasBerlinOrgaId) {
+        dplan.notify.error(Translator.trans('mein.berlin.organisation.id.missing'))
+        await this.$nextTick()
+        this.removeInvalidFile()
+        return
+      }
+
       try {
         // First check if the file type is valid
         const validFormats = ['image/png', 'image/jpeg', 'image/gif']
