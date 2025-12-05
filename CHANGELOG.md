@@ -1,6 +1,13 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **feat BEAA2-29**: Validation for the mein.berlin pictogram upload feature
+  - Validate dimensions and format: only PNG, JPEG, and GIF files are accepted, min. 500x300px
+  - Validate in real-time: Checks happen immediately after upload via @upload-success event
+  - Load Image: Uses new Image() API to validate actual image dimensions from the server
+  - Remove invalid file, add error and warning notifications
+  - Prevent uploading pictogram, copyright- and alt text if Berlin oragId missing, add error notification
+
 - **feat BEAA2-28**: Replace B-Plan number field with district dropdown
   - Replace `procedureShortName` (VARCHAR 255) with `district` (VARCHAR 2) field
   - Add migration to rename column and populate district from organisation mapping
@@ -10,6 +17,8 @@
   - Update Vue component to use district field instead of procedureShortName
   - Remove obsolete translation keys and update to district-based translations
   - Fix test suite bootstrap configuration and update tests for new field names
+  - Block district selection in onChange() when !hasBerlinOrgaIdand reset dropdown to placeholder after
+    invalid selection attempt
 
 - **feat BEAA2-27**: Add explicit interface activation control for mein.berlin.de data transmission
   - Add `isInterfaceActivated` boolean field to `MeinBerlinAddonEntity` to control data transmission
