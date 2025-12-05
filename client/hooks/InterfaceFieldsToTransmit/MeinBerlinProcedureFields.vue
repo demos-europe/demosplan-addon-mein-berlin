@@ -297,13 +297,22 @@ export default {
       this.$nextTick(() => {
         const select = this.$el.querySelector('select')
 
-        if (select && this.currentValue !== null && this.currentValue !== '') {
-          select.value = this.currentValue
+        if (select) {
+          // Set value if exists, otherwise reset to empty (placeholder)
+          select.value = (this.currentValue !== null && this.currentValue !== '') ? this.currentValue : ''
         }
       })
     },
 
     onChange (value) {
+      // Prevent selection if user doesn't have Berlin org ID
+      if (!this.hasBerlinOrgaId) {
+        dplan.notify.error(Translator.trans('mein.berlin.organisation.id.missing'))
+        this.currentValue = null
+        this.$nextTick(() => this.syncNativeSelect())
+        return
+      }
+
       this.currentValue = value
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
       this.syncNativeSelect()
