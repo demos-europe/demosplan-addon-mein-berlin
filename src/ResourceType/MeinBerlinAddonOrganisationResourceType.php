@@ -167,7 +167,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                         // messageBag gets the generic error message automatically
                         throw new MeinBerlinCommunicationException('relation has to be unique');
                     }
-                    // add AccessControlPictogramPermission for the this organisation, the current customer and the roles
+                    // add AccessControlPictogramPermission for this organisation, the current customer and the roles
                     // defined within the parameters.yml
                     try {
                         $this->addAccessControlPictogramPermission(
