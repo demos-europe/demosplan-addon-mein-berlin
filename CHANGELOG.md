@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.17 (2025-12-05)
 - **feat BEAA2-29**: Validation for the mein.berlin pictogram upload feature
   - Validate dimensions and format: only PNG, JPEG, and GIF files are accepted, min. 500x300px
   - Validate in real-time: Checks happen immediately after upload via @upload-success event
