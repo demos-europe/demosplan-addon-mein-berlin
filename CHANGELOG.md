@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.18 (2025-12-09)
 - **feat BEAA2-28**: Add district mapping migration for alte-gaertnerei procedure
   - Map alte-gaertnerei procedure to Pankow district (pa)
   - Add migration Version20251209123738 with up/down methods
