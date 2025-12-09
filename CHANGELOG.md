@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **feat BEAA2-28**: Add district mapping migration for alte-gaertnerei procedure
+  - Map alte-gaertnerei procedure to Pankow district (pa)
+  - Add migration Version20251209123738 with up/down methods
+
 ## v0.17 (2025-12-05)
 - **feat BEAA2-29**: Validation for the mein.berlin pictogram upload feature
   - Validate dimensions and format: only PNG, JPEG, and GIF files are accepted, min. 500x300px
