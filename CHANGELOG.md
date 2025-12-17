@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **feat BEAA2-28**: Add district mapping migration for molkenmarkt procedure
+  - Map molkenmarkt procedure (Bebauungsplan 1-14-1) to Mitte district (mi)
+  - Add migration Version20251216175007 with up/down methods
+
 ## v0.18 (2025-12-09)
 - **feat BEAA2-28**: Add district mapping migration for alte-gaertnerei procedure
   - Map alte-gaertnerei procedure to Pankow district (pa)
