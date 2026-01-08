@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.20 (2026-01-08)
 - **fix BEAA2-33**: Rename district parameter to administrative_district in MeinBerlin API
   - Update MEIN_BERLIN_DISTRICT constant from 'district' to 'administrative_district'
   - Affects both CREATE (POST) and UPDATE (PATCH) requests to mein.berlin API
