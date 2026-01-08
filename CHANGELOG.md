@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **fix BEAA2-33**: Rename district parameter to administrative_district in MeinBerlin API
+  - Update MEIN_BERLIN_DISTRICT constant from 'district' to 'administrative_district'
+  - Affects both CREATE (POST) and UPDATE (PATCH) requests to mein.berlin API
+
 ## v0.19 (2025-12-17)
 - **feat BEAA2-28**: Add district mapping migration for molkenmarkt procedure
   - Map molkenmarkt procedure (Bebauungsplan 1-14-1) to Mitte district (mi)
