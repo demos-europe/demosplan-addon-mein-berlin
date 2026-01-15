@@ -261,11 +261,22 @@ class MeinBerlinUpdateProcedureService
             $pictogramFileString = $relevantProcedurePublicPhaseChanges[
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value
             ];
-            $relevantProcedurePublicPhaseChanges[
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value
-            ] = $this->meinBerlinProcedurePictogramFileHandler
+
+            $base64String = $this->meinBerlinProcedurePictogramFileHandler
                 ->checkForPictogramAndGetBase64FileString($pictogramFileString);
 
+            if ('' !== $base64String) {
+                // Pictogram exists: send the base64 encoded image
+                $relevantProcedurePublicPhaseChanges[
+                RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value
+                ] = $base64String;
+            } else {
+                // Pictogram was deleted: don't send tile_image field (image stays unchanged on MeinBerlin)
+                // Note: MeinBerlin API doesn't support deleting images via empty string or null
+                unset($relevantProcedurePublicPhaseChanges[
+                    RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->value
+                ]);
+            }
         }
 
         return $relevantProcedurePublicPhaseChanges;

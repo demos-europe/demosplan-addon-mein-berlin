@@ -102,8 +102,6 @@ class MeinBerlinCreateProcedureService
                 $procedure->getPublicParticipationPhaseObject()->getStartDate()->format('Y-m-d\TH:i'),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name =>
                 $procedure->getPublicParticipationPhaseObject()->getEndDate()->format('Y-m-d\TH:i'),
-            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name =>
-                $this->getBase64PictogramFileString($procedure),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name =>
                 $procedure->getPublicParticipationPhaseObject()->getName(),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name =>
@@ -116,6 +114,13 @@ class MeinBerlinCreateProcedureService
             MeinBerlinAddonOrgaRelation::MEIN_BERLIN_ORGANISATION_ID => $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
             MeinBerlinAddonEntity::MEIN_BERLIN_IS_DRAFT => false,
         ];
+
+        // Only add tile_image if pictogram exists
+        $tileImage = $this->getBase64PictogramFileString($procedure);
+        if ('' !== $tileImage) {
+            $data[RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name] = $tileImage;
+        }
+
         $this->logProcedureCreateData($data);
 
         return $data;
