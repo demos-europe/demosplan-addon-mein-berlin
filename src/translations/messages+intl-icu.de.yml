@@ -3,7 +3,7 @@ mein.berlin.communication.create.success: "Dieses Verfahren wurde erfolgreich an
 mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-berlin übermittelt werden."
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
 mein.berlin.district:
-    label: "Verortung mein.berlin.de (Kierzradar)"
+    label: "Verortung mein.berlin.de (Kiezradar)"
     tooltip: "Bitte wählen Sie den Bezirk aus, in dem sich der Bebauungsplan befindet. Dieses Feld ist wichtig für die Verortung im mein.berlin.de Kiezradar."
     gesamtstädtisch: "Gesamtstädtisch"
     mitte: "Mitte"
