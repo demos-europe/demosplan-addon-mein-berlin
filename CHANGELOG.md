@@ -1,6 +1,11 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **fix BEAA2-33**: Make tile_image parameter optional in MeinBerlin API requests
+  - Only send tile_image when a pictogram is actually uploaded
+  - Remove tile_image from payload if empty to prevent "tile_image darf nicht leer sein" error
+  - Affects both CREATE (POST) and UPDATE (PATCH) requests to mein.berlin API
+
 ## v0.20 (2026-01-08)
 - **fix BEAA2-33**: Rename district parameter to administrative_district in MeinBerlin API
   - Update MEIN_BERLIN_DISTRICT constant from 'district' to 'administrative_district'
