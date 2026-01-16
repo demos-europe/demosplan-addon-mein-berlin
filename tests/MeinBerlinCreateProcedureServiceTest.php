@@ -158,6 +158,7 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::start_date->name => '2024-11-14T00:00',
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name => '2099-12-31T00:00',
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name => 'phaseName',
+            RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name => '',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name => 'coordinate',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_copyright->name => 'copyright',
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::image_alt_text->name => 'altText',
