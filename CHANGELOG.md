@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.21 (2026-01-16)
 - fix: Typo in translation key for district label (Kierzadar --> Kiezradar)
 - **feat BEAA2-37**: Activate interface through warning modal
     - Click on 'activate interface'-button in the modal checks the interface checkbox
