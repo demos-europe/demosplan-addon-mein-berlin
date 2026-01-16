@@ -3,7 +3,7 @@ mein.berlin.communication.create.success: "Dieses Verfahren wurde erfolgreich an
 mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-berlin übermittelt werden."
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
 mein.berlin.district:
-    label: "Verortung mein.berlin.de (Kierzradar)"
+    label: "Verortung mein.berlin.de (Kiezradar)"
     tooltip: "Bitte wählen Sie den Bezirk aus, in dem sich der Bebauungsplan befindet. Dieses Feld ist wichtig für die Verortung im mein.berlin.de Kiezradar."
     gesamtstädtisch: "Gesamtstädtisch"
     mitte: "Mitte"
@@ -59,6 +59,7 @@ mein.berlin.rss.feed.description: "Aktuelle Bebauungsplanverfahren { organisatio
 mein.berlin.rss.feed.plan.prefix: "Verortung mein.berlin.de"
 activate.interface: "Verlinkung aktivieren"
 check.procedure.pictogram.delete: "Möchten Sie die Übersichtskarte/Bild wirklich löschen?"
+interface.activation.success: "Verlinkung wurde aktiviert. Verfahren wird an mein.berlin.de übermittelt."
 interface.activation.warning: "Hinweis zur Schnittstellenaktivierung"
 procedure.transmission.via.interface.not.automatic: "Öffentlichkeitsbeteiligungen werden standardmäßig auf <strong>mein.berlin.de</strong> verlinkt. Für dieses Verfahren ist die Verlinkung aktuell <strong>deaktiviert</strong>."
 submit.without.interface.activation: "Fortfahren ohne Verlinkung"

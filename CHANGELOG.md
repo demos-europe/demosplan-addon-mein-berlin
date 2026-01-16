@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## UNRELEASED
+- fix: Typo in translation key for district label (Kierzadar --> Kiezradar)
+- **feat BEAA2-37**: Activate interface through warning modal
+    - Click on 'activate interface'-button in the modal checks the interface checkbox
+    - Success notification
 - **fix BEAA2-33**: Make tile_image parameter optional in MeinBerlin API requests
   - Only send tile_image when a pictogram is actually uploaded
   - Remove tile_image from payload if empty to prevent "tile_image darf nicht leer sein" error
