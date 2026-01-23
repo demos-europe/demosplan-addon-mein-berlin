@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- bump demosplan-addon version from v0.64 to v0.65
+
 ## v0.21 (2026-01-16)
 - fix: Typo in translation key for district label (Kierzadar --> Kiezradar)
 - **feat BEAA2-37**: Activate interface through warning modal
