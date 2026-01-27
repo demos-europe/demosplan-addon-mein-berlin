@@ -1,7 +1,7 @@
 {
   "name": "demos-europe/demosplan-addon-mein-berlin",
   "description": "demosplan Addon to integrate with mein.berlin.de",
-  "version": "v0.21",
+  "version": "v0.22",
   "type": "demosplan-addon",
   "license": "proprietary",
   "autoload": {
@@ -19,7 +19,7 @@
     "php": "^8.1",
     "symfony/translation": "6.*.*",
     "demos-europe/demosplan-addon-installer": "^0",
-    "demos-europe/demosplan-addon": "~v0.64",
+    "demos-europe/demosplan-addon": "~v0.65",
     "doctrine/doctrine-bundle": "^2",
     "doctrine/doctrine-migrations-bundle": "^3.2",
     "gedmo/doctrine-extensions": "^3",

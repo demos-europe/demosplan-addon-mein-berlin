@@ -6,6 +6,9 @@
   - tile_image field is now always sent, even if empty (reverts previous fix)
   - Affects both CREATE (POST) and UPDATE (PATCH) requests to mein.berlin API
 
+## v0.22 (2026-01-23)
+- bump demosplan-addon version from v0.64 to v0.65
+
 ## v0.21 (2026-01-16)
 - fix: Typo in translation key for district label (Kierzadar --> Kiezradar)
 - **feat BEAA2-37**: Activate interface through warning modal
