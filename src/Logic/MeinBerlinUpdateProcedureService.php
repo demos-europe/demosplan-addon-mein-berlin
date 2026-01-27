@@ -414,6 +414,10 @@ class MeinBerlinUpdateProcedureService
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::getChangedProperties(
                 $procedureSettingsChangeSet
             );
+        // Simplify structure to extract only new values
+        $relevantProcedureSettingsChanges = $this->getOnlyNewValuesForChangeSet(
+            $relevantProcedureSettingsChanges
+        );
         $this->logger->info(
             'demosplan-mein-berlin-addon discovered relevant ProcedureSettings changes:',
             $relevantProcedureSettingsChanges
