@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.23 (2026-01-27)
 - **fix BEAA2-33**: Revert tile_image optional fix - allow empty tile_image in API requests
   - MeinBerlin API will be updated to accept empty tile_image values
   - tile_image field is now always sent, even if empty (reverts previous fix)
