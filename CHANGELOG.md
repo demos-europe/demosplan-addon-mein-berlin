@@ -1,6 +1,11 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **fix BEAA2-33**: Revert tile_image optional fix - allow empty tile_image in API requests
+  - MeinBerlin API will be updated to accept empty tile_image values
+  - tile_image field is now always sent, even if empty (reverts previous fix)
+  - Affects both CREATE (POST) and UPDATE (PATCH) requests to mein.berlin API
+
 ## v0.22 (2026-01-23)
 - bump demosplan-addon version from v0.64 to v0.65
 
