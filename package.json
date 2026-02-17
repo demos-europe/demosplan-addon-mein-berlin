@@ -6,7 +6,7 @@
   "license": "LicenseRef-LICENSE",
   "devDependencies": {
     "@demos-europe/demosplan-addon-client-builder": "^0.0.13",
-    "webpack": "5.88.2",
+    "webpack": "5.105.2",
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
