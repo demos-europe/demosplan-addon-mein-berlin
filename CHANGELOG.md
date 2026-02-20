@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.24 (2026-02-20)
 - bump demosplan-addon version from v0.64 to v0.65
 
 ## v0.23 (2026-01-27)
