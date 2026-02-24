@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **BEAA2-39**: Remove prefix in rss feed
+
 ## v0.25 (2026-02-20)
 - bump demosplan-addon version from v0.66 to v0.67
 

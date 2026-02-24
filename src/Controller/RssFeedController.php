@@ -75,10 +75,7 @@ class RssFeedController extends AbstractController
         // Add items to the feed
         foreach ($procedures as $procedure) {
             $entry = $feed->createEntry();
-            $entry->setTitle(sprintf('%s: %s',
-                $this->translator->trans('mein.berlin.rss.feed.plan.prefix'),
-                $procedure->getExternalName()
-            ));
+            $entry->setTitle($procedure->getExternalName());
             $url = $this->router->generate('DemosPlan_procedure_public_detail', ['procedure' => $procedure->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
             $entry->setLink($url);
             $entry->setDescription($this->formatDescription($procedure, $url));
