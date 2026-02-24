@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- save meinBerlin response in log prior to payload to avoid stripping the response
+
 ## v0.26 (2026-02-24)
 - **BEAA2-39**: Remove prefix in rss feed
 

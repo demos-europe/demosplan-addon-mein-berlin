@@ -163,8 +163,8 @@ class MeinBerlinProcedureCommunicator
                         'statusCode' => $statusCode,
                         'meinBerlinOrganisationId' => $organisationId,
                         $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
-                        'payload' => $preparedProcedureData,
-                        'content' => $response->getContent(false)
+                        'content' => $response->getContent(false),
+                        'payload' => $preparedProcedureData
                     ]
                 );
                 throw new MeinBerlinCommunicationException(
