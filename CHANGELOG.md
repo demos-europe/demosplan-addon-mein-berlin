@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.26 (2026-02-24)
 - **BEAA2-39**: Remove prefix in rss feed
 
 ## v0.25 (2026-02-20)
