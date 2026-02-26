@@ -33,6 +33,7 @@ mein.berlin.district.office:
     tempelhof_schoeneberg: "Bezirksamt Tempelhof-Schöneberg"
     treptow_koepenick: "Bezirksamt Treptow-Köpenick"
 mein.berlin.error.create.access.control.permission: "Eine für mein-berlin notwendige Erweiterung konnte nicht aktiviert werden."
+mein.berlin.error.create.empty.coordinate: "Es ist erforderlich, eine Verortung (Punkt) im Verfahren zu setzen, bevor es an mein.berlin.de übermittelt werden kann."
 mein.berlin.error.create.empty.district: "Es ist erforderlich, einen Bezirk auszuwählen."
 mein.berlin.error.create.empty.procedure.short.name: "Es kann kein leeres Feld gespeichert werden."
 mein.berlin.error.create.empty.organisation.id: "Es ist erforderlich, eine Organisations-ID zu vergeben."

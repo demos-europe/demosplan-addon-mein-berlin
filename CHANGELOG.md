@@ -2,6 +2,8 @@
 
 ## UNRELEASED
 - save meinBerlin response in log prior to payload to avoid stripping the response
+- **BEAA2-40**: Truncate tile_image base64 in error logs to reduce log size
+- **BEAA2-40**: Skip mein-berlin create and show error message to user when no coordinate (point) is set on the procedure
 
 ## v0.26 (2026-02-24)
 - **BEAA2-39**: Remove prefix in rss feed
