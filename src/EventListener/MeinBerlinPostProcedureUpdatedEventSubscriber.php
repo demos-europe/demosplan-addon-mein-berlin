@@ -65,9 +65,17 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         }
         $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($newProcedure);
         $hasDistrictSet = $this->communicationHelper->hasDistrictSet($newProcedure);
+        $hasCoordinateSet = $this->communicationHelper->hasCoordinateSet($newProcedure);
         $bplanIdIsPresent = $this->communicationHelper->hasBplanIdSet($newProcedure);
 
         if ($isPublishedVal && $hasDistrictSet && !$bplanIdIsPresent) {
+            if (!$hasCoordinateSet) {
+                $this->logger->warning('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - skipping create: no coordinate (point) set on procedure', [
+                    'procedureId' => $newProcedure->getId(),
+                ]);
+
+                return;
+            }
             $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - create new procedure entry at MeinBerlin');
             // create new Procedure entry at MeinBerlin if procedure is publicly visible, has a district set
             // and has a pictogram set, but was not communicated to MeinBerlin previously (bplanIdIsPresent = false)

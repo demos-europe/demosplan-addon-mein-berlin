@@ -102,12 +102,34 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
         $this->communicationHelper->method('checkProcedurePublicPhasePermissionsetNotHidden')
             ->willReturn(true);
         $this->communicationHelper->method('hasDistrictSet')->willReturn(true);
+        $this->communicationHelper->method('hasCoordinateSet')->willReturn(true);
         $this->communicationHelper->method('hasBplanIdSet')->willReturn(false);
         $this->communicationHelper->method('getCorrespondingOrgaRelation')->willReturn($orgaRelation);
 
         $this->createProcedureService->expects(self::once())
             ->method('createMeinBerlinProcedure')
             ->with($procedure, $addonEntity, $orgaRelation);
+
+        $this->sut->onProcedureUpdate($event);
+    }
+
+    public function testOnProcedureUpdateSkipsCreateWhenNoCoordinateSet(): void
+    {
+        $event = $this->createMock(PostProcedureUpdatedEventInterface::class);
+        $procedure = $this->createMock(ProcedureInterface::class);
+        $addonEntity = $this->createMock(MeinBerlinAddonEntity::class);
+
+        $addonEntity->method('getIsInterfaceActivated')->willReturn(true);
+
+        $event->method('getProcedureAfterUpdate')->willReturn($procedure);
+        $this->communicationHelper->method('hasOrganisationIdSet')->willReturn(true);
+        $this->communicationHelper->method('getCorrespondingAddonEntity')->willReturn($addonEntity);
+        $this->communicationHelper->method('checkProcedurePublicPhasePermissionsetNotHidden')->willReturn(true);
+        $this->communicationHelper->method('hasDistrictSet')->willReturn(true);
+        $this->communicationHelper->method('hasCoordinateSet')->willReturn(false);
+        $this->communicationHelper->method('hasBplanIdSet')->willReturn(false);
+
+        $this->createProcedureService->expects(self::never())->method('createMeinBerlinProcedure');
 
         $this->sut->onProcedureUpdate($event);
     }

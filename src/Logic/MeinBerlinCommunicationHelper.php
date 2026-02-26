@@ -59,6 +59,13 @@ class MeinBerlinCommunicationHelper
         return null !== $addonEntity && '' !== $addonEntity->getDistrict();
     }
 
+    public function hasCoordinateSet(ProcedureInterface $procedure): bool
+    {
+        $coordinate = $procedure->getCoordinate();
+
+        return null !== $coordinate && '' !== $coordinate;
+    }
+
     public function getCorrespondingAddonEntity(ProcedureInterface $procedure): ?MeinBerlinAddonEntity
     {
         return $this->addonEntityRepository->getByProceduerId($procedure->getId());

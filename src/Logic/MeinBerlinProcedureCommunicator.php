@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonEntityRepository;
 use Exception;
@@ -77,7 +78,7 @@ class MeinBerlinProcedureCommunicator
                         'meinBerlinOrganisationId' => $organisationId,
                         'meinBerlinProcedureCommunicationId' => $bplanId,
                         'PATCH url' => $url,
-                        'payload' => $preparedProcedureData,
+                        'payload' => $this->truncateTileImageForLogging($preparedProcedureData),
                         'content' => $response->getContent(false)
                     ]
                 );
@@ -164,7 +165,7 @@ class MeinBerlinProcedureCommunicator
                         'meinBerlinOrganisationId' => $organisationId,
                         $correspondingAddonEntity->getProcedure()?->getName() => $correspondingAddonEntity->getProcedure()?->getId(),
                         'content' => $response->getContent(false),
-                        'payload' => $preparedProcedureData
+                        'payload' => $this->truncateTileImageForLogging($preparedProcedureData)
                     ]
                 );
                 throw new MeinBerlinCommunicationException(
@@ -289,6 +290,20 @@ class MeinBerlinProcedureCommunicator
             necessary for future procedure related communication.'
         );
         return (string)$responseContentArray['id'];
+    }
+
+    /**
+     * @param array<string, string|bool> $payload
+     * @return array<string, string|bool>
+     */
+    private function truncateTileImageForLogging(array $payload): array
+    {
+        $key = RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name;
+        if (isset($payload[$key]) && is_string($payload[$key])) {
+            $payload[$key] = substr($payload[$key], 0, 64);
+        }
+
+        return $payload;
     }
 
     private function attachBplanCommunicationId(
