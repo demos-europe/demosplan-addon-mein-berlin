@@ -14,6 +14,7 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\Events\PostProcedureUpdatedEventInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener\MeinBerlinPostProcedureUpdatedEventSubscriber;
@@ -29,6 +30,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
     private MeinBerlinCommunicationHelper|MockObject|null $communicationHelper = null;
     private MeinBerlinCreateProcedureService|MockObject|null $createProcedureService = null;
     private MeinBerlinUpdateProcedureService|MockObject|null $updateProcedureService = null;
+    private MessageBagInterface|MockObject|null $messageBag = null;
     private MeinBerlinPostProcedureUpdatedEventSubscriber|null $sut = null;
 
     protected function setUp(): void
@@ -36,10 +38,11 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
         $this->communicationHelper = $this->createMock(MeinBerlinCommunicationHelper::class);
         $this->createProcedureService = $this->createMock(MeinBerlinCreateProcedureService::class);
         $this->updateProcedureService = $this->createMock(MeinBerlinUpdateProcedureService::class);
+        $this->messageBag = $this->createMock(MessageBagInterface::class);
 
         // Create a partial mock for the SUT
         $this->sut = $this->getMockBuilder(MeinBerlinPostProcedureUpdatedEventSubscriber::class)
-            ->setConstructorArgs([(new NullLogger()),$this->communicationHelper, $this->createProcedureService, $this->updateProcedureService])
+            ->setConstructorArgs([(new NullLogger()), $this->communicationHelper, $this->createProcedureService, $this->updateProcedureService, $this->messageBag])
             ->onlyMethods(['isPublishedIfNeedsToBeIncludedOnUpdate'])
             ->getMock();
 
@@ -130,6 +133,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
         $this->communicationHelper->method('hasBplanIdSet')->willReturn(false);
 
         $this->createProcedureService->expects(self::never())->method('createMeinBerlinProcedure');
+        $this->messageBag->expects(self::once())->method('add')->with('error', 'mein.berlin.error.create.empty.coordinate');
 
         $this->sut->onProcedureUpdate($event);
     }

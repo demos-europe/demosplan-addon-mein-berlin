@@ -13,6 +13,7 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener;
 
 
 use DemosEurope\DemosplanAddon\Contracts\Events\PostProcedureUpdatedEventInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
@@ -29,6 +30,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         private readonly MeinBerlinCommunicationHelper $communicationHelper,
         private readonly MeinBerlinCreateProcedureService $createProcedureService,
         private readonly MeinBerlinUpdateProcedureService $updateProcedureService,
+        private readonly MessageBagInterface $messageBag,
     ) {
     }
 
@@ -73,6 +75,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $this->logger->warning('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - skipping create: no coordinate (point) set on procedure', [
                     'procedureId' => $newProcedure->getId(),
                 ]);
+                $this->messageBag->add('error', 'mein.berlin.error.create.empty.coordinate');
 
                 return;
             }
