@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.27 (2026-02-27)
 - save meinBerlin response in log prior to payload to avoid stripping the response
 
 ## v0.26 (2026-02-24)
