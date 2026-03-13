@@ -13,6 +13,7 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\EventListener;
 
 
 use DemosEurope\DemosplanAddon\Contracts\Events\PostProcedureUpdatedEventInterface;
+use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCommunicationHelper;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureService;
@@ -29,6 +30,7 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         private readonly MeinBerlinCommunicationHelper $communicationHelper,
         private readonly MeinBerlinCreateProcedureService $createProcedureService,
         private readonly MeinBerlinUpdateProcedureService $updateProcedureService,
+        private readonly MessageBagInterface $messageBag,
     ) {
     }
 
@@ -65,9 +67,18 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
         }
         $isPublishedVal = $this->communicationHelper->checkProcedurePublicPhasePermissionsetNotHidden($newProcedure);
         $hasDistrictSet = $this->communicationHelper->hasDistrictSet($newProcedure);
+        $hasCoordinateSet = $this->communicationHelper->hasCoordinateSet($newProcedure);
         $bplanIdIsPresent = $this->communicationHelper->hasBplanIdSet($newProcedure);
 
         if ($isPublishedVal && $hasDistrictSet && !$bplanIdIsPresent) {
+            if (!$hasCoordinateSet) {
+                $this->logger->warning('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - skipping create: no coordinate (point) set on procedure', [
+                    'procedureId' => $newProcedure->getId(),
+                ]);
+                $this->messageBag->add('error', 'mein.berlin.error.create.empty.coordinate');
+
+                return;
+            }
             $this->logger->info('MeinBerlinPostProcedureUpdatedEventSubscriber::onProcedureUpdate - create new procedure entry at MeinBerlin');
             // create new Procedure entry at MeinBerlin if procedure is publicly visible, has a district set
             // and has a pictogram set, but was not communicated to MeinBerlin previously (bplanIdIsPresent = false)
