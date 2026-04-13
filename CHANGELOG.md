@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **fix BEAA2-39**: Support multiple orgs sharing the same meinBerlin organisation ID in RSS feed
+
 ## v0.27 (2026-02-27)
 - save meinBerlin response in log prior to payload to avoid stripping the response
 - **BEAA2-40**: Truncate tile_image base64 in error logs to reduce log size
