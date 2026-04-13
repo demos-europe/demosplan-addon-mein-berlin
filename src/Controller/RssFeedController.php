@@ -25,7 +25,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use DateTime;
-use Webmozart\Assert\Assert;
 
 class RssFeedController extends AbstractController
 {
@@ -48,24 +47,38 @@ class RssFeedController extends AbstractController
         string $organisationId
     ): Response
     {
-        $correspondingAddonOrgaRelation = $correspondingAddonOrgaRelationRepository->findOneBy(['meinBerlinOrganisationId' => $organisationId]);
-        if ($correspondingAddonOrgaRelation === null) {
+        $correspondingAddonOrgaRelations = $correspondingAddonOrgaRelationRepository->findBy(['meinBerlinOrganisationId' => $organisationId]);
+        if ([] === $correspondingAddonOrgaRelations) {
             $this->logger->error('No corresponding addon organization relation found for organisationId: ' . $organisationId);
             return new Response('', 200);
         }
-        Assert::notNull($correspondingAddonOrgaRelation);
-        $demosplanOrga = $correspondingAddonOrgaRelation->getOrga();
-        Assert::notNull($demosplanOrga);
+
         $externalPhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('read||write');
-        // Fetch procedures from the service
-        $procedures = $orgaRelationService->getVisibleProcedures(
-            $externalPhaseKeys,
-            $demosplanOrga
+
+        // Aggregate procedures from all organizations sharing this meinBerlinId
+        $proceduresByOrga = [];
+        $feedOrgaNames = [];
+        foreach ($correspondingAddonOrgaRelations as $orgaRelation) {
+            $orga = $orgaRelation->getOrga();
+            if (null === $orga) {
+                continue;
+            }
+            $visibleProcedures = $orgaRelationService->getVisibleProcedures($externalPhaseKeys, $orga);
+            if ([] !== $visibleProcedures) {
+                $feedOrgaNames[] = $orga->getName();
+            }
+            $proceduresByOrga[] = $visibleProcedures;
+        }
+        $procedures = array_merge(...$proceduresByOrga);
+
+        // Re-sort aggregated procedures by end date descending
+        usort($procedures, static fn (ProcedureInterface $a, ProcedureInterface $b): int =>
+            $b->getPublicParticipationEndDateTimestamp() <=> $a->getPublicParticipationEndDateTimestamp()
         );
         // Create the RSS feed
         $feed = new Feed();
         $feed->setTitle($this->translator->trans('mein.berlin.rss.feed.title'));
-        $feed->setDescription($this->translator->trans('mein.berlin.rss.feed.description', ['organisation' => $demosplanOrga->getName()]));
+        $feed->setDescription($this->translator->trans('mein.berlin.rss.feed.description', ['organisation' => implode(', ', $feedOrgaNames)]));
         $feed->setLink($this->router->generate('core_home', [], UrlGeneratorInterface::ABSOLUTE_URL));
         $feed->setFeedLink($this->router->generate('addon_mein_berlin_rss_feed', ['organisationId' => $organisationId], UrlGeneratorInterface::ABSOLUTE_URL), 'rss');
         $feed->setGenerator('demosplan');
