@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Controller;
 
-use DemosEurope\DemosplanAddon\Contracts\Config\GlobalConfigInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
@@ -29,7 +28,6 @@ use DateTime;
 class RssFeedController extends AbstractController
 {
     public function __construct(
-        protected readonly GlobalConfigInterface $demosplanConfig,
         private readonly RouterInterface $router,
         protected readonly TranslatorInterface $translator,
         private readonly LoggerInterface $logger,
@@ -53,8 +51,6 @@ class RssFeedController extends AbstractController
             return new Response('', 200);
         }
 
-        $externalPhaseKeys = $this->demosplanConfig->getExternalPhaseKeys('read||write');
-
         // Aggregate procedures from all organizations sharing this meinBerlinId
         $proceduresByOrga = [];
         $feedOrgaNames = [];
@@ -63,7 +59,7 @@ class RssFeedController extends AbstractController
             if (null === $orga) {
                 continue;
             }
-            $visibleProcedures = $orgaRelationService->getVisibleProcedures($externalPhaseKeys, $orga);
+            $visibleProcedures = $orgaRelationService->getVisibleProcedures($orga);
             if ([] !== $visibleProcedures) {
                 $feedOrgaNames[] = $orga->getName();
             }
@@ -116,9 +112,7 @@ class RssFeedController extends AbstractController
         $endDate = $procedure->getPublicParticipationEndDate()->format('d.m.Y');
         $descParts = [];
         $descParts[] = "{$startDate} - {$endDate}";
-        $descParts[] = $this->demosplanConfig->getPhaseNameWithPriorityExternal(
-            $procedure->getPublicParticipationPhase()
-        );
+        $descParts[] = $procedure->getPublicParticipationPhaseObject()->getPhaseDefinition()->getName();
         if ('' !== $procedure->getExternalDesc()) {
             $descParts[] = $procedure->getExternalDesc();
         }

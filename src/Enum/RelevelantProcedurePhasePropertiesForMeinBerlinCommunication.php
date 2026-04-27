@@ -17,5 +17,5 @@ enum RelevelantProcedurePhasePropertiesForMeinBerlinCommunication: string
 
     case start_date = 'startDate';
     case end_date = 'endDate';
-    case status = 'name';
+    case status = 'phaseDefinition';
 }

@@ -18,16 +18,18 @@ use Exception;
 class MeinBerlinAddonRelationService
 {
     /**
-     * @param array<int, string> $phaseKeys
      * @return ProcedureInterface[]
      * @throws Exception
      */
-    public function getVisibleProcedures(array $phaseKeys, OrgaInterface $orga): array
+    public function getVisibleProcedures(OrgaInterface $orga): array
     {
         $procedures = $orga->getProcedures();
-        $phaseKeysCollection = collect($phaseKeys);
         $hits = collect($procedures)->filter(
-            static fn (ProcedureInterface $procedure): bool => $phaseKeysCollection->contains($procedure->getPublicParticipationPhase())
+            static fn (ProcedureInterface $procedure): bool => in_array(
+                $procedure->getPublicParticipationPhasePermissionset(),
+                ['read', 'write'],
+                true
+            )
         )
         ->sortByDesc(static fn (ProcedureInterface $procedure): int => $procedure->getPublicParticipationEndDateTimestamp());
 
