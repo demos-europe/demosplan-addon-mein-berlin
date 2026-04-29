@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.29-rc1 (2026-04-29)
 - **fix BEAA2-39**: Support multiple orgs sharing the same meinBerlin organisation ID in RSS feed
 
 **Replace legacy phase string APIs with ProcedurePhaseDefinition (DPLAN-16766)**
