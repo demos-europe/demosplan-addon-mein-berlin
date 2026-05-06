@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.28 (2026-04-13)
 - **fix BEAA2-39**: Support multiple orgs sharing the same meinBerlin organisation ID in RSS feed
 
 ## v0.27 (2026-02-27)
