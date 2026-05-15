@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **fix**: distinguish missing-config errors from response-parse errors in procedure create/update logging
+
 ## v0.28 (2026-04-13)
 - **fix BEAA2-39**: Support multiple orgs sharing the same meinBerlin organisation ID in RSS feed
 
