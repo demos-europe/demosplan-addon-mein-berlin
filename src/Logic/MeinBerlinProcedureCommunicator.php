@@ -51,6 +51,8 @@ class MeinBerlinProcedureCommunicator
         string $bplanId,
         string $procedureId
     ): void {
+        $headers = $this->resolveMeinBerlinHeader($preparedProcedureData, null, $procedureId);
+
         try {
             $method = 'PATCH';
             $url = str_replace(
@@ -63,7 +65,7 @@ class MeinBerlinProcedureCommunicator
                 $method,
                 $url,
                 [
-                    'headers' => $this->getMeinBerlinHeader(),
+                    'headers' => $headers,
                     'json' => $preparedProcedureData
                 ]
             );
@@ -139,6 +141,8 @@ class MeinBerlinProcedureCommunicator
         string $organisationId,
         bool $flushIsInQueued
     ): void {
+        $headers = $this->resolveMeinBerlinHeader($preparedProcedureData, $correspondingAddonEntity);
+
         try {
             $method = 'POST';
             $url = str_replace(
@@ -152,7 +156,7 @@ class MeinBerlinProcedureCommunicator
                 $method,
                 $url,
                 [
-                    'headers' => $this->getMeinBerlinHeader(),
+                    'headers' => $headers,
                     'json' => $preparedProcedureData
                 ]
             );
@@ -226,8 +230,7 @@ class MeinBerlinProcedureCommunicator
             throw new MeinBerlinCommunicationException($e->getMessage());
         } catch (InvalidArgumentException $e) {
             $this->logger->error(
-                'demosplan-mein-berlin-addon failed to parse the responseContent.
-                 Expected different type or layout',
+                'demosplan-mein-berlin-addon got an unexpected response body shape during create (parse/assert failure)',
                 [
                     'Exception' => $e,
                     'ExceptionMessage' => $e->getMessage(),
@@ -266,6 +269,35 @@ class MeinBerlinProcedureCommunicator
             'Content-Type' => 'application/json',
             'Authorization' => $bearerAuth
         ];
+    }
+
+    /**
+     * @param array<string, string|bool> $preparedProcedureData
+     * @return array{Accept: 'application/json', Content-Type: 'application/json', Authorization: non-empty-string}
+     * @throws MeinBerlinCommunicationException
+     */
+    private function resolveMeinBerlinHeader(
+        array $preparedProcedureData,
+        ?MeinBerlinAddonEntity $correspondingAddonEntity = null,
+        ?string $procedureId = null
+    ): array {
+        try {
+            return $this->getMeinBerlinHeader();
+        } catch (ParameterNotFoundException | InvalidArgumentException $e) {
+            $this->logger->error(
+                'demosplan-mein-berlin-addon: invalid configuration (mein_berlin_authorization missing or empty)',
+                [
+                    'Exception' => $e,
+                    'ExceptionMessage' => $e->getMessage(),
+                    'procedureId' => $procedureId
+                        ?? $correspondingAddonEntity?->getProcedure()?->getId(),
+                    'payload' => $this->truncateTileImageForLogging($preparedProcedureData),
+                ]
+            );
+            throw new MeinBerlinCommunicationException(
+                'Invalid mein_berlin configuration: '.$e->getMessage()
+            );
+        }
     }
 
     /**
