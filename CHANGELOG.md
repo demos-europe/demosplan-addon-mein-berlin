@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.29 (2026-05-20)
 - **chore DPLAN-17129**: Align composer dependencies with core's Doctrine ORM v3 upgrade
   - Widen `demos-europe/demosplan-addon` constraint from `~v0.67` to `^0.71`
   - Add explicit pins: `doctrine/orm: ^3.3`, `doctrine/dbal: ^3`, `doctrine/persistence: ^2.0 || ^3.0`
