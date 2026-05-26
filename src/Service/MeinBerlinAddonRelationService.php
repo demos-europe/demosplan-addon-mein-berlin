@@ -27,7 +27,7 @@ class MeinBerlinAddonRelationService
         $hits = collect($procedures)->filter(
             static fn (ProcedureInterface $procedure): bool => in_array(
                 $procedure->getPublicParticipationPhasePermissionset(),
-                ['read', 'write'],
+                [ProcedureInterface::PROCEDURE_PHASE_PERMISSIONSET_READ, ProcedureInterface::PROCEDURE_PHASE_PERMISSIONSET_WRITE],
                 true
             )
         )
