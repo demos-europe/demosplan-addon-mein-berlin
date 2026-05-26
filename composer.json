@@ -1,7 +1,7 @@
 {
   "name": "demos-europe/demosplan-addon-mein-berlin",
   "description": "demosplan Addon to integrate with mein.berlin.de",
-  "version": "v0.29-rc1",
+  "version": "v0.29",
   "type": "demosplan-addon",
   "license": "proprietary",
   "autoload": {
@@ -22,6 +22,9 @@
     "demos-europe/demosplan-addon": "dev-f-DPLAN-16766-phase-definition-interface-integration",
     "doctrine/doctrine-bundle": "^2",
     "doctrine/doctrine-migrations-bundle": "^3.2",
+    "doctrine/orm": "^3.3",
+    "doctrine/dbal": "^3",
+    "doctrine/persistence": "^2.0 || ^3.0",
     "gedmo/doctrine-extensions": "^3",
     "symfony/http-client": "6.*.*",
     "league/flysystem-aws-s3-v3": "^3.28",
