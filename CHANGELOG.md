@@ -1,6 +1,13 @@
 # CHANGELOG
 
 ## UNRELEASED
+**Integrate ProcedurePhaseDefinition into MeinBerlin communication (DPLAN-16766)**
+- Replace `getExternalPhaseKeys()`/`getPublicParticipationPhase()` with `getPublicParticipationPhasePermissionset()` in `MeinBerlinAddonRelationService`
+- Replace `getPhaseNameWithPriorityExternal()` with `getPhaseDefinition()->getName()` for phase name resolution
+- `RelevelantProcedurePhasePropertiesForMeinBerlinCommunication` now uses `phaseDefinition` instead of `name`
+- `MeinBerlinUpdateProcedureService` resolves a `ProcedurePhaseDefinitionInterface` instance in the public-phase change set to its name before sending the update to MeinBerlin
+- Remove `GlobalConfigInterface` dependency from `RssFeedController`
+
 ## v0.29 (2026-05-20)
 - **chore DPLAN-17129**: Align composer dependencies with core's Doctrine ORM v3 upgrade
     - Widen `demos-europe/demosplan-addon` constraint from `~v0.67` to `^0.71`
