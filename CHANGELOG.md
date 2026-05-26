@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.30 (2026-05-26)
 **Integrate ProcedurePhaseDefinition into MeinBerlin communication (DPLAN-16766)**
 - Replace `getExternalPhaseKeys()`/`getPublicParticipationPhase()` with `getPublicParticipationPhasePermissionset()` in `MeinBerlinAddonRelationService`
 - Replace `getPhaseNameWithPriorityExternal()` with `getPhaseDefinition()->getName()` for phase name resolution
