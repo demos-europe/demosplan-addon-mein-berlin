@@ -1,14 +1,28 @@
 # CHANGELOG
 
 ## UNRELEASED
+**Integrate ProcedurePhaseDefinition into MeinBerlin communication (DPLAN-16766)**
+- Replace `getExternalPhaseKeys()`/`getPublicParticipationPhase()` with `getPublicParticipationPhasePermissionset()` in `MeinBerlinAddonRelationService`
+- Replace `getPhaseNameWithPriorityExternal()` with `getPhaseDefinition()->getName()` for phase name resolution
+- `RelevelantProcedurePhasePropertiesForMeinBerlinCommunication` now uses `phaseDefinition` instead of `name`
+- `MeinBerlinUpdateProcedureService` resolves a `ProcedurePhaseDefinitionInterface` instance in the public-phase change set to its name before sending the update to MeinBerlin
+- Remove `GlobalConfigInterface` dependency from `RssFeedController`
+
 ## v0.29 (2026-05-20)
 - **chore DPLAN-17129**: Align composer dependencies with core's Doctrine ORM v3 upgrade
-  - Widen `demos-europe/demosplan-addon` constraint from `~v0.67` to `^0.71`
-  - Add explicit pins: `doctrine/orm: ^3.3`, `doctrine/dbal: ^3`, `doctrine/persistence: ^2.0 || ^3.0`
-  - `doctrine/orm` pin is required because none of the transitive constraints demand v3 — without it, Composer resolves orm to v2.10, producing a mixed-major vendor tree that crashes at install with "The $reportFieldsWhereDeclared argument is no longer supported"
-  - `doctrine/dbal: ^3` blocks a transitive escalation to DBAL v4 triggered by carbon-doctrine-types 3.2.0; forces a downgrade of carbon-doctrine-types to 2.1.0
-  - Resolved versions now match core: orm 3.6.5, dbal 3.10.5, persistence 3.4.4, edt-* 0.28.0
-  - No addon code changes needed — entities were already PHP 8 attribute-mapped and repos already use `getEntityManager()` / `generateId()`
+    - Widen `demos-europe/demosplan-addon` constraint from `~v0.67` to `^0.71`
+    - Add explicit pins: `doctrine/orm: ^3.3`, `doctrine/dbal: ^3`, `doctrine/persistence: ^2.0 || ^3.0`
+    - `doctrine/orm` pin is required because none of the transitive constraints demand v3 — without it, Composer resolves orm to v2.10, producing a mixed-major vendor tree that crashes at install with "The $reportFieldsWhereDeclared argument is no longer supported"
+    - `doctrine/dbal: ^3` blocks a transitive escalation to DBAL v4 triggered by carbon-doctrine-types 3.2.0; forces a downgrade of carbon-doctrine-types to 2.1.0
+    - Resolved versions now match core: orm 3.6.5, dbal 3.10.5, persistence 3.4.4, edt-* 0.28.0
+    - No addon code changes needed — entities were already PHP 8 attribute-mapped and repos already use `getEntityManager()` / `generateId()`
+
+## v0.29-rc1 (2026-04-29)
+**Replace legacy phase string APIs with ProcedurePhaseDefinition (DPLAN-16766)**
+- Replace `getExternalPhaseKeys()`/`getPublicParticipationPhase()` with `getPublicParticipationPhasePermissionset()` in `MeinBerlinAddonRelationService`
+- Replace `getPhaseNameWithPriorityExternal()` with `getPhaseDefinition()->getName()` for phase name resolution
+- Update `RelevelantProcedurePhasePropertiesForMeinBerlinCommunication` to use `phaseDefinition` instead of `name`
+- Remove `GlobalConfigInterface` dependency from `RssFeedController`
 
 ## v0.28 (2026-04-13)
 - **fix BEAA2-39**: Support multiple orgs sharing the same meinBerlin organisation ID in RSS feed

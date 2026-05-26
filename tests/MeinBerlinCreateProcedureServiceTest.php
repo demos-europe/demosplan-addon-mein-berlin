@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
+use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseDefinitionInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureSettingsInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\SlugInterface;
@@ -58,10 +59,13 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
         $procedureSettings->method('getPictogramAltText')->willReturn('altText');
         $this->procedure->method('getSettings')->willReturn($procedureSettings);
 
+        $phaseDefinition = $this->createMock(ProcedurePhaseDefinitionInterface::class);
+        $phaseDefinition->method('getName')->willReturn('phaseName');
+
         $publicParticipationPhase = $this->createMock(ProcedurePhaseInterface::class);
         $publicParticipationPhase->method('getStartDate')->willReturn(new \DateTime('2024-11-14'));
         $publicParticipationPhase->method('getEndDate')->willReturn(new \DateTime('2099-12-31'));
-        $publicParticipationPhase->method('getName')->willReturn('phaseName');
+        $publicParticipationPhase->method('getPhaseDefinition')->willReturn($phaseDefinition);
         $this->procedure->method('getPublicParticipationPhaseObject')->willReturn($publicParticipationPhase);
 
         $currentSlug = $this->createMock(SlugInterface::class);

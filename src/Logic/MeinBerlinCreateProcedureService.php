@@ -103,7 +103,7 @@ class MeinBerlinCreateProcedureService
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::end_date->name =>
                 $procedure->getPublicParticipationPhaseObject()->getEndDate()->format('Y-m-d\TH:i'),
             RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->name =>
-                $procedure->getPublicParticipationPhaseObject()->getName(),
+                $procedure->getPublicParticipationPhaseObject()->getPhaseDefinition()->getName(),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::tile_image->name =>
                 $this->getBase64PictogramFileString($procedure),
             RelevantProcedureSettingsPropertiesForMeinBerlinCommunication::point->name =>

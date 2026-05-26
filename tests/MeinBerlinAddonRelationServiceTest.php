@@ -20,11 +20,11 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
 
     public function testReturnsOnlyProceduresInAllowedPhases(): void
     {
-        $visible = $this->createProcedureMock('p-1', 'participation', 1000);
-        $hidden = $this->createProcedureMock('p-2', 'configuration', 2000);
+        $visible = $this->createProcedureMock('p-1', 'read', 1000);
+        $hidden = $this->createProcedureMock('p-2', 'preparation', 2000);
         $orga = $this->createOrgaMock([$visible, $hidden]);
 
-        $result = $this->sut->getVisibleProcedures(['participation'], $orga);
+        $result = $this->sut->getVisibleProcedures($orga);
 
         self::assertCount(1, $result);
         self::assertSame('p-1', array_values($result)[0]->getId());
@@ -32,22 +32,22 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
 
     public function testReturnsEmptyArrayWhenNoProceduresMatchPhase(): void
     {
-        $procedure = $this->createProcedureMock('p-1', 'configuration', 1000);
+        $procedure = $this->createProcedureMock('p-1', 'preparation', 1000);
         $orga = $this->createOrgaMock([$procedure]);
 
-        $result = $this->sut->getVisibleProcedures(['participation'], $orga);
+        $result = $this->sut->getVisibleProcedures($orga);
 
         self::assertSame([], $result);
     }
 
     public function testSortsProceduresByEndDateDescending(): void
     {
-        $oldest = $this->createProcedureMock('p-oldest', 'participation', 1000);
-        $middle = $this->createProcedureMock('p-middle', 'participation', 2000);
-        $newest = $this->createProcedureMock('p-newest', 'participation', 3000);
+        $oldest = $this->createProcedureMock('p-oldest', 'read', 1000);
+        $middle = $this->createProcedureMock('p-middle', 'read', 2000);
+        $newest = $this->createProcedureMock('p-newest', 'read', 3000);
         $orga = $this->createOrgaMock([$oldest, $middle, $newest]);
 
-        $result = array_values($this->sut->getVisibleProcedures(['participation'], $orga));
+        $result = array_values($this->sut->getVisibleProcedures($orga));
 
         self::assertSame('p-newest', $result[0]->getId());
         self::assertSame('p-middle', $result[1]->getId());
@@ -58,17 +58,17 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
     {
         $orga = $this->createOrgaMock([]);
 
-        self::assertSame([], $this->sut->getVisibleProcedures(['participation'], $orga));
+        self::assertSame([], $this->sut->getVisibleProcedures($orga));
     }
 
-    public function testMultiplePhaseKeysAreRespected(): void
+    public function testBothReadAndWritePermissionSetsAreVisible(): void
     {
-        $procA = $this->createProcedureMock('p-1', 'participation', 1000);
-        $procB = $this->createProcedureMock('p-2', 'evaluating', 2000);
-        $procC = $this->createProcedureMock('p-3', 'configuration', 3000);
-        $orga = $this->createOrgaMock([$procA, $procB, $procC]);
+        $procRead = $this->createProcedureMock('p-1', 'read', 1000);
+        $procWrite = $this->createProcedureMock('p-2', 'write', 2000);
+        $procHidden = $this->createProcedureMock('p-3', 'preparation', 3000);
+        $orga = $this->createOrgaMock([$procRead, $procWrite, $procHidden]);
 
-        $result = $this->sut->getVisibleProcedures(['participation', 'evaluating'], $orga);
+        $result = $this->sut->getVisibleProcedures($orga);
 
         self::assertCount(2, $result);
     }
@@ -80,14 +80,14 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
     public function testMultiOrgAggregationCollectsProceduresFromAllOrgs(): void
     {
         $orgaA = $this->createOrgaMock([
-            $this->createProcedureMock('p-a1', 'participation', 3000),
+            $this->createProcedureMock('p-a1', 'read', 3000),
         ]);
         $orgaB = $this->createOrgaMock([
-            $this->createProcedureMock('p-b1', 'participation', 2000),
-            $this->createProcedureMock('p-b2', 'participation', 1000),
+            $this->createProcedureMock('p-b1', 'read', 2000),
+            $this->createProcedureMock('p-b2', 'read', 1000),
         ]);
 
-        $procedures = $this->aggregateVisibleProcedures(['participation'], [$orgaA, $orgaB]);
+        $procedures = $this->aggregateVisibleProcedures([$orgaA, $orgaB]);
 
         self::assertCount(3, $procedures);
         self::assertSame('p-a1', $procedures[0]->getId());
@@ -98,23 +98,22 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
     /**
      * Real-world scenario: multiple orgs share the same external ID,
      * but only one has procedures in a visible phase. Others are either
-     * empty or only have procedures in non-visible phases like 'configuration'.
+     * empty or only have procedures in non-visible phases.
      */
     public function testMultiOrgAggregationWithMixedVisibility(): void
     {
         $orgaWithVisible = $this->createOrgaMock([
-            $this->createProcedureMock('p-1', 'participation', 2000),
+            $this->createProcedureMock('p-1', 'read', 2000),
         ], 'Org A');
         $orgaAllHidden = $this->createOrgaMock([
-            $this->createProcedureMock('p-2', 'configuration', 3000),
+            $this->createProcedureMock('p-2', 'preparation', 3000),
         ], 'Org B');
         $orgaEmpty = $this->createOrgaMock([], 'Org C');
 
         $orgas = [$orgaWithVisible, $orgaAllHidden, $orgaEmpty];
-        $phaseKeys = ['participation', 'evaluating'];
 
-        $procedures = $this->aggregateVisibleProcedures($phaseKeys, $orgas);
-        $orgaNames = $this->collectOrgaNamesWithVisibleProcedures($phaseKeys, $orgas);
+        $procedures = $this->aggregateVisibleProcedures($orgas);
+        $orgaNames = $this->collectOrgaNamesWithVisibleProcedures($orgas);
 
         self::assertCount(1, $procedures);
         self::assertSame('p-1', $procedures[0]->getId());
@@ -129,21 +128,20 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
     public function testMultiOrgAggregationShowsAllContributingOrgNames(): void
     {
         $orgaA = $this->createOrgaMock([
-            $this->createProcedureMock('p-a1', 'participation', 3000),
-            $this->createProcedureMock('p-a2', 'evaluating', 1000),
+            $this->createProcedureMock('p-a1', 'read', 3000),
+            $this->createProcedureMock('p-a2', 'write', 1000),
         ], 'Org A');
         $orgaB = $this->createOrgaMock([
-            $this->createProcedureMock('p-b1', 'participation', 2000),
+            $this->createProcedureMock('p-b1', 'read', 2000),
         ], 'Org B');
         $orgaNonContributing = $this->createOrgaMock([
-            $this->createProcedureMock('p-c1', 'configuration', 4000),
+            $this->createProcedureMock('p-c1', 'preparation', 4000),
         ], 'Org C');
 
         $orgas = [$orgaA, $orgaB, $orgaNonContributing];
-        $phaseKeys = ['participation', 'evaluating'];
 
-        $procedures = $this->aggregateVisibleProcedures($phaseKeys, $orgas);
-        $orgaNames = $this->collectOrgaNamesWithVisibleProcedures($phaseKeys, $orgas);
+        $procedures = $this->aggregateVisibleProcedures($orgas);
+        $orgaNames = $this->collectOrgaNamesWithVisibleProcedures($orgas);
 
         self::assertCount(3, $procedures);
         self::assertSame('Org A, Org B', implode(', ', $orgaNames));
@@ -152,16 +150,14 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
     /**
      * Replicates the aggregation logic from RssFeedController::generateRssFeed.
      *
-     * @param string[]        $phaseKeys
      * @param OrgaInterface[] $orgas
-     *
      * @return ProcedureInterface[]
      */
-    private function aggregateVisibleProcedures(array $phaseKeys, array $orgas): array
+    private function aggregateVisibleProcedures(array $orgas): array
     {
         $proceduresByOrga = [];
         foreach ($orgas as $orga) {
-            $proceduresByOrga[] = $this->sut->getVisibleProcedures($phaseKeys, $orga);
+            $proceduresByOrga[] = $this->sut->getVisibleProcedures($orga);
         }
 
         $procedures = array_merge(...$proceduresByOrga);
@@ -175,16 +171,14 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
     /**
      * Replicates the org name collection from RssFeedController::generateRssFeed.
      *
-     * @param string[]        $phaseKeys
      * @param OrgaInterface[] $orgas
-     *
      * @return string[]
      */
-    private function collectOrgaNamesWithVisibleProcedures(array $phaseKeys, array $orgas): array
+    private function collectOrgaNamesWithVisibleProcedures(array $orgas): array
     {
         $names = [];
         foreach ($orgas as $orga) {
-            $visibleProcedures = $this->sut->getVisibleProcedures($phaseKeys, $orga);
+            $visibleProcedures = $this->sut->getVisibleProcedures($orga);
             if ([] !== $visibleProcedures) {
                 $names[] = $orga->getName();
             }
@@ -193,11 +187,11 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
         return $names;
     }
 
-    private function createProcedureMock(string $id, string $phase, int $endTimestamp): ProcedureInterface
+    private function createProcedureMock(string $id, string $permissionset, int $endTimestamp): ProcedureInterface
     {
         $procedure = $this->createMock(ProcedureInterface::class);
         $procedure->method('getId')->willReturn($id);
-        $procedure->method('getPublicParticipationPhase')->willReturn($phase);
+        $procedure->method('getPublicParticipationPhasePermissionset')->willReturn($permissionset);
         $procedure->method('getPublicParticipationEndDateTimestamp')->willReturn($endTimestamp);
 
         return $procedure;

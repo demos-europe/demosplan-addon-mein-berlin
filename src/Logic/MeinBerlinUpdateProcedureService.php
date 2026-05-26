@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DateTime;
+use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseDefinitionInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
@@ -369,6 +370,20 @@ class MeinBerlinUpdateProcedureService
     }
 
     /**
+     * @param array<string, mixed> $phaseChanges
+     * @return array<string, mixed>
+     */
+    private function resolvePhaseDefinitionToName(array $phaseChanges): array
+    {
+        $key = RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::status->value;
+        if (array_key_exists($key, $phaseChanges) && $phaseChanges[$key] instanceof ProcedurePhaseDefinitionInterface) {
+            $phaseChanges[$key] = $phaseChanges[$key]->getName();
+        }
+
+        return $phaseChanges;
+    }
+
+    /**
      * @param array<string, mixed> $relevantProcedurePublicPhaseChanges
      * @return array<string, mixed>
      */
@@ -397,6 +412,7 @@ class MeinBerlinUpdateProcedureService
             $relevantProcedurePublicPhaseChanges
         );
         $relevantProcedurePublicPhaseChanges = $this->formatDateTime($relevantProcedurePublicPhaseChanges);
+        $relevantProcedurePublicPhaseChanges = $this->resolvePhaseDefinitionToName($relevantProcedurePublicPhaseChanges);
 
         // map our property names to their requested names
         return RelevelantProcedurePhasePropertiesForMeinBerlinCommunication::
