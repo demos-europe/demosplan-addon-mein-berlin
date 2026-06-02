@@ -88,6 +88,7 @@
         text: Translator.trans('procedure.pictogram.altText'),
         tooltip: Translator.trans('procedure.pictogram.altText.toolTipp')
       }"
+      :maxlength="79"
       :readonly="!hasBerlinOrgaId"
       class="my-2"
       data-cy="procedure:pictogramAltText"
