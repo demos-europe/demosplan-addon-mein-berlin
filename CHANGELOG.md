@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+## v0.31 (2026-06-02)
 - **fix DPLAN-17776**: Limit the procedure pictogram alt text input to 79 characters, since mein.berlin.de rejects alt text of 80 or more characters
 
 ## v0.30 (2026-05-26)
