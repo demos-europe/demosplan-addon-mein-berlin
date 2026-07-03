@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+
+## v0.32 (2026-07-03)
 - **fix**: Pre-select existing mein.berlin organisation ID in org/procedure dropdowns — prevents TypeError crash when API returns `data: null` for relationship items belonging to other customers, which was silently aborting the mounted callback and triggering a create instead of an update
 
 ## v0.31 (2026-06-02)
