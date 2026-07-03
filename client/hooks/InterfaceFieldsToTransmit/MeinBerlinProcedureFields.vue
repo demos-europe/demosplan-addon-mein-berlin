@@ -270,7 +270,7 @@ export default {
 
     getItemByRelationshipId () {
       this.item = Object.values(this.list || []).find(
-        el => el.relationships.procedure.data.id === this.relationshipId
+        el => el.relationships?.procedure?.data?.id === this.relationshipId
       ) || null
 
       // Reset if no item

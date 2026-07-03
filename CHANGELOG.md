@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **fix**: Pre-select existing mein.berlin organisation ID in org/procedure dropdowns — prevents TypeError crash when API returns `data: null` for relationship items belonging to other customers, which was silently aborting the mounted callback and triggering a create instead of an update
+
 ## v0.31 (2026-06-02)
 - **fix DPLAN-17776**: Limit the procedure pictogram alt text input to 79 characters, since mein.berlin.de rejects alt text of 80 or more characters
 
