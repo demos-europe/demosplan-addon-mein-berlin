@@ -2,6 +2,8 @@
 
 ## UNRELEASED
 
+- Limit procedure pictogram copyright to 120 and alt text to 80 characters (BEAA2)
+
 ## v0.32 (2026-07-03)
 - **fix**: Pre-select existing mein.berlin organisation ID in org/procedure dropdowns — prevents TypeError crash when API returns `data: null` for relationship items belonging to other customers, which was silently aborting the mounted callback and triggering a create instead of an update
 
