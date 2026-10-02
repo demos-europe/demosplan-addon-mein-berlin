@@ -15,6 +15,7 @@ use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\MeinBerlinTransferType;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
@@ -40,6 +41,7 @@ class MeinBerlinCreateProcedureService
         private readonly MessageBagInterface                          $messageBag,
         private readonly MeinBerlinProcedurePictogramFileHandler      $meinBerlinProcedurePictogramFileHandler,
         private readonly MeinBerlinProcedureSettingsCoordinateHandler $meinBerlinProcedureSettingsCoordinateHandler,
+        private readonly MeinBerlinTransferFailureNotifier            $transferFailureNotifier,
     ){
 
     }
@@ -76,6 +78,8 @@ class MeinBerlinCreateProcedureService
             $this->messageBag->add('confirm', 'mein.berlin.communication.create.success');
         } catch (MeinBerlinCommunicationException $e) {
             $this->messageBag->add('error', 'mein.berlin.communication.create.error');
+            // the messageBag is not visible to anybody if the procedure was updated automatically (phase switch)
+            $this->transferFailureNotifier->notifyAboutFailedTransfer($procedure, $e, MeinBerlinTransferType::create);
             // propagate only if flush is still in queue - otherwise nothing can be done.
             if ($calledViaResourceTypeFlushIsQueued) {
                 throw $e;
