@@ -15,3 +15,9 @@ parameters:
         - !php/const DemosEurope\DemosplanAddon\Contracts\Entities\RoleInterface::PLANNING_AGENCY_WORKER
     mein_berlin_pictogram_permission_name: 'field_procedure_pictogram'
     mein_berlin_pictogram_resolution_restriction_permission_name: 'feature_procedure_pictogram_resolution_restriction'
+    # Failure mail sent when a procedure could not be transferred to mein.berlin.de. Both values are set via the
+    # environment (e.g. in .env.local) and are null if not set.
+    # Contact named in the mail, left out of the mail if empty
+    mein_berlin_failure_mail_support_address: '%env(default::MEIN_BERLIN_FAILURE_MAIL_SUPPORT_ADDRESS)%'
+    # Additional recipients (cc) of the mail, comma separated
+    mein_berlin_failure_mail_cc: '%env(default::MEIN_BERLIN_FAILURE_MAIL_CC)%'

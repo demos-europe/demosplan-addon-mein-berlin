@@ -1,5 +1,36 @@
 mein.berlin.communication.create.error: "Beim Versuch, Informationen zu diesem Verfahren an mein-berlin zu übermitteln, ist ein Fehler aufgetreten."
 mein.berlin.communication.create.success: "Dieses Verfahren wurde erfolgreich an mein-berlin übertragen."
+mein.berlin.failure.mail.subject.create: "Übermittlung an mein.berlin.de fehlgeschlagen: {procedureName}"
+mein.berlin.failure.mail.subject.update: "Übermittlung von Änderungen an mein.berlin.de fehlgeschlagen: {procedureName}"
+mein.berlin.failure.mail.body: |-
+    Hallo,
+
+    {intro}
+
+    Grund: {reason}
+
+    Bitte versuchen Sie es zu einem späteren Zeitpunkt erneut. Sollte das Problem weiterhin bestehen, {contact} und leiten Sie diese Nachricht inklusive der technischen Details weiter.
+
+    Technische Details:
+    {details}
+
+    Mit freundlichen Grüßen
+    Ihr DiPlanBeteiligung-Team
+mein.berlin.failure.mail.intro.create: "die Übermittlung des Verfahrens \"{procedureName}\" an mein.berlin.de ist fehlgeschlagen."
+mein.berlin.failure.mail.intro.update: "die Übermittlung der Änderungen am Verfahren \"{procedureName}\" an mein.berlin.de ist fehlgeschlagen."
+mein.berlin.failure.mail.contact.address: "wenden Sie sich bitte an {supportAddress}"
+mein.berlin.failure.mail.contact.generic: "wenden Sie sich bitte an den Support"
+mein.berlin.failure.mail.reason.unreachable: "Der Server von mein.berlin.de war nicht erreichbar."
+mein.berlin.failure.mail.reason.timeout: "Der Server von mein.berlin.de hat nicht rechtzeitig geantwortet (Zeitüberschreitung)."
+mein.berlin.failure.mail.reason.rejected: "mein.berlin.de hat die Annahme der Daten verweigert."
+mein.berlin.failure.mail.reason.server_error: "Beim Server von mein.berlin.de ist ein Fehler aufgetreten."
+mein.berlin.failure.mail.reason.invalid_response: "mein.berlin.de hat mit einer unerwarteten Antwort reagiert."
+mein.berlin.failure.mail.reason.configuration: "Die Schnittstelle zu mein.berlin.de ist nicht vollständig konfiguriert."
+mein.berlin.failure.mail.reason.unknown: "Es ist ein unbekanntes Problem aufgetreten."
+mein.berlin.failure.mail.details.category: "Kategorie: {category}"
+mein.berlin.failure.mail.details.status: "HTTP-Status: {status}"
+mein.berlin.failure.mail.details.message: "Meldung: {message}"
+mein.berlin.failure.mail.details.response: "Antwort von mein.berlin.de: {response}"
 mein.berlin.communication.update.error: "Die Änderungen konnten nicht an mein-berlin übermittelt werden."
 mein.berlin.communication.update.success: "Die Änderungen des Verfahrens wurden erfolgreich an mein-berlin übertragen."
 mein.berlin.district:
