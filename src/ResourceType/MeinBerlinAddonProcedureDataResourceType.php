@@ -357,11 +357,14 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
                 this procedure is known to / has been transferred to -meinBerlin',
             ['newDistrict' => $district, 'assignedCommunicationId' => $meinBerlinAddonEntity->getBplanId()]
         );
+        $currentProcedure = $this->currentContextProviderInterface->getCurrentProcedure();
+        Assert::notNull($currentProcedure);
         $this->updateProcedureService->updateDistrictByResourceType(
             $meinBerlinAddonEntity,
             $organisationId,
             $meinBerlinAddonEntity->getBplanId(),
-            $this->currentContextProviderInterface->getCurrentProcedure()?->getId(),
+            $currentProcedure->getId(),
+            $currentProcedure
         );
     }
 }

@@ -19,6 +19,7 @@ use DemosEurope\DemosplanAddon\Contracts\Entities\SlugInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\MeinBerlinTransferType;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
@@ -28,6 +29,7 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinCreateProcedureSe
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureCommunicator;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedurePictogramFileHandler;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinProcedureSettingsCoordinateHandler;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinTransferFailureNotifier;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -43,6 +45,8 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
     private ProcedureInterface|MockObject|null $procedure = null;
     private MeinBerlinAddonEntity|MockObject|null $correspondingAddonEntity = null;
     private MeinBerlinAddonOrgaRelation|MockObject|null $correspondingOrgaRelation = null;
+    private MeinBerlinProcedureCommunicator|MockObject|null $communicator = null;
+    private MeinBerlinTransferFailureNotifier|MockObject|null $transferFailureNotifier = null;
 
     protected function setUp(): void
     {
@@ -84,19 +88,9 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $parameterBag = $this->createMock(ParameterBagInterface::class);
         $router = $this->createMock(RouterInterface::class);
-        $meinBerlinProcedureCommunicator = $this->createMock(MeinBerlinProcedureCommunicator::class);
-        $meinBerlinProcedureCommunicator->method('createProcedure')
-            ->willReturnCallback(
-                function (
-                    array $procedureCreateRequestData,
-                    MeinBerlinAddonEntity $addonEntity,
-                    string $organisationId,
-                    bool $isPublished = false
-                ): void {
-                    // do nothing
-                    echo 'test';
-                }
-            );
+        // does nothing on createProcedure unless a test lets it throw
+        $this->communicator = $this->createMock(MeinBerlinProcedureCommunicator::class);
+        $this->transferFailureNotifier = $this->createMock(MeinBerlinTransferFailureNotifier::class);
         $meinBerlinProcedurePictureFileHandler = $this->createMock(
             MeinBerlinProcedurePictogramFileHandler::class
         );
@@ -124,10 +118,11 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             $parameterBag,
             $router,
             $requestContext,
-            $meinBerlinProcedureCommunicator,
+            $this->communicator,
             $this->messageBag,
             $meinBerlinProcedurePictureFileHandler,
-            $procedureCoordinateHandler
+            $procedureCoordinateHandler,
+            $this->transferFailureNotifier
         );
     }
 
@@ -213,5 +208,50 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
             true
         );
         self::assertCount(2, $stepsMade);
+    }
+
+    public function testNotifiesAboutFailedTransfer(): void
+    {
+        $exception = new MeinBerlinCommunicationException('testingPurpose');
+        $this->communicator->method('createProcedure')->willThrowException($exception);
+
+        $this->transferFailureNotifier->expects(self::once())
+            ->method('notifyAboutFailedTransfer')
+            ->with($this->procedure, $exception, MeinBerlinTransferType::create);
+
+        $this->sut->createMeinBerlinProcedure(
+            $this->procedure,
+            $this->correspondingAddonEntity,
+            $this->correspondingOrgaRelation
+        );
+    }
+
+    public function testNotifiesAboutFailedTransferBeforePropagatingTheException(): void
+    {
+        $exception = new MeinBerlinCommunicationException('testingPurpose');
+        $this->communicator->method('createProcedure')->willThrowException($exception);
+
+        $this->transferFailureNotifier->expects(self::once())
+            ->method('notifyAboutFailedTransfer')
+            ->with($this->procedure, $exception, MeinBerlinTransferType::create);
+
+        $this->expectException(MeinBerlinCommunicationException::class);
+        $this->sut->createMeinBerlinProcedure(
+            $this->procedure,
+            $this->correspondingAddonEntity,
+            $this->correspondingOrgaRelation,
+            true
+        );
+    }
+
+    public function testDoesNotNotifyAfterSuccessfulTransfer(): void
+    {
+        $this->transferFailureNotifier->expects(self::never())->method('notifyAboutFailedTransfer');
+
+        $this->sut->createMeinBerlinProcedure(
+            $this->procedure,
+            $this->correspondingAddonEntity,
+            $this->correspondingOrgaRelation
+        );
     }
 }
