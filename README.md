@@ -38,6 +38,18 @@ parameters:
     mein_berlin_public_procedure_route: 'core_procedure_slug'
 ```
 
+### Failure mail (optional)
+
+If a procedure cannot be transferred to mein.berlin.de, the agency main email address of the procedure is informed by mail.
+The following environment variables can be set (e.g. in `.env.local`), both can be left empty:
+
+```
+# contact named in the mail, a generic hint to the support is used if empty
+MEIN_BERLIN_FAILURE_MAIL_SUPPORT_ADDRESS=
+# additional recipients (cc), comma separated
+MEIN_BERLIN_FAILURE_MAIL_CC=
+```
+
 ## Core Components
 
 ### Entities

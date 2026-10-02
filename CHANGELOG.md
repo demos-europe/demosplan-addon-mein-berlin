@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## UNRELEASED
+- **feat BEAA2-32**: Send a mail to the agency main email address if a procedure, or a change of it, could not be transferred to mein.berlin.de (creating as well as updating, also on automatic phase switches). The mail names the reason and contains technical details (category, HTTP status, truncated response). Subject and body are built by the addon and sent via the generic core mail template `dm_schlussmitteilung`, no mail template has to be added. Optional environment variables: `MEIN_BERLIN_FAILURE_MAIL_SUPPORT_ADDRESS` (contact named in the mail) and `MEIN_BERLIN_FAILURE_MAIL_CC` (comma separated cc recipients). Requires a demosplan-addon release containing `MailServiceInterface`.
+- `MeinBerlinCommunicationException` carries an error category, the HTTP status and the truncated response body
 
 ## v0.32 (2026-07-03)
 - **fix**: Pre-select existing mein.berlin organisation ID in org/procedure dropdowns — prevents TypeError crash when API returns `data: null` for relationship items belonging to other customers, which was silently aborting the mounted callback and triggering a create instead of an update
