@@ -12,9 +12,11 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic;
 
 use DateTime;
+use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseDefinitionInterface;
 use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\MeinBerlinTransferType;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureCurrentSlugPropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedurePropertiesForMeinBerlinCommunication;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\RelevantProcedureSettingsPropertiesForMeinBerlinCommunication;
@@ -42,6 +44,7 @@ class MeinBerlinUpdateProcedureService
         private readonly MessageBagInterface $messageBag,
         private readonly MeinBerlinProcedurePictogramFileHandler $meinBerlinProcedurePictogramFileHandler,
         private readonly MeinBerlinProcedureSettingsCoordinateHandler $meinBerlinProcedureSettingsCoordinateHandler,
+        private readonly MeinBerlinTransferFailureNotifier $transferFailureNotifier,
     ){
 
     }
@@ -53,7 +56,8 @@ class MeinBerlinUpdateProcedureService
         MeinBerlinAddonEntity $changedEntity,
         string $meinBerlinOrganisationId,
         string $bplanId,
-        string $procedureId
+        string $procedureId,
+        ProcedureInterface $procedure
     ): void
     {
         $fieldsToUpdate = [];
@@ -72,6 +76,7 @@ class MeinBerlinUpdateProcedureService
         } catch (MeinBerlinCommunicationException $e) {
             // logs have been written
             $this->messageBag->add('error', 'mein.berlin.communication.update.error');
+            $this->transferFailureNotifier->notifyAboutFailedTransfer($procedure, $e, MeinBerlinTransferType::update);
             // rethrow here to prevent the flushing the change on our side
             throw $e;
         }
@@ -89,7 +94,8 @@ class MeinBerlinUpdateProcedureService
         ?bool $isPublished,
         string $meinBerlinOrganisationId,
         string $bplanId,
-        string $procedureId
+        string $procedureId,
+        ProcedureInterface $procedure
     ): void
     {
         if (RelevantProcedurePropertiesForMeinBerlinCommunication::
@@ -126,6 +132,12 @@ class MeinBerlinUpdateProcedureService
             } catch (MeinBerlinCommunicationException $e) {
                 // logs have been written already
                 $this->messageBag->add('error', 'mein.berlin.communication.update.error');
+                // the messageBag is not visible to anybody if the procedure was updated automatically (phase switch)
+                $this->transferFailureNotifier->notifyAboutFailedTransfer(
+                    $procedure,
+                    $e,
+                    MeinBerlinTransferType::update
+                );
                 // do not rethrow this Exception as the procedure updates are flushed anyhow and information is lost
             }
         }
