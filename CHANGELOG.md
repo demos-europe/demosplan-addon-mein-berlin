@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 
+- **feat BEAA2-42**: The RSS feed can be restricted to procedures in certain public phases (Verfahrensschritte) with the query parameter `VERFAHRENSSCHRITT`, e.g. `?VERFAHRENSSCHRITT=("Beteiligung Öffentlichkeit","Auswertung Öffentlichkeit")`. Single names, quoted names, lists and the array notation are supported. Without the parameter the feed is unchanged.
 - Limit procedure pictogram copyright to 120 and alt text to 80 characters (BEAA2-45)
 
 ## v0.32 (2026-07-03)
