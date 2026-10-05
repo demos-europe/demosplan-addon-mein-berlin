@@ -5,17 +5,22 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
+use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseDefinitionInterface;
+use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedurePhaseInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinRssPhaseFilter;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 
 class MeinBerlinAddonRelationServiceTest extends TestCase
 {
     private MeinBerlinAddonRelationService $sut;
+    private MeinBerlinRssPhaseFilter $phaseFilter;
 
     protected function setUp(): void
     {
-        $this->sut = new MeinBerlinAddonRelationService();
+        $this->phaseFilter = new MeinBerlinRssPhaseFilter();
+        $this->sut = new MeinBerlinAddonRelationService($this->phaseFilter);
     }
 
     public function testReturnsOnlyProceduresInAllowedPhases(): void
@@ -147,6 +152,67 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
         self::assertSame('Org A, Org B', implode(', ', $orgaNames));
     }
 
+    public function testWithoutPhaseNamesAllVisibleProceduresAreReturned(): void
+    {
+        $orga = $this->createOrgaMock([
+            $this->createProcedureMock('p-1', 'write', 3000, 'Beteiligung Öffentlichkeit'),
+            $this->createProcedureMock('p-2', 'read', 2000, 'Auswertung Öffentlichkeit'),
+        ]);
+
+        self::assertCount(2, $this->sut->getVisibleProcedures($orga));
+        self::assertCount(2, $this->sut->getVisibleProcedures($orga, []));
+    }
+
+    public function testRestrictsToTheGivenPhaseName(): void
+    {
+        $orga = $this->createOrgaMock([
+            $this->createProcedureMock('p-running', 'write', 3000, 'Beteiligung Öffentlichkeit'),
+            $this->createProcedureMock('p-finished', 'read', 2000, 'Auswertung Öffentlichkeit'),
+        ]);
+
+        $result = array_values($this->sut->getVisibleProcedures($orga, $this->phaseFilter->parse('Auswertung Öffentlichkeit')));
+
+        self::assertCount(1, $result);
+        self::assertSame('p-finished', $result[0]->getId());
+    }
+
+    public function testRestrictsToSeveralPhaseNamesAndKeepsTheSorting(): void
+    {
+        $orga = $this->createOrgaMock([
+            $this->createProcedureMock('p-early', 'write', 1000, 'Frühzeitige Beteiligung Öffentlichkeit - § 3 (1) BauGB'),
+            $this->createProcedureMock('p-running', 'write', 3000, 'Beteiligung Öffentlichkeit'),
+            $this->createProcedureMock('p-finished', 'read', 2000, 'Auswertung Öffentlichkeit'),
+        ]);
+        $phaseNames = $this->phaseFilter->parse(
+            '("Beteiligung Öffentlichkeit","Frühzeitige Beteiligung Öffentlichkeit - § 3 (1) BauGB")'
+        );
+
+        $result = array_values($this->sut->getVisibleProcedures($orga, $phaseNames));
+
+        self::assertSame(['p-running', 'p-early'], array_map(
+            static fn (ProcedureInterface $procedure): string => $procedure->getId(),
+            $result
+        ));
+    }
+
+    public function testUnknownPhaseNameReturnsNothing(): void
+    {
+        $orga = $this->createOrgaMock([
+            $this->createProcedureMock('p-1', 'write', 3000, 'Beteiligung Öffentlichkeit'),
+        ]);
+
+        self::assertSame([], $this->sut->getVisibleProcedures($orga, $this->phaseFilter->parse('Gibt es nicht')));
+    }
+
+    public function testPhaseNamesNeverMakeHiddenProceduresVisible(): void
+    {
+        $orga = $this->createOrgaMock([
+            $this->createProcedureMock('p-hidden', 'hidden', 3000, 'Konfiguration'),
+        ]);
+
+        self::assertSame([], $this->sut->getVisibleProcedures($orga, $this->phaseFilter->parse('Konfiguration')));
+    }
+
     /**
      * Replicates the aggregation logic from RssFeedController::generateRssFeed.
      *
@@ -187,12 +253,22 @@ class MeinBerlinAddonRelationServiceTest extends TestCase
         return $names;
     }
 
-    private function createProcedureMock(string $id, string $permissionset, int $endTimestamp): ProcedureInterface
-    {
+    private function createProcedureMock(
+        string $id,
+        string $permissionset,
+        int $endTimestamp,
+        string $phaseName = 'Beteiligung Öffentlichkeit'
+    ): ProcedureInterface {
+        $phaseDefinition = $this->createMock(ProcedurePhaseDefinitionInterface::class);
+        $phaseDefinition->method('getName')->willReturn($phaseName);
+        $phase = $this->createMock(ProcedurePhaseInterface::class);
+        $phase->method('getPhaseDefinition')->willReturn($phaseDefinition);
+
         $procedure = $this->createMock(ProcedureInterface::class);
         $procedure->method('getId')->willReturn($id);
         $procedure->method('getPublicParticipationPhasePermissionset')->willReturn($permissionset);
         $procedure->method('getPublicParticipationEndDateTimestamp')->willReturn($endTimestamp);
+        $procedure->method('getPublicParticipationPhaseObject')->willReturn($phase);
 
         return $procedure;
     }
