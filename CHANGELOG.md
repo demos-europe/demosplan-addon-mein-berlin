@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 
+## v0.33 (2026-10-06)
 - Limit procedure pictogram copyright to 120 and alt text to 80 characters (BEAA2-45)
 
 ## v0.32 (2026-07-03)
