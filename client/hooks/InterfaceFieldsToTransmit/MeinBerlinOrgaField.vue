@@ -15,6 +15,7 @@
 
 <script>
 import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
+import { fetchDistricts } from './fetchDistricts'
 
 export default {
   name: 'MeinBerlinOrgaField',
@@ -64,23 +65,7 @@ export default {
       initValue: null,
       item: null,
       list: null,
-
-      // Organization / Authority ID on mein.berlin.de
-      options: [
-        { label: Translator.trans('mein.berlin.district.office.administration'), value: '14' },
-        { label: Translator.trans('mein.berlin.district.office.charlottenburg_wilmersdorf'), value: '27' },
-        { label: Translator.trans('mein.berlin.district.office.friedrichshain_kreuzberg'), value: '28' },
-        { label: Translator.trans('mein.berlin.district.office.lichtenberg'), value: '29' },
-        { label: Translator.trans('mein.berlin.district.office.marzahn_hellersdorf'), value: '25' },
-        { label: Translator.trans('mein.berlin.district.office.mitte'), value: '16' },
-        { label: Translator.trans('mein.berlin.district.office.neukoelln'), value: '30' },
-        { label: Translator.trans('mein.berlin.district.office.pankow'), value: '20' },
-        { label: Translator.trans('mein.berlin.district.office.reinickendorf'), value: '31' },
-        { label: Translator.trans('mein.berlin.district.office.spandau'), value: '26' },
-        { label: Translator.trans('mein.berlin.district.office.steglitz_zehlendorf'), value: '32' },
-        { label: Translator.trans('mein.berlin.district.office.tempelhof_schoeneberg'), value: '24' },
-        { label: Translator.trans('mein.berlin.district.office.treptow_koepenick'), value: '15' }
-      ]
+      districts: []
     }
   },
 
@@ -109,6 +94,28 @@ export default {
 
     label () {
       return Translator.trans('mein.berlin.organisation.id')
+    },
+
+    /**
+     * One option per district that has a mein.berlin.de organisation ID, labelled with the ID in front,
+     * e.g. "29 – Lichtenberg". The IDs are maintained in the district catalog.
+     */
+    options () {
+      const options = this.districts
+        .filter(({ meinBerlinOrganisationId }) => meinBerlinOrganisationId)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(({ meinBerlinOrganisationId, name }) => ({
+          label: `${meinBerlinOrganisationId} – ${name}`,
+          value: meinBerlinOrganisationId
+        }))
+
+      // An ID saved for the organisation stays selectable even if no district has it (anymore)
+      const savedId = this.initValue
+      if (savedId && !options.some(option => option.value === savedId)) {
+        options.push({ label: savedId, value: savedId })
+      }
+
+      return options
     },
 
     resourceType () {
@@ -198,6 +205,8 @@ export default {
   },
 
   mounted() {
+    fetchDistricts(this.demosplanUi).then(districts => { this.districts = districts })
+
     const hasProvidedOptions = this.additionalFieldOptions.length > 0
     const hasNoCurrentValue =
       this.currentValue === null ||
