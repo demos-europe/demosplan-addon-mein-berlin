@@ -24,6 +24,7 @@ use EDT\JsonApi\PropertyConfig\Builder\AttributeConfigBuilderInterface;
  *
  * @property-read ToOneRelationshipConfigBuilderInterface<ClauseFunctionInterface<bool>,OrderBySortMethodInterface, MeinBerlinAddonOrgaRelation, OrgaInterface> $orga
  * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonOrgaRelation> $meinBerlinOrganisationId
+ * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonOrgaRelation> $communicatedProcedures
  */
 class MeinBerlinAddonOrganisationResourceConfigBuilder extends MagicResourceConfigBuilder
 {
