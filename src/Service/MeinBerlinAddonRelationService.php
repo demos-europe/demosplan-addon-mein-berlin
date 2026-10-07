@@ -17,11 +17,18 @@ use Exception;
 
 class MeinBerlinAddonRelationService
 {
+    public function __construct(private readonly MeinBerlinRssPhaseFilter $phaseFilter)
+    {
+    }
+
     /**
+     * @param list<string> $phaseNames normalized names of the public phases (see {@link MeinBerlinRssPhaseFilter::parse()})
+     *                                 to restrict the result to, an empty list returns all visible procedures
+     *
      * @return ProcedureInterface[]
      * @throws Exception
      */
-    public function getVisibleProcedures(OrgaInterface $orga): array
+    public function getVisibleProcedures(OrgaInterface $orga, array $phaseNames = []): array
     {
         $procedures = $orga->getProcedures();
         $hits = collect($procedures)->filter(
@@ -30,10 +37,19 @@ class MeinBerlinAddonRelationService
                 [ProcedureInterface::PROCEDURE_PHASE_PERMISSIONSET_READ, ProcedureInterface::PROCEDURE_PHASE_PERMISSIONSET_WRITE],
                 true
             )
-        )
-        ->sortByDesc(static fn (ProcedureInterface $procedure): int => $procedure->getPublicParticipationEndDateTimestamp());
+        );
+        // only ever narrows down the procedures that are visible anyhow
+        if ([] !== $phaseNames) {
+            $hits = $hits->filter(
+                fn (ProcedureInterface $procedure): bool => $this->phaseFilter->matches(
+                    $procedure->getPublicParticipationPhaseObject()->getPhaseDefinition()->getName(),
+                    $phaseNames
+                )
+            );
+        }
 
-        return $hits->toArray();
+        return $hits
+            ->sortByDesc(static fn (ProcedureInterface $procedure): int => $procedure->getPublicParticipationEndDateTimestamp())
+            ->toArray();
     }
-
 }
