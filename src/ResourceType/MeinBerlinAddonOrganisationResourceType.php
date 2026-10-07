@@ -19,10 +19,10 @@ use DemosEurope\DemosplanAddon\Contracts\MessageBagInterface;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\AddonResourceType;
 use DemosEurope\DemosplanAddon\Contracts\ResourceType\OrgaResourceTypeInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Configuration\Permissions\Features;
-use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinAccessControlPermissionException;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Logic\MeinBerlinOrganisationIdChangeHandler;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\Permission\AccessControl\AccessControlRepositoryInterface;
 use DemosEurope\DemosplanAddon\Permission\PermissionEvaluatorInterface;
@@ -56,6 +56,7 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
         private readonly AccessControlRepositoryInterface $accessControlRepository,
         private readonly parameterBagInterface $parameterBag,
         private readonly MessageBagInterface $messageBag,
+        private readonly MeinBerlinOrganisationIdChangeHandler $organisationIdChangeHandler,
     ) {
 
     }
@@ -103,30 +104,23 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                         MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation,
                         ?string $meinBerlinOrganisationId
                     ): array {
-                        // no update will be sent to meinBerlin as updating this field is allowed only until
-                        // the first procedure has been published with this organisationId
+                        // no update will be sent to meinBerlin: the organisation id is a part of the urls used later on.
+                        $meinBerlinOrganisationId ??= '';
                         $this->logger->info('demosplan-mein-berlin-addon registered an
-                        MeinBerlinOrganisationId update - check if any Procedures were live already',
+                        MeinBerlinOrganisationId update',
                             [$meinBerlinAddonOrgaRelation, ['newMeinBerlinOrganisationId' => $meinBerlinOrganisationId]]
                         );
-                        $alreadyEstablishedCommunications = $this->meinBerlinAddonOrgaRelationRepository
-                            ->getProceduresOfOrgaWithExistingBplanId($meinBerlinAddonOrgaRelation);
-                        if (0 < count($alreadyEstablishedCommunications)) {
-                            $alreadyEstablishedCommunicationProcedureIds = array_map(
-                                static fn(MeinBerlinAddonEntity $addonEntity) => $addonEntity->getProcedure()?->getId(),
-                                $alreadyEstablishedCommunications
-                            );
-                            $this->logger->info('demosplan-mein-berlin-addon found already established
-                            communications for MeinBerlinOrganisationId',
-                                ['procedures' => $alreadyEstablishedCommunicationProcedureIds]
-                            );
-                            $this->messageBag->add(
-                                'error',
-                                'mein.berlin.error.update.organisation.id.for.established.communication'
-                            );
-                            throw new MeinBerlinCommunicationException('MeinBerlinOrganisationId already in use');
+                        if ('' !== $meinBerlinOrganisationId && !ctype_digit($meinBerlinOrganisationId)) {
+                            $this->messageBag->add('error', 'mein.berlin.error.update.organisation.id.invalid');
+                            throw new MeinBerlinCommunicationException('MeinBerlinOrganisationId has to be a number');
                         }
-                        $this->logger->info('checks passed - will update MeinBerlinOrganisationId');
+                        // procedures that were already communicated lose their link to meinBerlin when the id changes
+                        $releasedProcedures = $this->organisationIdChangeHandler
+                            ->releaseCommunicatedProcedures($meinBerlinAddonOrgaRelation, $meinBerlinOrganisationId);
+                        $this->logger->info(
+                            'demosplan-mein-berlin-addon will update MeinBerlinOrganisationId',
+                            ['releasedProcedures' => $releasedProcedures]
+                        );
                         $meinBerlinAddonOrgaRelation->setMeinBerlinOrganisationId($meinBerlinOrganisationId);
 
                         return [];
@@ -135,6 +129,10 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                 )
             )
             ->addPathCreationBehavior();
+        $configBuilder->communicatedProcedures->setReadableByCallable(
+            fn (MeinBerlinAddonOrgaRelation $meinBerlinAddonOrgaRelation): array => $this->organisationIdChangeHandler
+                ->getCommunicatedProceduresInfo($meinBerlinAddonOrgaRelation)
+        );
         $configBuilder->orga->setRelationshipType($this->orgaResourceType)
             ->setReadableByPath()
             ->setFilterable()

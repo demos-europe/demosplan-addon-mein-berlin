@@ -49,39 +49,7 @@
 <script>
 import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
 import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
-
-// District options for Berlin districts
-const DISTRICT_OPTIONS = [
-  { label: Translator.trans('mein.berlin.district.gesamtstädtisch'), value: 'be' },
-  { label: Translator.trans('mein.berlin.district.mitte'), value: 'mi' },
-  { label: Translator.trans('mein.berlin.district.friedrichshain_kreuzberg'), value: 'fk' },
-  { label: Translator.trans('mein.berlin.district.pankow'), value: 'pa' },
-  { label: Translator.trans('mein.berlin.district.charlottenburg_wilmersdorf'), value: 'cw' },
-  { label: Translator.trans('mein.berlin.district.spandau'), value: 'sp' },
-  { label: Translator.trans('mein.berlin.district.steglitz_zehlendorf'), value: 'sz' },
-  { label: Translator.trans('mein.berlin.district.tempelhof_schoeneberg'), value: 'ts' },
-  { label: Translator.trans('mein.berlin.district.neukoelln'), value: 'nk' },
-  { label: Translator.trans('mein.berlin.district.treptow_koepenick'), value: 'tk' },
-  { label: Translator.trans('mein.berlin.district.marzahn_hellersdorf'), value: 'mh' },
-  { label: Translator.trans('mein.berlin.district.lichtenberg'), value: 'li' },
-  { label: Translator.trans('mein.berlin.district.reinickendorf'), value: 'rd' }
-]
-
-// Mapping mein.berlin organization ID to district short code
-const ORG_ID_TO_DISTRICT_CODE = {
-  '16': 'mi',
-  '28': 'fk',
-  '20': 'pa',
-  '27': 'cw',
-  '26': 'sp',
-  '32': 'sz',
-  '24': 'ts',
-  '30': 'nk',
-  '15': 'tk',
-  '25': 'mh',
-  '29': 'li',
-  '31': 'rd'
-}
+import { fetchDistricts } from './fetchDistricts'
 
 export default {
   name: 'MeinBerlinProcedureFields',
@@ -156,8 +124,7 @@ export default {
       isInterfaceActivated: false,
       item: null,
       list: null,
-      districtOptions: DISTRICT_OPTIONS,
-      orgIdToDistrictCode: ORG_ID_TO_DISTRICT_CODE
+      districts: []
     }
   },
 
@@ -180,6 +147,15 @@ export default {
         value: this.currentValue,
         url: this.item ? 'api_resource_update' : 'api_resource_create'
       }
+    },
+
+    /**
+     * Options of the district select, taken from the district catalog.
+     */
+    districtOptions () {
+      return this.districts
+        .map(({ districtCode, name }) => ({ label: name, value: districtCode }))
+        .sort((a, b) => a.label.localeCompare(b.label))
     },
 
     isProcedureTransmitted () {
@@ -243,10 +219,13 @@ export default {
 
       if (!meinBerlinOrgId) return
 
-      const code = this.orgIdToDistrictCode[String(meinBerlinOrgId).trim()]
+      // The district that has the organisation ID of the user in the district catalog
+      const district = this.districts.find(
+        ({ meinBerlinOrganisationId }) => meinBerlinOrganisationId === String(meinBerlinOrgId).trim()
+      )
 
-      if (code) {
-        this.$nextTick(() => this.onChange(code))
+      if (district) {
+        this.$nextTick(() => this.onChange(district.districtCode))
       }
     },
 
@@ -325,7 +304,10 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted () {
+    // The districts are needed for the select and for the preselection, so they are loaded first
+    this.districts = await fetchDistricts(this.demosplanUi)
+
     // Case: options are already provided → no need to fetch from backend
     if (this.additionalFieldOptions.length > 0) {
       this.list = this.additionalFieldOptions
