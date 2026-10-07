@@ -23,6 +23,8 @@ use EDT\JsonApi\ResourceConfig\Builder\MagicResourceConfigBuilder;
  * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonDistrict> $districtCode
  * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonDistrict> $name
  * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonDistrict> $meinBerlinOrganisationId
+ * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonDistrict> $usedByOrganisations
+ * @property-read AttributeConfigBuilderInterface<ClauseFunctionInterface<bool>,MeinBerlinAddonDistrict> $communicatedProcedures
  */
 class MeinBerlinAddonDistrictResourceConfigBuilder extends MagicResourceConfigBuilder
 {

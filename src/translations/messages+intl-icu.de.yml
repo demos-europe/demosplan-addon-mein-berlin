@@ -37,6 +37,7 @@ mein.berlin.error.create.empty.coordinate: "Es ist erforderlich, eine Verortung 
 mein.berlin.error.create.empty.district: "Es ist erforderlich, einen Bezirk auszuwählen."
 mein.berlin.error.create.empty.procedure.short.name: "Es kann kein leeres Feld gespeichert werden."
 mein.berlin.error.create.empty.organisation.id: "Es ist erforderlich, eine Organisations-ID zu vergeben."
+mein.berlin.error.update.district.organisation.id.taken: "Diese Organisations-ID gehört bereits zu einem anderen Bezirk."
 mein.berlin.error.update.organisation.id.invalid: "Die Organisations-ID darf nur aus Ziffern bestehen."
 mein.berlin.interface: "Schnittstelle mein.berlin.de"
 mein.berlin.interface.activation: "Verfahren auf mein.berlin.de verlinken"
