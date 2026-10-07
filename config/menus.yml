@@ -1,0 +1,13 @@
+# Entries the addon adds to the menus of the core, see MenusLoaderPass
+sidemenu:
+    administer:
+        children:
+            mein_berlin_districts:
+                label: 'mein.berlin.districts.menu'
+                path: 'DemosPlan_addon_page'
+                path_params:
+                    hookName: 'mein_berlin_districts'
+                addon: 'demos-europe/demosplan-addon-mein-berlin'
+                permission: 'feature_set_mein_berlin_organisation_id'
+                link_attributes:
+                    data-cy: 'meinBerlinDistricts'

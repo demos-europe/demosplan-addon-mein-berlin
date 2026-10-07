@@ -5,6 +5,9 @@ const config = DemosPlanAddon.build(
   {
     MeinBerlinAdditionalFields: DemosPlanAddon.resolve(
       'client/hooks/InterfaceFieldsToTransmit/MeinBerlinAdditionalFields.vue'
+    ),
+    MeinBerlinDistrictsAdmin: DemosPlanAddon.resolve(
+      'client/hooks/DistrictsAdmin/MeinBerlinDistrictsAdmin.vue'
     )
   }
 )
