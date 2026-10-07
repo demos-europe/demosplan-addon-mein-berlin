@@ -48,7 +48,7 @@ final class Version20261006131519 extends AbstractMigration
     {
         $this->abortIfNotMysql();
 
-        $this->addSql('CREATE TABLE IF NOT EXISTS addon_mein_berlin_district (id CHAR(36) NOT NULL, district_code VARCHAR(2) NOT NULL, name VARCHAR(255) NOT NULL, mein_berlin_organisation_id VARCHAR(255) DEFAULT NULL, UNIQUE INDEX unique_district_code (district_code), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE IF NOT EXISTS addon_mein_berlin_district (id CHAR(36) NOT NULL, district_code VARCHAR(2) NOT NULL, name VARCHAR(255) NOT NULL, mein_berlin_organisation_id VARCHAR(255) DEFAULT NULL, UNIQUE INDEX unique_district_code (district_code), UNIQUE INDEX unique_district_organisation_id (mein_berlin_organisation_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
 
         foreach (self::DISTRICTS as $districtCode => $district) {
             // INSERT IGNORE: the unique index on district_code keeps an already existing row untouched

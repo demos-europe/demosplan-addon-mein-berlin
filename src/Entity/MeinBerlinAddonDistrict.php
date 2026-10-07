@@ -26,6 +26,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MeinBerlinAddonDistrictRepository::class)]
 #[ORM\Table(name: 'addon_mein_berlin_district')]
 #[ORM\UniqueConstraint(name: 'unique_district_code', columns: ['district_code'])]
+#[ORM\UniqueConstraint(name: 'unique_district_organisation_id', columns: ['mein_berlin_organisation_id'])]
 class MeinBerlinAddonDistrict implements UuidEntityInterface
 {
     #[ORM\Column(type: 'string', length: 36, nullable: false, options: ['fixed' => true])]
