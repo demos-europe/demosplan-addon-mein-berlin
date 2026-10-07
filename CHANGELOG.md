@@ -5,6 +5,8 @@
 - Limit procedure pictogram copyright to 120 and alt text to 80 characters (BEAA2-45)
 - Add the table `addon_mein_berlin_district` with the mein.berlin.de organisation ID per Berlin district and a read-only JSON:API resource `MeinBerlinAddonDistrict` for it (BEAA2-44)
 - Build the organisation dropdown and the district select of a procedure, including the district preselection, from the district catalog instead of hard coded values; the organisation dropdown shows the mein.berlin.de organisation ID in front of the district name (BEAA2-44)
+- The mein.berlin.de organisation ID of a district is changed on the page "mein.berlin.de Bezirke" only: all organisations that use the old ID get the new one, and procedures that were already communicated with the old ID are released (their bplanId is cleared and the old values are logged), so they are created again with the new ID. The user has to confirm a warning before. The organisation dropdown only offers the IDs of the districts and warns in the same way when an organisation gets another ID. An organisation ID must be a number now (BEAA2-44)
+- Add the page "mein.berlin.de Bezirke" (menu entry in the administration menu) where the Mandanten-Administration maintains the mein.berlin.de organisation ID of each district; an ID can belong to one district only. Requires the menu and page support of the core (BEAA2-44)
 
 ## v0.32 (2026-07-03)
 - **fix**: Pre-select existing mein.berlin organisation ID in org/procedure dropdowns — prevents TypeError crash when API returns `data: null` for relationship items belonging to other customers, which was silently aborting the mounted callback and triggering a create instead of an update

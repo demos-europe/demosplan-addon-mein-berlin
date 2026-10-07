@@ -122,6 +122,9 @@ The addon provides RSS feeds accessible via specific routes for mein.berlin to c
 - `mein_berlin_addon_entity`: Stores procedure-specific mein.berlin data
 - `mein_berlin_addon_orga_relation`: Maps organizations to mein.berlin IDs
 
+### District Maintenance
+The mein.berlin.de organisation IDs of the Berlin districts are saved in `addon_mein_berlin_district` and offered in the organisation dropdown. Users with the permission `feature_set_mein_berlin_organisation_id` maintain them on the page "mein.berlin.de Bezirke", which is linked in the administration menu by `config/menus.yml`. The page is the generic addon page of the core (`/addon/page/mein_berlin_districts`) that shows the components of the hook `mein_berlin_districts` (without ".berlin.", as the router of the core removes that from URLs). An ID can belong to one district only. Changing the ID of a district gives all organisations that use the old ID the new one; the procedures of those organisations that were already communicated are released (see Limitations), after the user confirmed a warning.
+
 ### Migrations
 Located in `src/DoctrineMigrations/` with versioned migration files.
 
@@ -129,7 +132,7 @@ Located in `src/DoctrineMigrations/` with versioned migration files.
 
 - **No Delete Support**: mein.berlin API does not support procedure deletion
 - **Draft Hiding**: Procedures can only be hidden by updating `is_draft` status
-- **Organization ID Constraints**: Organization IDs cannot be changed if procedures are already communicated
+- **Organization ID Changes**: Changing the ID of a district (or choosing another ID for an organization) releases procedures that are already communicated with the old ID (their `bplanId` is cleared). They are created again with the new ID, the entries at mein.berlin.de that belong to the old ID have to be updated or deleted manually in the mein.berlin.de dashboard
 
 ## Error Handling
 
