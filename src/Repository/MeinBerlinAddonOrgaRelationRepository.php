@@ -11,10 +11,11 @@ declare(strict_types=1);
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository;
 
 use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
-use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
 use DemosEurope\DemosplanAddon\Logic\ApiRequest\FluentRepository;
+use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
@@ -56,29 +57,82 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
     }
 
     /**
-     * This method is used to determine if a meinBerlin organisation id is allowed to be updated.
-     * It will return all already to meinBerlin communicated addonEntities of an organisation using the existing
-     * meinBerlin organisation id. If the old organisation id is in use already, an update should be prohibited.
+     * Returns the addonEntities of the not deleted procedures of the organisation that were already
+     * communicated to meinBerlin, i.e. that have a bplanId. Those procedures belong to the meinBerlin
+     * organisation id the organisation currently has.
+     *
      * @return MeinBerlinAddonEntity[]
      */
-    public function getProceduresOfOrgaWithExistingBplanId(MeinBerlinAddonOrgaRelation $orgaRelation): array
-    {
-        $orgaId = $orgaRelation->getOrga()?->getId();
-        $procedureRepository = $this->getEntityManager()->getRepository(ProcedureInterface::class);
-        $proceduresOfOrga = $procedureRepository->findBy(['orga' => $orgaId, 'deleted' => false]);
-        $proceduresOfOrga = array_map(
-            static fn(ProcedureInterface $procedure) => $procedure->getId(),
-            $proceduresOfOrga
-        );
-        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-
-        return $queryBuilder->select('addonEntity')
-            ->from(MeinBerlinAddonEntity::class, 'addonEntity')
-            ->where('addonEntity.procedure IN (:procedureIds)')
-            ->andWhere('addonEntity.bplanId != :emptyBplanId')
-            ->setParameter('procedureIds', $proceduresOfOrga)
-            ->setParameter('emptyBplanId', '')
+    public function getProceduresOfOrgaWithExistingBplanId(
+        MeinBerlinAddonOrgaRelation $orgaRelation,
+        ?int $limit = null
+    ): array {
+        return $this->createCommunicatedProceduresQueryBuilder($orgaRelation)
+            ->select('addonEntity')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+    }
+
+    public function countProceduresOfOrgaWithExistingBplanId(MeinBerlinAddonOrgaRelation $orgaRelation): int
+    {
+        return (int) $this->createCommunicatedProceduresQueryBuilder($orgaRelation)
+            ->select('COUNT(addonEntity.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Same as {@link getProceduresOfOrgaWithExistingBplanId()} for all organisations that use the given
+     * meinBerlin organisation id.
+     *
+     * @return MeinBerlinAddonEntity[]
+     */
+    public function getProceduresOfOrganisationIdWithExistingBplanId(
+        string $meinBerlinOrganisationId,
+        ?int $limit = null
+    ): array {
+        return $this->createCommunicatedProceduresOfOrganisationIdQueryBuilder($meinBerlinOrganisationId)
+            ->select('addonEntity')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countProceduresOfOrganisationIdWithExistingBplanId(string $meinBerlinOrganisationId): int
+    {
+        return (int) $this->createCommunicatedProceduresOfOrganisationIdQueryBuilder($meinBerlinOrganisationId)
+            ->select('COUNT(addonEntity.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    private function createCommunicatedProceduresOfOrganisationIdQueryBuilder(
+        string $meinBerlinOrganisationId
+    ): QueryBuilder {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->from(MeinBerlinAddonEntity::class, 'addonEntity')
+            ->join('addonEntity.procedure', 'procedure')
+            ->join(MeinBerlinAddonOrgaRelation::class, 'relation', Join::WITH, 'relation.orga = procedure.orga')
+            ->where('relation.meinBerlinOrganisationId = :meinBerlinOrganisationId')
+            ->andWhere('procedure.deleted = :deleted')
+            ->andWhere('addonEntity.bplanId != :emptyBplanId')
+            ->setParameter('meinBerlinOrganisationId', $meinBerlinOrganisationId)
+            ->setParameter('deleted', false)
+            ->setParameter('emptyBplanId', '');
+    }
+
+    private function createCommunicatedProceduresQueryBuilder(
+        MeinBerlinAddonOrgaRelation $orgaRelation
+    ): QueryBuilder {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->from(MeinBerlinAddonEntity::class, 'addonEntity')
+            ->join('addonEntity.procedure', 'procedure')
+            ->where('procedure.orga = :orgaId')
+            ->andWhere('procedure.deleted = :deleted')
+            ->andWhere('addonEntity.bplanId != :emptyBplanId')
+            ->setParameter('orgaId', $orgaRelation->getOrga()?->getId())
+            ->setParameter('deleted', false)
+            ->setParameter('emptyBplanId', '');
     }
 }

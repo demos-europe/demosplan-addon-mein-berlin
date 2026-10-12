@@ -10,3 +10,8 @@ demosplan_addon:
     hooks:
      interface.fields.to.transmit:
         entry: MeinBerlinAdditionalFields
+     mein_berlin_districts:
+        entry: MeinBerlinDistrictsAdmin
+        options:
+          permissions:
+            - feature_set_mein_berlin_organisation_id
