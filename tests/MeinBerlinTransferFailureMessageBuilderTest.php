@@ -119,6 +119,67 @@ class MeinBerlinTransferFailureMessageBuilderTest extends TestCase
         self::assertStringContainsString('wenden Sie sich bitte an den Support', $body);
     }
 
+    public function testHtmlInResponseAndMessageIsEscaped(): void
+    {
+        $this->parameterBag->method('get')->willReturn('');
+        $exception = new MeinBerlinCommunicationException(
+            '<b>failed</b>',
+            category: MeinBerlinCommunicationErrorCategory::server_error,
+            httpStatus: 502,
+            responseBody: '<html><body><h1>502 Bad Gateway</h1></body></html>'
+        );
+
+        $body = $this->sut->getBody($this->procedure, $exception, MeinBerlinTransferType::create);
+
+        self::assertStringNotContainsString('<h1>', $body);
+        self::assertStringNotContainsString('<b>', $body);
+        self::assertStringContainsString('&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;', $body);
+        self::assertStringContainsString('Meldung: &lt;b&gt;failed&lt;/b&gt;', $body);
+    }
+
+    public function testHtmlInProcedureNameIsEscaped(): void
+    {
+        $this->parameterBag->method('get')->willReturn('');
+        $procedure = $this->createMock(ProcedureInterface::class);
+        $procedure->method('getName')->willReturn('Plan <script>');
+
+        $body = $this->sut->getBody($procedure, new MeinBerlinCommunicationException('failed'), MeinBerlinTransferType::create);
+
+        self::assertStringNotContainsString('<script>', $body);
+        self::assertStringContainsString('Plan &lt;script&gt;', $body);
+    }
+
+    public function testReplacementSyntaxSurvivesPregReplace(): void
+    {
+        $this->parameterBag->method('get')->willReturn('');
+        $responseBody = 'cost $1 and ${2} and \\1 and \\\\ end';
+        $exception = new MeinBerlinCommunicationException('failed', responseBody: $responseBody);
+        $procedure = $this->createMock(ProcedureInterface::class);
+        $procedure->method('getName')->willReturn('Plan $1');
+
+        $body = $this->sut->getBody($procedure, $exception, MeinBerlinTransferType::create);
+        $subject = $this->sut->getSubject($procedure, MeinBerlinTransferType::create);
+
+        // the same call the core makes in MailRepository::replacePlaceholder
+        self::assertSame(
+            'Antwort von mein.berlin.de: '.$responseBody,
+            $this->extractResponseLine(preg_replace('/\$\{mailbody\}/', $body, '${mailbody}'))
+        );
+        self::assertStringContainsString('"Plan $1"', preg_replace('/\$\{mailbody\}/', $body, '${mailbody}'));
+        self::assertSame('Übermittlung an mein.berlin.de fehlgeschlagen: Plan $1', preg_replace('/\$\{mailsubject\}/', $subject, '${mailsubject}'));
+    }
+
+    private function extractResponseLine(string $body): string
+    {
+        foreach (explode("\r\n", $body) as $line) {
+            if (str_starts_with($line, 'Antwort von mein.berlin.de: ')) {
+                return $line;
+            }
+        }
+
+        return '';
+    }
+
     /**
      * @dataProvider categoryProvider
      */

@@ -16,7 +16,9 @@ use DemosEurope\DemosplanAddon\DemosMeinBerlin\Enum\MeinBerlinTransferType;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Exception\MeinBerlinCommunicationException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use function htmlspecialchars;
 use function preg_replace;
+use function strtr;
 use function trim;
 
 /**
@@ -33,10 +35,10 @@ class MeinBerlinTransferFailureMessageBuilder
 
     public function getSubject(ProcedureInterface $procedure, MeinBerlinTransferType $type): string
     {
-        return $this->translator->trans(
+        return $this->neutralizeReplacementSyntax($this->translator->trans(
             'mein.berlin.failure.mail.subject.'.$type->value,
             ['procedureName' => $procedure->getName()]
-        );
+        ));
     }
 
     public function getBody(
@@ -49,7 +51,7 @@ class MeinBerlinTransferFailureMessageBuilder
             [
                 'intro' => $this->translator->trans(
                     'mein.berlin.failure.mail.intro.'.$type->value,
-                    ['procedureName' => $procedure->getName()]
+                    ['procedureName' => $this->escapeHtml((string) $procedure->getName())]
                 ),
                 'reason' => $this->translator->trans(
                     'mein.berlin.failure.mail.reason.'.$exception->getCategory()->value
@@ -60,7 +62,7 @@ class MeinBerlinTransferFailureMessageBuilder
         );
 
         // line breaks as in the other mails of the core
-        return preg_replace('/\r?\n/', "\r\n", $body);
+        return $this->neutralizeReplacementSyntax(preg_replace('/\r?\n/', "\r\n", $body));
     }
 
     private function getContact(): string
@@ -72,7 +74,7 @@ class MeinBerlinTransferFailureMessageBuilder
 
         return $this->translator->trans(
             'mein.berlin.failure.mail.contact.address',
-            ['supportAddress' => $supportAddress]
+            ['supportAddress' => $this->escapeHtml($supportAddress)]
         );
     }
 
@@ -95,16 +97,34 @@ class MeinBerlinTransferFailureMessageBuilder
         }
         $details[] = $this->translator->trans(
             'mein.berlin.failure.mail.details.message',
-            ['message' => $exception->getMessage()]
+            ['message' => $this->escapeHtml($exception->getMessage())]
         );
         $responseBody = $exception->getResponseBody();
         if (null !== $responseBody && '' !== $responseBody) {
             $details[] = $this->translator->trans(
                 'mein.berlin.failure.mail.details.response',
-                ['response' => $responseBody]
+                ['response' => $this->escapeHtml($responseBody)]
             );
         }
 
         return implode("\r\n", $details);
+    }
+
+    /**
+     * The core sends the mail as HTML without escaping, so text of external origin (e.g. an HTML error page of
+     * the server) would be rendered instead of shown. Quotes stay as they are to keep JSON readable.
+     */
+    private function escapeHtml(string $value): string
+    {
+        return htmlspecialchars($value, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    /**
+     * The core inserts the text via preg_replace as replacement string, where "$1", "${1}" and "\1" are
+     * back references. Escaping them makes them appear literally.
+     */
+    private function neutralizeReplacementSyntax(string $text): string
+    {
+        return strtr($text, ['\\' => '\\\\', '$' => '\\$']);
     }
 }
