@@ -78,12 +78,14 @@ class MeinBerlinCreateProcedureService
             $this->messageBag->add('confirm', 'mein.berlin.communication.create.success');
         } catch (MeinBerlinCommunicationException $e) {
             $this->messageBag->add('error', 'mein.berlin.communication.create.error');
-            // the messageBag is not visible to anybody if the procedure was updated automatically (phase switch)
-            $this->transferFailureNotifier->notifyAboutFailedTransfer($procedure, $e, MeinBerlinTransferType::create);
             // propagate only if flush is still in queue - otherwise nothing can be done.
+            // The failure is then rethrown and the transaction rolled back, which would discard a queued mail.
+            // The user sees the error in the messageBag, so no mail is sent here.
             if ($calledViaResourceTypeFlushIsQueued) {
                 throw $e;
             }
+            // the messageBag is not visible to anybody if the procedure was updated automatically (phase switch)
+            $this->transferFailureNotifier->notifyAboutFailedTransfer($procedure, $e, MeinBerlinTransferType::create);
         }
     }
 

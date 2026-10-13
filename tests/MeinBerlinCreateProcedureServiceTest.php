@@ -226,14 +226,13 @@ class MeinBerlinCreateProcedureServiceTest extends TestCase
         );
     }
 
-    public function testNotifiesAboutFailedTransferBeforePropagatingTheException(): void
+    public function testDoesNotNotifyWhenPropagatingTheException(): void
     {
+        // the rethrow rolls back the transaction, which would discard a queued mail
         $exception = new MeinBerlinCommunicationException('testingPurpose');
         $this->communicator->method('createProcedure')->willThrowException($exception);
 
-        $this->transferFailureNotifier->expects(self::once())
-            ->method('notifyAboutFailedTransfer')
-            ->with($this->procedure, $exception, MeinBerlinTransferType::create);
+        $this->transferFailureNotifier->expects(self::never())->method('notifyAboutFailedTransfer');
 
         $this->expectException(MeinBerlinCommunicationException::class);
         $this->sut->createMeinBerlinProcedure(

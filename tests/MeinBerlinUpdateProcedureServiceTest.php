@@ -204,21 +204,19 @@ class MeinBerlinUpdateProcedureServiceTest extends TestCase
         );
     }
 
-    public function testNotifiesAboutFailedDistrictUpdateBeforePropagatingTheException(): void
+    public function testDoesNotNotifyAboutFailedDistrictUpdateWhenPropagatingTheException(): void
     {
+        // the rethrow rolls back the transaction, which would discard a queued mail
         $exception = new MeinBerlinCommunicationException('testingPurpose');
         $this->communicator->method('updateProcedure')->willThrowException($exception);
-        $this->transferFailureNotifier->expects(self::once())
-            ->method('notifyAboutFailedTransfer')
-            ->with($this->procedure, $exception, MeinBerlinTransferType::update);
+        $this->transferFailureNotifier->expects(self::never())->method('notifyAboutFailedTransfer');
 
         $this->expectException(MeinBerlinCommunicationException::class);
         $this->sut->updateDistrictByResourceType(
             $this->createMock(MeinBerlinAddonEntity::class),
             'meinBerlinOrganisationId',
             'testBplanId',
-            'testProcedureId',
-            $this->procedure
+            'testProcedureId'
         );
     }
 }

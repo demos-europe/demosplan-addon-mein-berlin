@@ -56,8 +56,7 @@ class MeinBerlinUpdateProcedureService
         MeinBerlinAddonEntity $changedEntity,
         string $meinBerlinOrganisationId,
         string $bplanId,
-        string $procedureId,
-        ProcedureInterface $procedure
+        string $procedureId
     ): void
     {
         $fieldsToUpdate = [];
@@ -76,7 +75,7 @@ class MeinBerlinUpdateProcedureService
         } catch (MeinBerlinCommunicationException $e) {
             // logs have been written
             $this->messageBag->add('error', 'mein.berlin.communication.update.error');
-            $this->transferFailureNotifier->notifyAboutFailedTransfer($procedure, $e, MeinBerlinTransferType::update);
+            // no failure mail here: the rethrow rolls back the transaction, which would discard the queued mail
             // rethrow here to prevent the flushing the change on our side
             throw $e;
         }
