@@ -22,8 +22,11 @@ use function array_filter;
 use function array_map;
 use function array_values;
 use function explode;
+use function filter_var;
 use function is_string;
 use function trim;
+
+use const FILTER_VALIDATE_EMAIL;
 
 /**
  * Tells the responsible planning agency by mail that a procedure (or a change of it) could not be transferred to
@@ -62,11 +65,22 @@ class MeinBerlinTransferFailureNotifier
         ];
 
         try {
+            // the core drops invalid addresses silently when queueing, so they are checked here
             $recipient = $procedure->getAgencyMainEmailAddress();
             if (!is_string($recipient) || '' === trim($recipient)) {
                 $this->logger->warning(
                     'demosplan-mein-berlin-addon transfer to MeinBerlin failed - no failure mail sent: '
                     .'the procedure has no agency main email address',
+                    $logContext
+                );
+
+                return;
+            }
+            $recipient = trim($recipient);
+            if (!$this->isValidEmailAddress($recipient)) {
+                $this->logger->warning(
+                    'demosplan-mein-berlin-addon transfer to MeinBerlin failed - no failure mail sent: '
+                    .'the agency main email address of the procedure is not a valid email address',
                     $logContext
                 );
 
@@ -104,8 +118,28 @@ class MeinBerlinTransferFailureNotifier
     private function getCarbonCopyRecipients(): array
     {
         // comma separated, null if the environment variable is not set
-        $recipients = explode(',', (string) $this->parameterBag->get('mein_berlin_failure_mail_cc'));
+        $recipients = array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) $this->parameterBag->get('mein_berlin_failure_mail_cc'))
+        )));
 
-        return array_values(array_filter(array_map('trim', $recipients)));
+        $validRecipients = [];
+        foreach ($recipients as $recipient) {
+            if ($this->isValidEmailAddress($recipient)) {
+                $validRecipients[] = $recipient;
+                continue;
+            }
+            $this->logger->warning(
+                'demosplan-mein-berlin-addon invalid entry in MEIN_BERLIN_FAILURE_MAIL_CC ignored',
+                ['entry' => $recipient]
+            );
+        }
+
+        return $validRecipients;
+    }
+
+    private function isValidEmailAddress(string $address): bool
+    {
+        return false !== filter_var($address, FILTER_VALIDATE_EMAIL);
     }
 }

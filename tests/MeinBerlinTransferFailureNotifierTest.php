@@ -147,6 +147,50 @@ class MeinBerlinTransferFailureNotifierTest extends TestCase
         $this->sut->notifyAboutFailedTransfer($procedure, new MeinBerlinCommunicationException('failed'), MeinBerlinTransferType::create);
     }
 
+    public function testDoesNotSendMailToInvalidMainRecipientAndDoesNotLogQueued(): void
+    {
+        // even a valid cc must not turn the mail into one that only goes to the cc recipients
+        $this->parameterBag->method('get')->willReturn('cc@example.org');
+        $procedure = $this->createMock(ProcedureInterface::class);
+        $procedure->method('getAgencyMainEmailAddress')->willReturn('not-an-address');
+
+        $this->mailService->expects(self::never())->method('sendMail');
+        $this->logger->expects(self::once())->method('warning');
+        $this->logger->expects(self::never())->method('info');
+
+        $this->sut->notifyAboutFailedTransfer($procedure, new MeinBerlinCommunicationException('failed'), MeinBerlinTransferType::create);
+    }
+
+    public function testTrimsMainRecipient(): void
+    {
+        $procedure = $this->createMock(ProcedureInterface::class);
+        $procedure->method('getAgencyMainEmailAddress')->willReturn(' agency@example.org ');
+
+        $this->mailService->expects(self::once())
+            ->method('sendMail')
+            ->with(self::anything(), self::anything(), 'agency@example.org')
+            ->willReturn($this->createMock(MailSendInterface::class));
+
+        $this->sut->notifyAboutFailedTransfer($procedure, new MeinBerlinCommunicationException('failed'), MeinBerlinTransferType::create);
+    }
+
+    public function testDropsInvalidCarbonCopyEntriesWithAWarningEach(): void
+    {
+        $this->parameterBag->method('get')->willReturn('a@example.org, typo@example, b@example.org,no-at-sign');
+
+        $this->mailService->expects(self::once())
+            ->method('sendMail')
+            ->with(
+                self::anything(), self::anything(), self::anything(), self::anything(),
+                ['a@example.org', 'b@example.org'],
+                self::anything(), self::anything(), self::anything()
+            )
+            ->willReturn($this->createMock(MailSendInterface::class));
+        $this->logger->expects(self::exactly(2))->method('warning');
+
+        $this->sut->notifyAboutFailedTransfer($this->procedure, new MeinBerlinCommunicationException('failed'), MeinBerlinTransferType::create);
+    }
+
     public function testMailProblemDoesNotPropagate(): void
     {
         $this->mailService->method('sendMail')->willThrowException(new RuntimeException('no template'));
