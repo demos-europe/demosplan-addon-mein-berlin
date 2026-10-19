@@ -73,6 +73,7 @@
       :label="{
         text: Translator.trans('procedure.pictogram.copyright')
       }"
+      :maxlength="120"
       :readonly="!hasBerlinOrgaId"
       class="my-2"
       data-cy="procedure:pictogramCopyright"
@@ -88,7 +89,7 @@
         text: Translator.trans('procedure.pictogram.altText'),
         tooltip: Translator.trans('procedure.pictogram.altText.toolTipp')
       }"
-      :maxlength="79"
+      :maxlength="80"
       :readonly="!hasBerlinOrgaId"
       class="my-2"
       data-cy="procedure:pictogramAltText"
