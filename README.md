@@ -104,6 +104,32 @@ The addon provides RSS feeds accessible via specific routes for mein.berlin to c
 - Links to public participation
 - Encoding and entry link configuration
 
+The feed is available at `/mein_berlin/rss/<mein.berlin organisation id>` and lists all procedures of the
+organisations with that id whose public phase is visible (permission set `read` or `write`). It is cached for one hour.
+
+### Filtering by phase (Verfahrensschritt)
+
+The feed can be restricted to procedures in certain public phases with the query parameter `VERFAHRENSSCHRITT`.
+The value is the name of the phase as it is shown in the feed (compared ignoring case and surplus whitespace).
+Without the parameter, the feed is unchanged. A filter only narrows the list, procedures that are not visible
+never appear. If no procedure matches, the feed is valid but has no entries.
+
+| Notation | Example (not URL encoded) |
+|---|---|
+| single name | `?VERFAHRENSSCHRITT=Auswertung Öffentlichkeit` |
+| single quoted name | `?VERFAHRENSSCHRITT="Auswertung Öffentlichkeit"` |
+| list in parentheses | `?VERFAHRENSSCHRITT=("Beteiligung Öffentlichkeit","Frühzeitige Beteiligung Öffentlichkeit - § 3 (1) BauGB")` |
+| comma separated list | `?VERFAHRENSSCHRITT=Beteiligung Öffentlichkeit,Auswertung Öffentlichkeit` |
+| array notation | `?VERFAHRENSSCHRITT[]=Beteiligung Öffentlichkeit&VERFAHRENSSCHRITT[]=Auswertung Öffentlichkeit` |
+
+Notes:
+- The parameter belongs to the query string and starts with `?`. Appending it with `&` directly to the organisation id
+  does not work, as everything after the slash is then read as the organisation id.
+- Names containing a comma have to be quoted or use the array notation.
+- Special characters have to be URL encoded when the URL is embedded, e.g. `?VERFAHRENSSCHRITT=%22Auswertung%20%C3%96ffentlichkeit%22`.
+- A repeated parameter without brackets can not be used for several names, only the last value reaches the application.
+- The names are those of the customer's phase definitions. If a phase is renamed, the URLs have to be adjusted.
+
 ## Security & Permissions
 
 ### Permission Management

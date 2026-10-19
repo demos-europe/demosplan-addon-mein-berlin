@@ -14,9 +14,11 @@ namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Controller;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Repository\MeinBerlinAddonOrgaRelationRepository;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinAddonRelationService;
+use DemosEurope\DemosplanAddon\DemosMeinBerlin\Service\MeinBerlinRssPhaseFilter;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Laminas\Feed\Writer\Feed;
@@ -42,6 +44,8 @@ class RssFeedController extends AbstractController
     public function generateRssFeed(
         MeinBerlinAddonOrgaRelationRepository $correspondingAddonOrgaRelationRepository,
         MeinBerlinAddonRelationService $orgaRelationService,
+        MeinBerlinRssPhaseFilter $phaseFilter,
+        Request $request,
         string $organisationId
     ): Response
     {
@@ -51,6 +55,10 @@ class RssFeedController extends AbstractController
             return new Response('', 200);
         }
 
+        // Optionally restrict the feed to procedures in certain phases (Verfahrensschritte)
+        $rawPhaseFilter = $phaseFilter->getRawValue($request->query->all());
+        $phaseNames = $phaseFilter->parse($rawPhaseFilter);
+
         // Aggregate procedures from all organizations sharing this meinBerlinId
         $proceduresByOrga = [];
         $feedOrgaNames = [];
@@ -59,7 +67,7 @@ class RssFeedController extends AbstractController
             if (null === $orga) {
                 continue;
             }
-            $visibleProcedures = $orgaRelationService->getVisibleProcedures($orga);
+            $visibleProcedures = $orgaRelationService->getVisibleProcedures($orga, $phaseNames);
             if ([] !== $visibleProcedures) {
                 $feedOrgaNames[] = $orga->getName();
             }
@@ -76,7 +84,12 @@ class RssFeedController extends AbstractController
         $feed->setTitle($this->translator->trans('mein.berlin.rss.feed.title'));
         $feed->setDescription($this->translator->trans('mein.berlin.rss.feed.description', ['organisation' => implode(', ', $feedOrgaNames)]));
         $feed->setLink($this->router->generate('core_home', [], UrlGeneratorInterface::ABSOLUTE_URL));
-        $feed->setFeedLink($this->router->generate('addon_mein_berlin_rss_feed', ['organisationId' => $organisationId], UrlGeneratorInterface::ABSOLUTE_URL), 'rss');
+        // the link of the feed itself has to contain the filter, otherwise readers would subscribe to the unfiltered feed
+        $feedLinkParameters = ['organisationId' => $organisationId];
+        if ([] !== $phaseNames) {
+            $feedLinkParameters[MeinBerlinRssPhaseFilter::PARAMETER_NAME] = $rawPhaseFilter;
+        }
+        $feed->setFeedLink($this->router->generate('addon_mein_berlin_rss_feed', $feedLinkParameters, UrlGeneratorInterface::ABSOLUTE_URL), 'rss');
         $feed->setGenerator('demosplan');
         $feed->setDateModified(new DateTime());
         $feed->setEncoding('UTF-8');

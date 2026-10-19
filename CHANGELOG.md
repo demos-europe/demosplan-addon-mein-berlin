@@ -2,6 +2,10 @@
 
 ## UNRELEASED
 
+## v0.34 (2026-10-15)
+- **feat BEAA2-42**: The RSS feed can be restricted to procedures in certain public phases (Verfahrensschritte) with the query parameter `VERFAHRENSSCHRITT`, e.g. `?VERFAHRENSSCHRITT=("Beteiligung Öffentlichkeit","Auswertung Öffentlichkeit")`. Single names, quoted names, lists and the array notation are supported. Without the parameter the feed is unchanged.
+
+## v0.33 (2026-10-06)
 - Limit procedure pictogram copyright to 120 and alt text to 80 characters (BEAA2-45)
 - Add the table `addon_mein_berlin_district` with the mein.berlin.de organisation ID per Berlin district and a read-only JSON:API resource `MeinBerlinAddonDistrict` for it (BEAA2-44)
 - Build the organisation dropdown and the district select of a procedure, including the district preselection, from the district catalog instead of hard coded values; the organisation dropdown shows the mein.berlin.de organisation ID in front of the district name (BEAA2-44)
