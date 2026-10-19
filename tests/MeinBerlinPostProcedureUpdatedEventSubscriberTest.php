@@ -167,7 +167,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriberTest extends TestCase
                 true,
                 $orgaRelation->getMeinBerlinOrganisationId(),
                 $addonEntity->getBplanId(),
-                $procedure->getId()
+                $procedure->getId(),
+                $procedure
             );
 
         $this->sut->onProcedureUpdate($event);

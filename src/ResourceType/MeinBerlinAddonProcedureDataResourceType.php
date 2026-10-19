@@ -361,7 +361,7 @@ class MeinBerlinAddonProcedureDataResourceType extends AddonResourceType
             $meinBerlinAddonEntity,
             $organisationId,
             $meinBerlinAddonEntity->getBplanId(),
-            $this->currentContextProviderInterface->getCurrentProcedure()?->getId(),
+            $this->currentContextProviderInterface->getCurrentProcedure()?->getId()
         );
     }
 }
