@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 
+## v0.34 (2026-10-15)
 - **feat BEAA2-42**: The RSS feed can be restricted to procedures in certain public phases (Verfahrensschritte) with the query parameter `VERFAHRENSSCHRITT`, e.g. `?VERFAHRENSSCHRITT=("Beteiligung Öffentlichkeit","Auswertung Öffentlichkeit")`. Single names, quoted names, lists and the array notation are supported. Without the parameter the feed is unchanged.
 
 ## v0.33 (2026-10-06)
