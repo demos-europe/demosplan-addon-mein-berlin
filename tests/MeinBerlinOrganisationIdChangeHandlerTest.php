@@ -25,6 +25,33 @@ class MeinBerlinOrganisationIdChangeHandlerTest extends TestCase
         $this->sut = new MeinBerlinOrganisationIdChangeHandler($this->logger, $this->repository);
     }
 
+    /**
+     * @dataProvider organisationIdProvider
+     */
+    public function testIsValidOrganisationId(string $organisationId, bool $expected): void
+    {
+        self::assertSame($expected, $this->sut->isValidOrganisationId($organisationId));
+    }
+
+    /**
+     * @return iterable<string, array{string, bool}>
+     */
+    public static function organisationIdProvider(): iterable
+    {
+        yield 'single digit' => ['2', true];
+        yield 'two digits' => ['14', true];
+        yield 'many digits' => ['1234567', true];
+        yield 'leading zero' => ['02', false];
+        yield 'only zero' => ['0', false];
+        yield 'empty' => ['', false];
+        yield 'letters' => ['abc', false];
+        yield 'number with letters' => ['12a', false];
+        yield 'negative number' => ['-5', false];
+        yield 'decimal number' => ['1.5', false];
+        yield 'surrounded by space' => [' 14 ', false];
+        yield 'trailing newline' => ["14\n", false];
+    }
+
     public function testReleaseClearsBplanIdOfCommunicatedProceduresWhenIdChanges(): void
     {
         $relation = $this->createRelation('25');

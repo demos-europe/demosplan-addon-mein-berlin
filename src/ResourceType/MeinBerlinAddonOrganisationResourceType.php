@@ -110,9 +110,11 @@ class MeinBerlinAddonOrganisationResourceType extends AddonResourceType
                         MeinBerlinOrganisationId update',
                             [$meinBerlinAddonOrgaRelation, ['newMeinBerlinOrganisationId' => $meinBerlinOrganisationId]]
                         );
-                        if ('' !== $meinBerlinOrganisationId && !ctype_digit($meinBerlinOrganisationId)) {
+                        if ('' !== $meinBerlinOrganisationId
+                            && !$this->organisationIdChangeHandler->isValidOrganisationId($meinBerlinOrganisationId)
+                        ) {
                             $this->messageBag->add('error', 'mein.berlin.error.update.organisation.id.invalid');
-                            throw new MeinBerlinCommunicationException('MeinBerlinOrganisationId has to be a number');
+                            throw new MeinBerlinCommunicationException('MeinBerlinOrganisationId has to be a whole number without leading zeros');
                         }
                         // procedures that were already communicated lose their link to meinBerlin when the id changes
                         $releasedProcedures = $this->organisationIdChangeHandler

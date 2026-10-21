@@ -11,7 +11,7 @@ mein.berlin.error.create.empty.district: "Es ist erforderlich, einen Bezirk ausz
 mein.berlin.error.create.empty.procedure.short.name: "Es kann kein leeres Feld gespeichert werden."
 mein.berlin.error.create.empty.organisation.id: "Es ist erforderlich, eine Organisations-ID zu vergeben."
 mein.berlin.error.update.district.organisation.id.taken: "Diese Organisations-ID gehört bereits zu einem anderen Bezirk."
-mein.berlin.error.update.organisation.id.invalid: "Die Organisations-ID darf nur aus Ziffern bestehen."
+mein.berlin.error.update.organisation.id.invalid: "Die Organisations-ID muss eine ganze Zahl ohne führende Null sein."
 mein.berlin.districts.confirm.required: "Bitte bestätigen Sie zuerst die Warnung, bevor Sie die ID ändern."
 mein.berlin.districts.change.organisations: "Die ID wird von {count, plural, one {# Organisation} other {# Organisationen}} verwendet. Diese erhalten die neue ID."
 mein.berlin.districts.change.reset: "Die ID wird entfernt. {count, plural, one {# Organisation verwendet} other {# Organisationen verwenden}} sie und {count, plural, one {verliert} other {verlieren}} damit ihre ID."

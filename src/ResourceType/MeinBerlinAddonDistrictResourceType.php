@@ -170,9 +170,9 @@ class MeinBerlinAddonDistrictResourceType extends AddonResourceType
             return;
         }
 
-        if (!ctype_digit($organisationId)) {
+        if (!$this->organisationIdChangeHandler->isValidOrganisationId($organisationId)) {
             $this->messageBag->add('error', 'mein.berlin.error.update.organisation.id.invalid');
-            throw new MeinBerlinCommunicationException('MeinBerlinOrganisationId has to be a number');
+            throw new MeinBerlinCommunicationException('MeinBerlinOrganisationId has to be a whole number without leading zeros');
         }
 
         $districtWithSameId = $this->districtRepository->findOneBy(['meinBerlinOrganisationId' => $organisationId]);

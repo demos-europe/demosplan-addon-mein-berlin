@@ -34,6 +34,15 @@ class MeinBerlinOrganisationIdChangeHandler
     }
 
     /**
+     * The organisation id is a part of the urls used for meinBerlin, so it has to be a whole number without leading
+     * zeros: "02" would be a different id than "2" for the unique check and for the organisations that use it.
+     */
+    public function isValidOrganisationId(string $organisationId): bool
+    {
+        return 1 === preg_match('/\A[1-9][0-9]*\z/', $organisationId);
+    }
+
+    /**
      * @return array{count: int, names: list<string>} the already communicated procedures of the organisation
      */
     public function getCommunicatedProceduresInfo(MeinBerlinAddonOrgaRelation $orgaRelation): array

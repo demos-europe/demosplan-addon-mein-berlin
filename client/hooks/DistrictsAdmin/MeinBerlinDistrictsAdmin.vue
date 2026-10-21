@@ -74,7 +74,7 @@
               :label="{ text: row.name, hide: true }"
               :model-value="row.value"
               :placeholder="Translator.trans('mein.berlin.districts.id.empty')"
-              pattern="[0-9]*"
+              pattern="[1-9][0-9]*"
               @update:model-value="value => onInput(row, value)"
             />
             <p
@@ -218,7 +218,7 @@ export default {
     },
 
     isValid (row) {
-      return /^\d*$/.test(row.value)
+      return /^([1-9]\d*)?$/.test(row.value)
     },
 
     /**
