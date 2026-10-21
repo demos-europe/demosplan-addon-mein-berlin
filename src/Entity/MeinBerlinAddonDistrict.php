@@ -44,6 +44,13 @@ class MeinBerlinAddonDistrict implements UuidEntityInterface
     #[ORM\Column(name: 'name', type: 'string', length: 255, nullable: false)]
     private string $name = '';
 
+    /**
+     * The name of the office at mein.berlin.de that owns the organisation ID, e.g. "Bezirksamt Lichtenberg". The
+     * name is the label of the district, which says where a plan is located.
+     */
+    #[ORM\Column(name: 'office_name', type: 'string', length: 255, nullable: false)]
+    private string $officeName = '';
+
     #[ORM\Column(name: 'mein_berlin_organisation_id', type: 'string', length: 255, nullable: true)]
     private ?string $meinBerlinOrganisationId = null;
 
@@ -75,6 +82,16 @@ class MeinBerlinAddonDistrict implements UuidEntityInterface
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function getOfficeName(): string
+    {
+        return $this->officeName;
+    }
+
+    public function setOfficeName(string $officeName): void
+    {
+        $this->officeName = $officeName;
     }
 
     public function getMeinBerlinOrganisationId(): ?string

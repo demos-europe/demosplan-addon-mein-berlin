@@ -19,24 +19,26 @@ use Doctrine\Migrations\AbstractMigration;
 final class Version20261006131519 extends AbstractMigration
 {
     /**
-     * Initial content of the district table: name and organisation id on mein.berlin.de by district code.
-     * The codes are the ones stored at procedures. Afterwards the table is the only source, the organisation ids
-     * are the ones that were hard coded in the frontend until now. "be" (gesamtstaedtisch) has none yet.
+     * Initial content of the district table by district code: the name of the district (where a plan is located),
+     * the name of the office at mein.berlin.de and the organisation id of that office. The codes are the ones
+     * stored at procedures. Afterwards the table is the only source, the organisation ids are the ones that were hard
+     * coded in the frontend until now. "be" (gesamtstaedtisch) is the id 14 of the Senatsverwaltung, which had no
+     * district code in the frontend.
      */
     private const DISTRICTS = [
-        'be' => ['name' => 'Gesamtstädtisch', 'organisationId' => null],
-        'mi' => ['name' => 'Mitte', 'organisationId' => '16'],
-        'fk' => ['name' => 'Friedrichshain-Kreuzberg', 'organisationId' => '28'],
-        'pa' => ['name' => 'Pankow', 'organisationId' => '20'],
-        'cw' => ['name' => 'Charlottenburg-Wilmersdorf', 'organisationId' => '27'],
-        'sp' => ['name' => 'Spandau', 'organisationId' => '26'],
-        'sz' => ['name' => 'Steglitz-Zehlendorf', 'organisationId' => '32'],
-        'ts' => ['name' => 'Tempelhof-Schöneberg', 'organisationId' => '24'],
-        'nk' => ['name' => 'Neukölln', 'organisationId' => '30'],
-        'tk' => ['name' => 'Treptow-Köpenick', 'organisationId' => '15'],
-        'mh' => ['name' => 'Marzahn-Hellersdorf', 'organisationId' => '25'],
-        'li' => ['name' => 'Lichtenberg', 'organisationId' => '29'],
-        'rd' => ['name' => 'Reinickendorf', 'organisationId' => '31'],
+        'be' => ['name' => 'Gesamtstädtisch', 'officeName' => 'Senatsverwaltung für Stadtentwicklung, Bauen und Wohnen', 'organisationId' => '14'],
+        'mi' => ['name' => 'Mitte', 'officeName' => 'Bezirksamt Mitte', 'organisationId' => '16'],
+        'fk' => ['name' => 'Friedrichshain-Kreuzberg', 'officeName' => 'Bezirksamt Friedrichshain-Kreuzberg', 'organisationId' => '28'],
+        'pa' => ['name' => 'Pankow', 'officeName' => 'Bezirksamt Pankow', 'organisationId' => '20'],
+        'cw' => ['name' => 'Charlottenburg-Wilmersdorf', 'officeName' => 'Bezirksamt Charlottenburg-Wilmersdorf', 'organisationId' => '27'],
+        'sp' => ['name' => 'Spandau', 'officeName' => 'Bezirksamt Spandau', 'organisationId' => '26'],
+        'sz' => ['name' => 'Steglitz-Zehlendorf', 'officeName' => 'Bezirksamt Steglitz-Zehlendorf', 'organisationId' => '32'],
+        'ts' => ['name' => 'Tempelhof-Schöneberg', 'officeName' => 'Bezirksamt Tempelhof-Schöneberg', 'organisationId' => '24'],
+        'nk' => ['name' => 'Neukölln', 'officeName' => 'Bezirksamt Neukölln', 'organisationId' => '30'],
+        'tk' => ['name' => 'Treptow-Köpenick', 'officeName' => 'Bezirksamt Treptow-Köpenick', 'organisationId' => '15'],
+        'mh' => ['name' => 'Marzahn-Hellersdorf', 'officeName' => 'Bezirksamt Marzahn-Hellersdorf', 'organisationId' => '25'],
+        'li' => ['name' => 'Lichtenberg', 'officeName' => 'Bezirksamt Lichtenberg', 'organisationId' => '29'],
+        'rd' => ['name' => 'Reinickendorf', 'officeName' => 'Bezirksamt Reinickendorf', 'organisationId' => '31'],
     ];
 
     public function getDescription(): string
@@ -48,14 +50,14 @@ final class Version20261006131519 extends AbstractMigration
     {
         $this->abortIfNotMysql();
 
-        $this->addSql('CREATE TABLE IF NOT EXISTS addon_mein_berlin_district (id CHAR(36) NOT NULL, district_code VARCHAR(2) NOT NULL, name VARCHAR(255) NOT NULL, mein_berlin_organisation_id VARCHAR(255) DEFAULT NULL, UNIQUE INDEX unique_district_code (district_code), UNIQUE INDEX unique_district_organisation_id (mein_berlin_organisation_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE IF NOT EXISTS addon_mein_berlin_district (id CHAR(36) NOT NULL, district_code VARCHAR(2) NOT NULL, name VARCHAR(255) NOT NULL, office_name VARCHAR(255) NOT NULL, mein_berlin_organisation_id VARCHAR(255) DEFAULT NULL, UNIQUE INDEX unique_district_code (district_code), UNIQUE INDEX unique_district_organisation_id (mein_berlin_organisation_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB');
 
         foreach (self::DISTRICTS as $districtCode => $district) {
             // INSERT IGNORE: the unique index on district_code keeps an already existing row untouched
             $this->addSql(
-                'INSERT IGNORE INTO addon_mein_berlin_district (id, district_code, name, mein_berlin_organisation_id)
-                 VALUES (UUID(), ?, ?, ?)',
-                [$districtCode, $district['name'], $district['organisationId']]
+                'INSERT IGNORE INTO addon_mein_berlin_district (id, district_code, name, office_name, mein_berlin_organisation_id)
+                 VALUES (UUID(), ?, ?, ?, ?)',
+                [$districtCode, $district['name'], $district['officeName'], $district['organisationId']]
             );
         }
 

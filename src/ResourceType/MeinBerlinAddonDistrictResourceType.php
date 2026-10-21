@@ -59,6 +59,7 @@ class MeinBerlinAddonDistrictResourceType extends AddonResourceType
         $configBuilder->id->setReadableByPath()->setSortable()->setFilterable();
         $configBuilder->districtCode->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable();
         $configBuilder->name->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable();
+        $configBuilder->officeName->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable();
         $configBuilder->meinBerlinOrganisationId->setReadableByPath(DefaultField::YES)->setSortable()->setFilterable()
             ->addUpdateBehavior(
                 new CallbackAttributeSetBehaviorFactory(
