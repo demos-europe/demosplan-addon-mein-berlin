@@ -1,7 +1,7 @@
 /**
- * Loads the Berlin districts with their name and mein.berlin organisation ID from the district catalog.
+ * Loads the Berlin districts with their name, the name of the office and the mein.berlin organisation ID from the district catalog.
  *
- * @return {Promise<Array<{ districtCode: string, name: string, meinBerlinOrganisationId: string|null }>>}
+ * @return {Promise<Array<{ districtCode: string, name: string, officeName: string, meinBerlinOrganisationId: string|null }>>}
  */
 export async function fetchDistricts (demosplanUi) {
   try {

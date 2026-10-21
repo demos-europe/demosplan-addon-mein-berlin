@@ -160,17 +160,19 @@ export default {
     },
 
     /**
-     * One option per district that has a mein.berlin.de organisation ID, labelled with the ID in front,
-     * e.g. "29 – Lichtenberg". The IDs are maintained in the district catalog.
+     * One option per district that has a mein.berlin.de organisation ID, labelled with the ID in front and the name
+     * of the office, e.g. "29 – Bezirksamt Lichtenberg". The IDs are maintained in the district catalog.
      */
     options () {
       const options = this.districts
         .filter(({ meinBerlinOrganisationId }) => meinBerlinOrganisationId)
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(({ meinBerlinOrganisationId, name }) => ({
-          label: `${meinBerlinOrganisationId} – ${name}`,
-          value: meinBerlinOrganisationId
+        .map(({ meinBerlinOrganisationId, name, officeName }) => ({
+          displayName: officeName || name,
+          id: meinBerlinOrganisationId
         }))
+        // Sorted by the displayed name, the office name differs from the district name (e.g. the Senatsverwaltung)
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'))
+        .map(({ displayName, id }) => ({ label: `${id} – ${displayName}`, value: id }))
 
       // An ID saved for the organisation stays selectable even if no district has it (anymore)
       const savedId = this.initValue
