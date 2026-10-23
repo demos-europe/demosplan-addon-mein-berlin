@@ -115,7 +115,8 @@ class MeinBerlinPostProcedureUpdatedEventSubscriber implements EventSubscriberIn
                 $isPublishedVal,
                 $correspondingAddonOrgaRelation->getMeinBerlinOrganisationId(),
                 $correspondingAddonEntity->getBplanId(),
-                $newProcedure->getId()
+                $newProcedure->getId(),
+                $newProcedure
             );
 
         }

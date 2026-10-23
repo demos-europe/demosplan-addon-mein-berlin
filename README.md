@@ -38,6 +38,20 @@ parameters:
     mein_berlin_public_procedure_route: 'core_procedure_slug'
 ```
 
+### Failure mail (optional)
+
+If a procedure cannot be transferred to mein.berlin.de, the agency main email address of the procedure is informed by mail.
+The following environment variables can be set (e.g. in `.env.local`), both can be left empty:
+
+```
+# contact named in the mail, a generic hint to the support is used if empty
+MEIN_BERLIN_FAILURE_MAIL_SUPPORT_ADDRESS=
+# additional recipients (cc), comma separated
+MEIN_BERLIN_FAILURE_MAIL_CC=
+```
+
+Failures while saving the district or the interface checkbox are not mailed, see [Limitations](#limitations).
+
 ## Core Components
 
 ### Entities
@@ -159,6 +173,7 @@ Located in `src/DoctrineMigrations/` with versioned migration files.
 - **No Delete Support**: mein.berlin API does not support procedure deletion
 - **Draft Hiding**: Procedures can only be hidden by updating `is_draft` status
 - **Organization ID Changes**: Changing the ID of a district (or choosing another ID for an organization) releases procedures that are already communicated with the old ID (their `bplanId` is cleared). They are created again with the new ID, the entries at mein.berlin.de that belong to the old ID have to be updated or deleted manually in the mein.berlin.de dashboard
+- **Failure mail scope**: The failure mail is only sent for transfers triggered by saving a procedure and by the automatic phase switch. If a transfer fails while saving the district or activating the interface checkbox, the user sees the error on screen and the change is not saved, but no mail is sent.
 
 ## Error Handling
 
