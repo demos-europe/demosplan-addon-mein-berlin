@@ -302,6 +302,11 @@ export default {
       return this.isChanged(row) && row.communicatedProcedures.count > 0
     },
 
+    hasResponseMessages (response) {
+      return Object.values(response?.data?.meta?.messages ?? {})
+        .some(messages => Object.keys(messages).length > 0)
+    },
+
     getRow (id) {
       return this.rows.find(row => row.id === id)
     },
@@ -391,7 +396,16 @@ export default {
 
       try {
         await this.refreshWarningData(id)
+      } catch (error) {
+        // Nothing was saved, so the input is kept for another try
+        console.error('[MeinBerlin] Failed to reload the usage of a district ID:', error)
+        dplan.notify.notify('error', Translator.trans('error.api.generic'))
+        this.updateRow(id, { isSaving: false })
 
+        return
+      }
+
+      try {
         const row = this.getRow(id)
         if (this.needsConfirmation(row)) {
           const isReset = row.value === ''
@@ -434,9 +448,13 @@ export default {
         // The organisations and procedures that use the ID have to be read again
         await this.fetchDistricts()
       } catch (error) {
-        // The reason is shown by the messages of the response, the saved value is restored
         console.error('[MeinBerlin] Failed to save the organisation ID of a district:', error)
-        dplan.notify.notify('error', Translator.trans('error.save'))
+
+        // dpApi already shows the messages of the response
+        if (!this.hasResponseMessages(error)) {
+          dplan.notify.notify('error', Translator.trans('error.save'))
+        }
+
         this.resetRow(id)
       } finally {
         this.updateRow(id, { isSaving: false })
