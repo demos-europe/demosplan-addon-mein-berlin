@@ -304,9 +304,9 @@ export default {
     }
   },
 
-  async mounted () {
-    // The districts are needed for the select and for the preselection, so they are loaded first
-    this.districts = await fetchDistricts(this.demosplanUi)
+  mounted () {
+    // Only the preselection needs the districts, so they are loaded alongside the other requests
+    const districtsLoaded = fetchDistricts(this.demosplanUi).then(districts => { this.districts = districts })
 
     // Case: options are already provided → no need to fetch from backend
     if (this.additionalFieldOptions.length > 0) {
@@ -315,7 +315,7 @@ export default {
       this.checkBerlinOrgaId()
 
       if (!this.currentValue) {
-        this.autoSelectDistrict()
+        districtsLoaded.then(() => this.autoSelectDistrict())
       }
 
       return
@@ -324,7 +324,8 @@ export default {
     // Case: options NOT provided → fetch list + orgaId state
     Promise.all([
       this.fetchResourceList(),
-      this.checkBerlinOrgaId()
+      this.checkBerlinOrgaId(),
+      districtsLoaded
     ]).then(() => {
       this.$emit('addonEvent:emit', {
         name: 'resourceList:loaded',
