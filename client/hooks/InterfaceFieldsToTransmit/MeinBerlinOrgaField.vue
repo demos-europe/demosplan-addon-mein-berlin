@@ -110,7 +110,7 @@ export default {
     },
 
     /**
-     * The already communicated procedures of the organisation, as delivered with the organisation relation.
+     * The already communicated procedures of the organization, only known after refreshItem.
      */
     communicatedProcedures () {
       return this.item?.attributes?.communicatedProcedures ?? { count: 0, names: [] }
@@ -226,11 +226,11 @@ export default {
     },
 
     fetchResourceList () {
-      // communicatedProcedures is not part of the default fields, as it takes queries for each relation
+      // communicatedProcedures takes queries for each relation, so it is only read for the saved organization (refreshItem)
       const url = Routing.generate('api_resource_list', {
         resourceType: this.resourceType,
         fields: {
-          [this.resourceType]: ['meinBerlinOrganisationId', 'communicatedProcedures', this.relationshipKey].join()
+          [this.resourceType]: ['meinBerlinOrganisationId', this.relationshipKey].join()
         },
         include: this.relationshipKey
       })
@@ -288,13 +288,20 @@ export default {
     },
 
     /**
-     * The saved ID and the communicated procedures may have changed since the page was loaded, e.g. by an earlier save,
-     * so they are read again before asking.
+     * The saved ID and the communicated procedures are read right before asking, they are not part of the list and may
+     * have changed, e.g. by an earlier save. Without them the warning can't be shown, so the save is canceled.
      *
-     * @return {Promise<boolean>} whether the organisation may be saved
+     * @return {Promise<boolean>} whether the organization may be saved
      */
     async confirmChange () {
-      await this.refreshItem()
+      try {
+        await this.refreshItem()
+      } catch (error) {
+        console.error('[MeinBerlin] Failed to refresh the organisation:', error)
+        dplan.notify.notify('error', Translator.trans('error.api.generic'))
+
+        return false
+      }
 
       return this.needsConfirmation ? this.confirmDialog.open() : true
     },
@@ -319,8 +326,6 @@ export default {
           this.item = { ...this.item, attributes: { ...this.item.attributes, ...attributes } }
           this.initValue = attributes.meinBerlinOrganisationId ?? null
         })
-        // The confirmation is then based on the data from page load
-        .catch(err => console.error('[MeinBerlin] Failed to refresh the organisation:', err))
     },
 
     emitSelected () {
