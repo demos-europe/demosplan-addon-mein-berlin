@@ -30,9 +30,9 @@
 </template>
 
 <script>
-import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
 import { nameListHtml } from '../nameListHtml'
 import { fetchDistricts } from './fetchDistricts'
+import { shareRequest } from '../shareRequest'
 
 export default {
   name: 'MeinBerlinOrgaField',
@@ -204,14 +204,14 @@ export default {
   },
 
   methods: {
-    async autoSelectOrga () {
+    autoSelectOrga () {
       let meinBerlinOrgId = this.userMeinBerlinOrgId
 
+      // The list holds the relations of all organizations, so it is not requested again
       if (!meinBerlinOrgId && this.userOrgaId) {
-        meinBerlinOrgId = await fetchMeinBerlinOrganisationId(
-          this.demosplanUi,
-          this.userOrgaId
-        )
+        meinBerlinOrgId = Object.values(this.list || []).find(
+          el => el.relationships?.[this.relationshipKey]?.data?.id === this.userOrgaId
+        )?.attributes?.meinBerlinOrganisationId || null
       }
 
       if (!meinBerlinOrgId) {
@@ -235,7 +235,7 @@ export default {
         include: this.relationshipKey
       })
 
-      return this.demosplanUi.dpApi.get(url)
+      return shareRequest(url, () => this.demosplanUi.dpApi.get(url))
         .then(response => {
           this.list = response.data.data.map(item => {
             const { attributes, id, relationships } = item

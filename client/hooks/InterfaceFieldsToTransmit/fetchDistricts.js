@@ -1,3 +1,5 @@
+import { shareRequest } from '../shareRequest'
+
 /**
  * Loads the Berlin districts with their name, the name of the office and the mein.berlin organisation ID from the district catalog.
  *
@@ -7,7 +9,7 @@ export async function fetchDistricts (demosplanUi) {
   try {
     const url = Routing.generate('api_resource_list', { resourceType: 'MeinBerlinAddonDistrict' })
 
-    const response = await demosplanUi.dpApi.get(url)
+    const response = await shareRequest(url, () => demosplanUi.dpApi.get(url))
 
     return (response.data?.data || []).map(({ attributes }) => attributes)
   } catch (err) {
