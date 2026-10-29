@@ -149,7 +149,7 @@ export default {
           : Translator.trans('mein.berlin.organisation.id.change.consequence')
       ]
       const procedureList = nameListHtml(
-        Translator.trans('mein.berlin.organisation.id.change.procedures', { count, names: '' }).trim(),
+        Translator.trans('mein.berlin.organisation.id.change.procedures', { count }),
         names,
         count
       )

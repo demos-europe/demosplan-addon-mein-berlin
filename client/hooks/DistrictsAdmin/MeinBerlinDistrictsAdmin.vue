@@ -275,7 +275,7 @@ export default {
         const { count: procedureCount, names } = row.communicatedProcedures
 
         html.push(nameListHtml(
-          Translator.trans('mein.berlin.organisation.id.change.procedures', { count: procedureCount, names: '' }).trim(),
+          Translator.trans('mein.berlin.organisation.id.change.procedures', { count: procedureCount }),
           names,
           procedureCount
         ))
