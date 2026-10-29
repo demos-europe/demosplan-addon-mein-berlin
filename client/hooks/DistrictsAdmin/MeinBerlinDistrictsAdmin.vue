@@ -260,8 +260,8 @@ export default {
 
       const html = paragraphs.map(text => `<p class="mb-2">${text}</p>`)
 
-      // The organisations lose their ID, so the admin has to know which ones to inform or give a new ID
-      if (isReset) {
+      // The organisations lose or change their ID, so the admin has to know which ones to inform
+      if (row.assignedOrganisations.count > 0) {
         const { count: organisationCount, names } = row.assignedOrganisations
 
         html.push(nameListHtml(
