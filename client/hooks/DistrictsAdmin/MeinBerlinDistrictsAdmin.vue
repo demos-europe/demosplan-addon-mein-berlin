@@ -78,8 +78,8 @@
             <button
               v-if="row.id !== editingId"
               :aria-label="Translator.trans('mein.berlin.districts.id.edit', { name: row.name })"
-              class="btn--blank o-link--default"
               :data-cy="`MeinBerlinAddonDistrict:edit:${row.districtCode}`"
+              class="btn--blank o-link--default"
               type="button"
               @click="edit(row)"
             >
@@ -92,9 +92,9 @@
             <template v-else>
               <button
                 :aria-label="Translator.trans('mein.berlin.districts.id.save', { name: row.name })"
-                class="btn--blank o-link--default inline-block mr-1"
                 :data-cy="`MeinBerlinAddonDistrict:save:${row.districtCode}`"
                 :disabled="row.isSaving"
+                class="btn--blank o-link--default inline-block mr-1"
                 type="button"
                 @click="validateAndSave(row)"
               >
@@ -106,9 +106,9 @@
               </button>
               <button
                 :aria-label="Translator.trans('mein.berlin.districts.id.abort', { name: row.name })"
-                class="btn--blank o-link--default inline-block"
                 :data-cy="`MeinBerlinAddonDistrict:abort:${row.districtCode}`"
                 :disabled="row.isSaving"
+                class="btn--blank o-link--default inline-block"
                 type="button"
                 @click="abort(row)"
               >
@@ -126,14 +126,14 @@
 
     <component
       :is="demosplanUi.DpConfirmDialog"
-      :confirm-button-text="confirmDialogButtonText"
-      data-cy="MeinBerlinAddonDistrict:confirm"
-      :decline-button-text="Translator.trans('back.to.edit')"
-      allow-html
       :checkbox-text="confirmDialogCheckboxText"
+      :confirm-button-text="confirmDialogButtonText"
+      :decline-button-text="Translator.trans('back.to.edit')"
       :header="confirmDialogHeader"
-      icon="warning"
       :message="confirmDialogMessage"
+      data-cy="MeinBerlinAddonDistrict:confirm"
+      icon="warning"
+      allow-html
       @vue:mounted="({ component }) => confirmDialog = component.proxy"
     />
   </div>
