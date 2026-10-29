@@ -155,7 +155,7 @@ export default {
     districtOptions () {
       return this.districts
         .map(({ districtCode, name }) => ({ label: name, value: districtCode }))
-        .sort((a, b) => a.label.localeCompare(b.label))
+        .sort((a, b) => a.label.localeCompare(b.label, 'de'))
     },
 
     isProcedureTransmitted () {
