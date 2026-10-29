@@ -85,6 +85,26 @@ class MeinBerlinOrganisationIdChangeHandler
     }
 
     /**
+     * @return array{count: int, names: list<string>} the organisations that use the organisation id, names sorted
+     */
+    public function getAssignedOrganisationsInfo(string $meinBerlinOrganisationId): array
+    {
+        $criteria = ['meinBerlinOrganisationId' => $meinBerlinOrganisationId];
+        $count = $this->orgaRelationRepository->count($criteria);
+        if (0 === $count) {
+            return ['count' => 0, 'names' => []];
+        }
+
+        $names = array_map(
+            static fn (MeinBerlinAddonOrgaRelation $orgaRelation): string => (string) $orgaRelation->getOrga()?->getName(),
+            $this->orgaRelationRepository->findBy($criteria, null, self::NAMES_LIMIT)
+        );
+        sort($names);
+
+        return ['count' => $count, 'names' => $names];
+    }
+
+    /**
      * Gives all organisations that use the organisation id of a district the new id, e.g. because the id of the
      * district was corrected. Their already communicated procedures are released, see
      * {@link releaseCommunicatedProcedures()}. The changes are not flushed, this is up to the caller.

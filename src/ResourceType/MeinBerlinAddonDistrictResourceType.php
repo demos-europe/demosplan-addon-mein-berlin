@@ -106,6 +106,13 @@ class MeinBerlinAddonDistrictResourceType extends AddonResourceType
                     'meinBerlinOrganisationId' => $district->getMeinBerlinOrganisationId(),
                 ])
         );
+        $configBuilder->assignedOrganisations->setReadableByCallable(
+            fn (MeinBerlinAddonDistrict $district): array => null === $district->getMeinBerlinOrganisationId()
+                ? ['count' => 0, 'names' => []]
+                : $this->organisationIdChangeHandler->getAssignedOrganisationsInfo(
+                    $district->getMeinBerlinOrganisationId()
+                )
+        );
         $configBuilder->communicatedProcedures->setReadableByCallable(
             fn (MeinBerlinAddonDistrict $district): array => null === $district->getMeinBerlinOrganisationId()
                 ? ['count' => 0, 'names' => []]

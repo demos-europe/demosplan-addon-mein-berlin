@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
 
+use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
@@ -188,10 +189,40 @@ class MeinBerlinOrganisationIdChangeHandlerTest extends TestCase
         self::assertSame(['count' => 7, 'names' => ['First']], $info);
     }
 
+    public function testAssignedOrganisationsInfoSkipsNamesQueryWithoutOrganisations(): void
+    {
+        $this->repository->method('count')->with(['meinBerlinOrganisationId' => '25'])->willReturn(0);
+        $this->repository->expects(self::never())->method('findBy');
+
+        self::assertSame(['count' => 0, 'names' => []], $this->sut->getAssignedOrganisationsInfo('25'));
+    }
+
+    public function testAssignedOrganisationsInfoReturnsCountAndLimitedSortedNames(): void
+    {
+        $this->repository->method('count')->with(['meinBerlinOrganisationId' => '25'])->willReturn(12);
+        $this->repository->expects(self::once())->method('findBy')
+            ->with(['meinBerlinOrganisationId' => '25'], null, 10)
+            ->willReturn([$this->createRelationOfOrga('25', 'Stadt Quickborn'), $this->createRelationOfOrga('25', 'Amt Nordwest')]);
+
+        $info = $this->sut->getAssignedOrganisationsInfo('25');
+
+        self::assertSame(['count' => 12, 'names' => ['Amt Nordwest', 'Stadt Quickborn']], $info);
+    }
+
     private function createRelation(string $organisationId): MeinBerlinAddonOrgaRelation
     {
         $relation = new MeinBerlinAddonOrgaRelation();
         $relation->setMeinBerlinOrganisationId($organisationId);
+
+        return $relation;
+    }
+
+    private function createRelationOfOrga(string $organisationId, string $orgaName): MeinBerlinAddonOrgaRelation
+    {
+        $orga = $this->createMock(OrgaInterface::class);
+        $orga->method('getName')->willReturn($orgaName);
+        $relation = $this->createRelation($organisationId);
+        $relation->setOrga($orga);
 
         return $relation;
     }
