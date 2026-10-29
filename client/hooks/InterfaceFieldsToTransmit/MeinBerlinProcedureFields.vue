@@ -49,7 +49,7 @@
 <script>
 import MeinBerlinProcedurePictogram from './MeinBerlinProcedurePictogram.vue'
 import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
-import { fetchDistricts } from './fetchDistricts'
+import { fetchDistricts } from '../fetchDistricts'
 
 export default {
   name: 'MeinBerlinProcedureFields',

@@ -31,7 +31,7 @@
 
 <script>
 import { nameListHtml } from '../nameListHtml'
-import { fetchDistricts } from './fetchDistricts'
+import { fetchDistricts } from '../fetchDistricts'
 import { shareRequest } from '../shareRequest'
 
 export default {

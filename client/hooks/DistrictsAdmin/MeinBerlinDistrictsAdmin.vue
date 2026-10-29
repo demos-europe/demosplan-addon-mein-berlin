@@ -141,6 +141,7 @@
 
 <script>
 import { escapeHtml } from '../escapeHtml'
+import { fetchDistricts } from '../fetchDistricts'
 import { nameListHtml } from '../nameListHtml'
 
 export default {
@@ -174,7 +175,7 @@ export default {
       this.editingId = null
     },
 
-    createRow (id, { communicatedProcedures, districtCode, meinBerlinOrganisationId, name, officeName, usedByOrganisations }) {
+    createRow ({ communicatedProcedures, districtCode, id, meinBerlinOrganisationId, name, officeName, usedByOrganisations }) {
       return {
         // Only read before saving, as it is only shown in the confirm dialog
         assignedOrganisations: { count: 0, names: [] },
@@ -201,31 +202,22 @@ export default {
       this.$nextTick(() => this.demosplanUi.assignHandlersForInputs(this.getTable()))
     },
 
-    fetchDistricts () {
-      // The number of organisations and the procedures that were already communicated are no default fields
-      const url = Routing.generate('api_resource_list', {
-        fields: {
-          MeinBerlinAddonDistrict: [
-            'communicatedProcedures',
-            'districtCode',
-            'meinBerlinOrganisationId',
-            'name',
-            'officeName',
-            'usedByOrganisations'
-          ].join()
-        },
-        resourceType: 'MeinBerlinAddonDistrict',
+    async loadRows () {
+      // The number of organizations and the procedures that were already communicated are no default fields
+      const districts = await fetchDistricts(this.demosplanUi, {
+        fields: [
+          'communicatedProcedures',
+          'districtCode',
+          'meinBerlinOrganisationId',
+          'name',
+          'officeName',
+          'usedByOrganisations'
+        ],
         sort: 'officeName'
       })
 
-      return this.demosplanUi.dpApi.get(url)
-        .then(response => {
-          this.rows = response.data.data.map(({ attributes, id }) => this.createRow(id, attributes))
-        })
-        .catch(err => console.error(err))
-        .finally(() => {
-          this.isLoading = false
-        })
+      this.rows = districts.map(district => this.createRow(district))
+      this.isLoading = false
     },
 
     /**
@@ -446,7 +438,7 @@ export default {
         dplan.notify.notify('confirm', Translator.trans('confirm.saved'))
         this.editingId = null
         // The organisations and procedures that use the ID have to be read again
-        await this.fetchDistricts()
+        await this.loadRows()
       } catch (error) {
         console.error('[MeinBerlin] Failed to save the organisation ID of a district:', error)
 
@@ -468,7 +460,7 @@ export default {
   },
 
   mounted () {
-    this.fetchDistricts()
+    this.loadRows()
   }
 }
 </script>
