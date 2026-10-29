@@ -303,6 +303,9 @@ export default {
         return false
       }
 
+      // Core skips the addon request if the payload has neither a value nor a saved value, so it gets the reloaded saved value
+      this.emitSelected()
+
       return this.needsConfirmation ? this.confirmDialog.open() : true
     },
 
