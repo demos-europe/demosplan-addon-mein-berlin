@@ -10,6 +10,7 @@
         tooltip
       }"
       :options="options"
+      :show-placeholder="!isValueRemovable"
       @select="onChange"
     />
 
@@ -53,6 +54,15 @@ export default {
     demosplanUi: {
       type: Object,
       required: true
+    },
+
+    /**
+     * Offers an empty entry, so the ID of the organisation can be removed
+     */
+    isValueRemovable: {
+      type: Boolean,
+      required: false,
+      default: false
     },
 
     relationshipId: {
@@ -150,7 +160,9 @@ export default {
 
       return [
         Translator.trans('mein.berlin.organisation.id.change.warning'),
-        Translator.trans('mein.berlin.organisation.id.change.consequence'),
+        this.effectiveValue === ''
+          ? Translator.trans('mein.berlin.districts.change.reset.consequence', { count: 1 })
+          : Translator.trans('mein.berlin.organisation.id.change.consequence'),
         procedures
       ].join('<br><br>')
     },
@@ -178,6 +190,10 @@ export default {
       const savedId = this.initValue
       if (savedId && !options.some(option => option.value === savedId)) {
         options.push({ label: savedId, value: savedId })
+      }
+
+      if (this.isValueRemovable) {
+        options.unshift({ label: Translator.trans('mein.berlin.districts.id.empty'), value: '' })
       }
 
       return options
