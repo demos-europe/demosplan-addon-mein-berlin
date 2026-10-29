@@ -77,7 +77,7 @@
           <td class="text-right whitespace-nowrap">
             <button
               v-if="row.id !== editingId"
-              :aria-label="Translator.trans('item.edit')"
+              :aria-label="Translator.trans('mein.berlin.districts.id.edit', { name: row.name })"
               class="btn--blank o-link--default"
               :data-cy="`MeinBerlinAddonDistrict:edit:${row.districtCode}`"
               type="button"
@@ -91,7 +91,7 @@
             </button>
             <template v-else>
               <button
-                :aria-label="Translator.trans('save')"
+                :aria-label="Translator.trans('mein.berlin.districts.id.save', { name: row.name })"
                 class="btn--blank o-link--default inline-block mr-1"
                 :data-cy="`MeinBerlinAddonDistrict:save:${row.districtCode}`"
                 :disabled="row.isSaving"
@@ -105,7 +105,7 @@
                 />
               </button>
               <button
-                :aria-label="Translator.trans('abort')"
+                :aria-label="Translator.trans('mein.berlin.districts.id.abort', { name: row.name })"
                 class="btn--blank o-link--default inline-block"
                 :data-cy="`MeinBerlinAddonDistrict:abort:${row.districtCode}`"
                 :disabled="row.isSaving"
