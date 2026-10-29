@@ -20,6 +20,7 @@
       v-if="!isLoading"
       class="c-data-table"
       data-cy="MeinBerlinAddonDistrict:table"
+      data-dp-validate="districtsTable"
     >
       <colgroup>
         <col class="w-1/3">
@@ -60,20 +61,14 @@
               <component
                 :is="demosplanUi.DpInput"
                 :id="`meinBerlinDistrictId-${row.districtCode}`"
+                :data-dp-validate-error="Translator.trans('mein.berlin.error.update.organisation.id.invalid')"
                 :disabled="row.isSaving"
-                :invalid="!isValid(row)"
                 :label="{ text: row.name, hide: true }"
                 :model-value="row.value"
                 :placeholder="Translator.trans('mein.berlin.districts.id.empty')"
-                pattern="[1-9][0-9]*"
+                pattern="^[1-9][0-9]*$"
                 @update:model-value="value => onInput(row, value)"
               />
-              <p
-                v-if="!isValid(row)"
-                class="mt-1 color-message-severe-text"
-              >
-                {{ Translator.trans('mein.berlin.error.update.organisation.id.invalid') }}
-              </p>
             </template>
           </td>
           <td>
@@ -99,9 +94,9 @@
                 :aria-label="Translator.trans('save')"
                 class="btn--blank o-link--default inline-block mr-1"
                 :data-cy="`MeinBerlinAddonDistrict:save:${row.districtCode}`"
-                :disabled="row.isSaving || !isValid(row)"
+                :disabled="row.isSaving"
                 type="button"
-                @click="save(row)"
+                @click="validateAndSave(row)"
               >
                 <component
                   :is="demosplanUi.DpIcon"
@@ -201,6 +196,8 @@ export default {
       }
 
       this.editingId = row.id
+      // The input only exists after rendering; clears the error border on focus and validates on blur, like the dpValidate mixin
+      this.$nextTick(() => this.demosplanUi.assignHandlersForInputs(this.getTable()))
     },
 
     fetchDistricts () {
@@ -307,10 +304,6 @@ export default {
       return this.isChanged(row) && (row.usedByOrganisations > 0 || this.hasCommunicatedProcedures(row))
     },
 
-    isValid (row) {
-      return /^([1-9]\d*)?$/.test(row.value)
-    },
-
     /**
      * Changing the ID releases the procedures that were already communicated.
      */
@@ -331,6 +324,17 @@ export default {
 
     resetRow (id) {
       this.updateRow(id, { value: this.getRow(id).initValue })
+    },
+
+    getTable () {
+      return this.$el.querySelector('[data-dp-validate="districtsTable"]')
+    },
+
+    /**
+     * Every district needs its own ID, so an ID of another district is rejected before any request is sent.
+     */
+    isTaken (row) {
+      return row.value !== '' && this.rows.some(other => other.id !== row.id && other.initValue === row.value)
     },
 
     onInput (row, value) {
@@ -359,6 +363,28 @@ export default {
           usedByOrganisations: usedByOrganisations ?? 0
         })
       })
+    },
+
+    /**
+     * The dpValidate mixin can't be used because mixins are merged when the component is defined, but demosplanUi is a prop.
+     * An empty input is valid, it removes the ID.
+     */
+    validateAndSave (row) {
+      const { invalidFields, valid } = this.demosplanUi.validateForm(this.getTable())
+
+      if (!valid) {
+        invalidFields.forEach(field => dplan.notify.notify('error', field.dataset.dpValidateError))
+
+        return
+      }
+
+      if (this.isTaken(row)) {
+        dplan.notify.notify('error', Translator.trans('mein.berlin.error.update.district.organisation.id.taken'))
+
+        return
+      }
+
+      this.save(row)
     },
 
     async save (clickedRow) {
