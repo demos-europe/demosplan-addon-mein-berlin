@@ -14,47 +14,33 @@
       class="u-mt"
     />
 
-    <div
-      v-for="row in rowsWithWarning"
-      :key="`warning-${row.id}`"
-      class="mb-4"
-      :data-cy="`MeinBerlinAddonDistrict:warning:${row.districtCode}`"
-    >
-      <p class="font-semibold mb-1">
-        {{ row.name }}
-      </p>
-      <component
-        :is="demosplanUi.DpInlineNotification"
-        :message="getWarningMessage(row)"
-        :type="needsConfirmation(row) ? 'warning' : 'info'"
-      />
-      <component
-        :is="demosplanUi.DpCheckbox"
-        v-if="needsConfirmation(row)"
-        :id="`meinBerlinDistrictConfirm-${row.districtCode}`"
-        :checked="row.isConfirmed"
-        class="mt-2"
-        :label="{ text: Translator.trans('mein.berlin.organisation.id.change.confirm') }"
-        @change="checked => updateRow(row.id, { isConfirmed: checked })"
-      />
-    </div>
-
+    <!-- Replace with DpDataTable once the addon no longer bundles its own vue; until then, content passed into slots of
+    core components is not updated -->
     <table
       v-if="!isLoading"
-      class="w-full text-left"
+      class="c-data-table"
+      data-cy="MeinBerlinAddonDistrict:table"
     >
+      <colgroup>
+        <col class="w-1/3">
+        <col class="w-1/3">
+        <col>
+        <col class="w-[50px]">
+      </colgroup>
       <thead>
         <tr>
-          <th class="p-2 w-1/3">
-            {{ Translator.trans('mein.berlin.districts.column.district') }}
+          <th>
+            {{ Translator.trans('mein.berlin.districts.column.organisation') }}
           </th>
-          <th class="p-2 w-1/3">
+          <th>
             {{ Translator.trans('mein.berlin.districts.column.id') }}
           </th>
-          <th class="p-2">
+          <th>
             {{ Translator.trans('mein.berlin.districts.column.orgas') }}
           </th>
-          <th class="p-2" />
+          <th>
+            <span class="sr-only">{{ Translator.trans('actions') }}</span>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -63,44 +49,98 @@
           :key="row.id"
           :data-cy="`MeinBerlinAddonDistrict:row:${row.districtCode}`"
         >
-          <td class="p-2">
+          <td>
             {{ row.name }}
           </td>
-          <td class="p-2">
-            <component
-              :is="demosplanUi.DpInput"
-              :id="`meinBerlinDistrictId-${row.districtCode}`"
-              :invalid="!isValid(row)"
-              :label="{ text: row.name, hide: true }"
-              :model-value="row.value"
-              :placeholder="Translator.trans('mein.berlin.districts.id.empty')"
-              pattern="[1-9][0-9]*"
-              @update:model-value="value => onInput(row, value)"
-            />
-            <p
-              v-if="!isValid(row)"
-              class="mt-1 color-message-severe-text"
-            >
-              {{ Translator.trans('mein.berlin.error.update.organisation.id.invalid') }}
-            </p>
+          <td>
+            <template v-if="row.id !== editingId">
+              {{ row.initValue || '–' }}
+            </template>
+            <template v-else>
+              <component
+                :is="demosplanUi.DpInput"
+                :id="`meinBerlinDistrictId-${row.districtCode}`"
+                :disabled="row.isSaving"
+                :invalid="!isValid(row)"
+                :label="{ text: row.name, hide: true }"
+                :model-value="row.value"
+                :placeholder="Translator.trans('mein.berlin.districts.id.empty')"
+                pattern="[1-9][0-9]*"
+                @update:model-value="value => onInput(row, value)"
+              />
+              <p
+                v-if="!isValid(row)"
+                class="mt-1 color-message-severe-text"
+              >
+                {{ Translator.trans('mein.berlin.error.update.organisation.id.invalid') }}
+              </p>
+            </template>
           </td>
-          <td class="p-2">
+          <td>
             {{ row.usedByOrganisations }}
           </td>
-          <td class="p-2">
-            <component
-              :is="demosplanUi.DpButton"
-              :busy="row.isSaving"
-              :data-cy="`MeinBerlinAddonDistrict:save:${row.districtCode}`"
-              :disabled="!isSavable(row)"
-              :text="Translator.trans('save')"
+          <td class="text-right whitespace-nowrap">
+            <button
+              v-if="row.id !== editingId"
+              :aria-label="Translator.trans('item.edit')"
+              class="btn--blank o-link--default"
+              :data-cy="`MeinBerlinAddonDistrict:edit:${row.districtCode}`"
               type="button"
-              @click="save(row)"
-            />
+              @click="edit(row)"
+            >
+              <component
+                :is="demosplanUi.DpIcon"
+                aria-hidden="true"
+                icon="edit"
+              />
+            </button>
+            <template v-else>
+              <button
+                :aria-label="Translator.trans('save')"
+                class="btn--blank o-link--default inline-block mr-1"
+                :data-cy="`MeinBerlinAddonDistrict:save:${row.districtCode}`"
+                :disabled="row.isSaving || !isValid(row)"
+                type="button"
+                @click="save(row)"
+              >
+                <component
+                  :is="demosplanUi.DpIcon"
+                  aria-hidden="true"
+                  icon="check"
+                />
+              </button>
+              <button
+                :aria-label="Translator.trans('abort')"
+                class="btn--blank o-link--default inline-block"
+                :data-cy="`MeinBerlinAddonDistrict:abort:${row.districtCode}`"
+                :disabled="row.isSaving"
+                type="button"
+                @click="abort(row)"
+              >
+                <component
+                  :is="demosplanUi.DpIcon"
+                  aria-hidden="true"
+                  icon="xmark"
+                />
+              </button>
+            </template>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <component
+      :is="demosplanUi.DpConfirmDialog"
+      :confirm-button-text="confirmDialogButtonText"
+      data-cy="MeinBerlinAddonDistrict:confirm"
+      :decline-button-text="Translator.trans('back.to.edit')"
+      allow-html
+      :checkbox-text="confirmDialogCheckboxText"
+      :header="confirmDialogHeader"
+      icon="warning"
+      :message="confirmDialogMessage"
+      @vue:mounted="({ component }) => confirmDialog = component.proxy"
+    />
   </div>
 </template>
 
@@ -119,34 +159,48 @@ export default {
 
   data () {
     return {
+      // Never empty: DpModal decides once whether it has a header
+      confirmDialogHeader: Translator.trans('mein.berlin.districts.change.confirm'),
+      confirmDialogButtonText: Translator.trans('mein.berlin.districts.change.button'),
+      // Requires a demosplan-ui version with the checkboxText prop of DpConfirmDialog
+      confirmDialogCheckboxText: '',
+      confirmDialogMessage: '',
+      // Only one row is editable at a time
+      editingId: null,
       isLoading: true,
       rows: []
     }
   },
 
-  computed: {
-    /**
-     * The rows whose change affects organisations or procedures. Their warnings are shown above the table.
-     */
-    rowsWithWarning () {
-      return this.rows.filter(row => this.isWarningShown(row))
-    }
-  },
-
   methods: {
-    createRow (id, { communicatedProcedures, districtCode, meinBerlinOrganisationId, name, usedByOrganisations }) {
+    abort (row) {
+      this.resetRow(row.id)
+      this.editingId = null
+    },
+
+    createRow (id, { communicatedProcedures, districtCode, meinBerlinOrganisationId, name, officeName, usedByOrganisations }) {
       return {
+        // Only read before saving, as it is only shown in the confirm dialog
+        assignedOrganisations: { count: 0, names: [] },
         communicatedProcedures: communicatedProcedures ?? { count: 0, names: [] },
         districtCode,
         id,
-        isConfirmed: false,
         isSaving: false,
         // The saved value is kept to find out if the row was changed
         initValue: meinBerlinOrganisationId ?? '',
-        name,
+        // The ID belongs to the organisation at mein.berlin.de, the district is only where plans are located
+        name: officeName || name,
         usedByOrganisations,
         value: meinBerlinOrganisationId ?? ''
       }
+    },
+
+    edit (row) {
+      if (this.editingId) {
+        this.resetRow(this.editingId)
+      }
+
+      this.editingId = row.id
     },
 
     fetchDistricts () {
@@ -158,11 +212,12 @@ export default {
             'districtCode',
             'meinBerlinOrganisationId',
             'name',
+            'officeName',
             'usedByOrganisations'
           ].join()
         },
         resourceType: 'MeinBerlinAddonDistrict',
-        sort: 'name'
+        sort: 'officeName'
       })
 
       return this.demosplanUi.dpApi.get(url)
@@ -175,28 +230,70 @@ export default {
         })
     },
 
+    /**
+     * The message is rendered as HTML, so the names are escaped.
+     */
     getWarningMessage (row) {
       const count = row.usedByOrganisations
-      const parts = [
-        row.value === ''
-          ? Translator.trans('mein.berlin.districts.change.reset', { count })
-          : Translator.trans('mein.berlin.districts.change.organisations', { count })
-      ]
+      const isReset = row.value === ''
+      const hasProcedures = this.hasCommunicatedProcedures(row)
+      const name = escapeHtml(row.name)
+      let organisations = isReset
+        ? Translator.trans('mein.berlin.districts.change.reset.organisations', { count })
+        : Translator.trans('mein.berlin.districts.change.organisations', { count })
 
-      if (this.needsConfirmation(row)) {
-        const { count: procedureCount, names } = row.communicatedProcedures
-
-        parts.push(
-          Translator.trans('mein.berlin.organisation.id.change.warning'),
-          Translator.trans('mein.berlin.organisation.id.change.consequence'),
-          Translator.trans('mein.berlin.organisation.id.change.procedures', {
-            count: procedureCount,
-            names: names.map(escapeHtml).join(', ') + (procedureCount > names.length ? ', …' : '')
-          })
-        )
+      if (hasProcedures) {
+        organisations += ' ' + Translator.trans('mein.berlin.districts.change.warning', { count })
       }
 
-      return parts.join('<br><br>')
+      const paragraphs = [
+        `<strong>${isReset
+          ? Translator.trans('mein.berlin.districts.change.reset', { name })
+          : Translator.trans('mein.berlin.districts.change.intro', { name })}</strong>`,
+        organisations
+      ]
+
+      // Without an ID nothing is transmitted anymore, no matter if procedures were transmitted before
+      if (isReset) {
+        paragraphs.push(Translator.trans('mein.berlin.districts.change.reset.consequence', { count }))
+      } else if (hasProcedures) {
+        paragraphs.push(Translator.trans('mein.berlin.districts.change.consequence'))
+      }
+
+      const html = paragraphs.map(text => `<p class="mb-2">${text}</p>`)
+
+      // The organisations lose their ID, so the admin has to know which ones to inform or give a new ID
+      if (isReset) {
+        const { count: organisationCount, names } = row.assignedOrganisations
+
+        html.push(this.getNameList(
+          Translator.trans('mein.berlin.districts.reset.organisations.list', { count: organisationCount }),
+          names,
+          organisationCount
+        ))
+      }
+
+      if (hasProcedures) {
+        const { count: procedureCount, names } = row.communicatedProcedures
+
+        html.push(this.getNameList(
+          Translator.trans('mein.berlin.organisation.id.change.procedures', { count: procedureCount, names: '' }).trim(),
+          names,
+          procedureCount
+        ))
+      }
+
+      return html.join('')
+    },
+
+    /**
+     * A bold heading and a list of at most the delivered names, "…" stands for the rest.
+     */
+    getNameList (heading, names, count) {
+      const items = [...names.map(escapeHtml), ...(count > names.length ? ['…'] : [])]
+
+      return `<p class="mb-2"><strong>${heading}</strong></p>`
+        + `<ul class="list-disc pl-4 mb-2">${items.map(item => `<li>${item}</li>`).join('')}</ul>`
     },
 
     isChanged (row) {
@@ -206,15 +303,8 @@ export default {
     /**
      * The organisations and procedures that use the saved ID are only affected if the ID is changed.
      */
-    isWarningShown (row) {
-      return this.isChanged(row) && (row.usedByOrganisations > 0 || this.needsConfirmation(row))
-    },
-
-    /**
-     * The button is active as long as nothing prevents the save, an unchanged row is answered when it is clicked.
-     */
-    isSavable (row) {
-      return this.isValid(row) && (!this.needsConfirmation(row) || row.isConfirmed)
+    needsConfirmation (row) {
+      return this.isChanged(row) && (row.usedByOrganisations > 0 || this.hasCommunicatedProcedures(row))
     },
 
     isValid (row) {
@@ -222,9 +312,9 @@ export default {
     },
 
     /**
-     * Changing the ID releases the procedures that were already communicated, so the user has to confirm.
+     * Changing the ID releases the procedures that were already communicated.
      */
-    needsConfirmation (row) {
+    hasCommunicatedProcedures (row) {
       return this.isChanged(row) && row.communicatedProcedures.count > 0
     },
 
@@ -239,19 +329,12 @@ export default {
       this.rows = this.rows.map(row => row.id === id ? { ...row, ...changes } : row)
     },
 
-    /**
-     * Brings the warning of a row into the visible area of the page.
-     */
-    showWarning (row) {
-      this.$nextTick(() => {
-        this.$el.querySelector(`[data-cy="MeinBerlinAddonDistrict:warning:${row.districtCode}"]`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      })
+    resetRow (id) {
+      this.updateRow(id, { value: this.getRow(id).initValue })
     },
 
     onInput (row, value) {
-      // A new value has to be confirmed again
-      this.updateRow(row.id, { isConfirmed: false, value: value.trim() })
+      this.updateRow(row.id, { value: value.trim() })
     },
 
     /**
@@ -261,16 +344,17 @@ export default {
     refreshWarningData (id) {
       const url = Routing.generate('api_resource_get', {
         fields: {
-          MeinBerlinAddonDistrict: ['communicatedProcedures', 'usedByOrganisations'].join()
+          MeinBerlinAddonDistrict: ['assignedOrganisations', 'communicatedProcedures', 'usedByOrganisations'].join()
         },
         resourceId: id,
         resourceType: 'MeinBerlinAddonDistrict'
       })
 
       return this.demosplanUi.dpApi.get(url).then(response => {
-        const { communicatedProcedures, usedByOrganisations } = response.data.data.attributes
+        const { assignedOrganisations, communicatedProcedures, usedByOrganisations } = response.data.data.attributes
 
         this.updateRow(id, {
+          assignedOrganisations: assignedOrganisations ?? { count: 0, names: [] },
           communicatedProcedures: communicatedProcedures ?? { count: 0, names: [] },
           usedByOrganisations: usedByOrganisations ?? 0
         })
@@ -281,7 +365,7 @@ export default {
       const id = clickedRow.id
 
       if (!this.isChanged(this.getRow(id))) {
-        dplan.notify.notify('info', Translator.trans('mein.berlin.districts.no.changes'))
+        this.editingId = null
 
         return
       }
@@ -291,13 +375,23 @@ export default {
       try {
         await this.refreshWarningData(id)
 
-        // The warning is shown now, nothing is saved before the user confirmed it
         const row = this.getRow(id)
-        if (this.needsConfirmation(row) && !row.isConfirmed) {
-          dplan.notify.notify('warning', Translator.trans('mein.berlin.districts.confirm.required'))
-          this.showWarning(row)
+        if (this.needsConfirmation(row)) {
+          const isReset = row.value === ''
+          this.confirmDialogHeader = isReset
+            ? Translator.trans('mein.berlin.districts.reset.confirm')
+            : Translator.trans('mein.berlin.districts.change.confirm')
+          this.confirmDialogButtonText = isReset
+            ? Translator.trans('mein.berlin.districts.reset.button')
+            : Translator.trans('mein.berlin.districts.change.button')
+          this.confirmDialogMessage = this.getWarningMessage(row)
+          this.confirmDialogCheckboxText = this.hasCommunicatedProcedures(row)
+            ? Translator.trans('mein.berlin.districts.change.procedures.confirm')
+            : ''
 
-          return
+          if (!await this.confirmDialog.open()) {
+            return
+          }
         }
 
         await this.demosplanUi.dpApi({
@@ -319,17 +413,23 @@ export default {
         })
 
         dplan.notify.notify('confirm', Translator.trans('confirm.saved'))
+        this.editingId = null
         // The organisations and procedures that use the ID have to be read again
         await this.fetchDistricts()
       } catch (error) {
         // The reason is shown by the messages of the response, the saved value is restored
         console.error('[MeinBerlin] Failed to save the organisation ID of a district:', error)
         dplan.notify.notify('error', Translator.trans('error.save'))
-        this.updateRow(id, { isConfirmed: false, value: this.getRow(id).initValue })
+        this.resetRow(id)
       } finally {
         this.updateRow(id, { isSaving: false })
       }
     }
+  },
+
+  created () {
+    // Not reactive and not a $ref: refs of the addon's own Vue copy are not resolved by core's Vue
+    this.confirmDialog = null
   },
 
   mounted () {
