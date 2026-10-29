@@ -14,29 +14,24 @@
       @select="onChange"
     />
 
-    <div v-if="needsConfirmation">
-      <component
-        :is="demosplanUi.DpInlineNotification"
-        class="mt-4"
-        :message="warningMessage"
-        type="warning"
-      />
-
-      <component
-        :is="demosplanUi.DpCheckbox"
-        id="interfaceFieldsToTransmit-orgIdChangeConfirm"
-        :checked="isConfirmed"
-        class="mt-2"
-        :label="{ text: confirmLabel }"
-        @change="isConfirmed = $event"
-      />
-    </div>
+    <component
+      :is="demosplanUi.DpConfirmDialog"
+      :checkbox-text="confirmation.checkboxText"
+      :confirm-button-text="confirmation.confirmButtonText"
+      :decline-button-text="Translator.trans('back.to.edit')"
+      :header="confirmation.header"
+      :message="confirmation.message"
+      data-cy="MeinBerlinAddonOrganisation:confirm"
+      icon="warning"
+      allow-html
+      @vue:mounted="({ component }) => confirmDialog = component.proxy"
+    />
   </div>
 </template>
 
 <script>
 import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
-import { escapeHtml } from '../escapeHtml'
+import { nameListHtml } from '../nameListHtml'
 import { fetchDistricts } from './fetchDistricts'
 
 export default {
@@ -93,7 +88,6 @@ export default {
   data () {
     return {
       currentValue: null,
-      isConfirmed: false,
       initValue: null,
       item: null,
       list: null,
@@ -103,23 +97,16 @@ export default {
 
   computed: {
     addonPayload () {
-      const attributes = {}
-
-      // A change that is not valid or not yet confirmed is not sent, the saved value stays as it is
-      attributes.meinBerlinOrganisationId = this.isChangeBlocked ? this.savedValue : this.effectiveValue
-
       return {
-        attributes,
+        attributes: { meinBerlinOrganisationId: this.effectiveValue },
+        // Core awaits it before saving the organisation, false cancels the save
+        beforeSave: this.confirmChange,
         id: this.item ? this.item.id : '',
         initValue: this.item ? this.initValue : '',
         resourceType: this.resourceType,
         value: this.currentValue,
         url: this.item ? 'api_resource_update' : 'api_resource_create'
       }
-    },
-
-    confirmLabel () {
-      return Translator.trans('mein.berlin.organisation.id.change.confirm')
     },
 
     /**
@@ -136,10 +123,6 @@ export default {
       return String(this.currentValue ?? this.savedValue)
     },
 
-    isChangeBlocked () {
-      return this.needsConfirmation && !this.isConfirmed
-    },
-
     /**
      * Choosing another ID releases procedures that were already communicated, so the user has to confirm.
      */
@@ -151,20 +134,32 @@ export default {
       return String(this.initValue ?? '')
     },
 
-    warningMessage () {
+    /**
+     * Same texts as the confirmation on the districts page. The message is rendered as HTML, so the names are escaped.
+     * Never without a header: DpModal decides once whether it has one.
+     */
+    confirmation () {
       const { count, names } = this.communicatedProcedures
-      const procedures = Translator.trans('mein.berlin.organisation.id.change.procedures', {
-        count,
-        names: names.map(escapeHtml).join(', ') + (count > names.length ? ', …' : '')
-      })
-
-      return [
-        Translator.trans('mein.berlin.organisation.id.change.warning'),
-        this.effectiveValue === ''
+      const isReset = this.effectiveValue === ''
+      const paragraphs = [
+        `<strong>${Translator.trans(isReset ? 'mein.berlin.organisation.id.reset.intro' : 'mein.berlin.organisation.id.change.intro')}</strong>`,
+        Translator.trans('mein.berlin.districts.change.warning', { count: 1 }),
+        isReset
           ? Translator.trans('mein.berlin.districts.change.reset.consequence', { count: 1 })
-          : Translator.trans('mein.berlin.organisation.id.change.consequence'),
-        procedures
-      ].join('<br><br>')
+          : Translator.trans('mein.berlin.organisation.id.change.consequence')
+      ]
+      const procedureList = nameListHtml(
+        Translator.trans('mein.berlin.organisation.id.change.procedures', { count, names: '' }).trim(),
+        names,
+        count
+      )
+
+      return {
+        checkboxText: Translator.trans('mein.berlin.districts.change.procedures.confirm'),
+        confirmButtonText: Translator.trans(isReset ? 'mein.berlin.districts.reset.button' : 'mein.berlin.districts.change.button'),
+        header: Translator.trans(isReset ? 'mein.berlin.districts.reset.confirm' : 'mein.berlin.districts.change.confirm'),
+        message: paragraphs.map(text => `<p class="mb-2">${text}</p>`).join('') + procedureList
+      }
     },
 
     label () {
@@ -205,13 +200,6 @@ export default {
 
     tooltip () {
       return Translator.trans('mein.berlin.organisation.id.tooltip')
-    }
-  },
-
-  watch: {
-    isChangeBlocked () {
-      // The payload depends on the confirmation, so the parent is informed when it changes
-      this.emitSelected()
     }
   },
 
@@ -295,15 +283,54 @@ export default {
 
     onChange (value) {
       this.currentValue = String(value ?? '').trim()
-      // A new value has to be confirmed again
-      this.isConfirmed = false
       this.emitSelected()
       this.syncNativeSelect()
+    },
+
+    /**
+     * The saved ID and the communicated procedures may have changed since the page was loaded, e.g. by an earlier save,
+     * so they are read again before asking.
+     *
+     * @return {Promise<boolean>} whether the organisation may be saved
+     */
+    async confirmChange () {
+      await this.refreshItem()
+
+      return this.needsConfirmation ? this.confirmDialog.open() : true
+    },
+
+    refreshItem () {
+      if (!this.item) {
+        return Promise.resolve()
+      }
+
+      const url = Routing.generate('api_resource_get', {
+        fields: {
+          [this.resourceType]: ['communicatedProcedures', 'meinBerlinOrganisationId'].join()
+        },
+        resourceId: this.item.id,
+        resourceType: this.resourceType
+      })
+
+      return this.demosplanUi.dpApi.get(url)
+        .then(response => {
+          const { attributes } = response.data.data
+
+          this.item = { ...this.item, attributes: { ...this.item.attributes, ...attributes } }
+          this.initValue = attributes.meinBerlinOrganisationId ?? null
+        })
+        // The confirmation is then based on the data from page load
+        .catch(err => console.error('[MeinBerlin] Failed to refresh the organisation:', err))
     },
 
     emitSelected () {
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
     }
+  },
+
+  created () {
+    // Not reactive and not a $ref: refs of the addon's own Vue copy are not resolved by core's Vue
+    this.confirmDialog = null
   },
 
   mounted() {

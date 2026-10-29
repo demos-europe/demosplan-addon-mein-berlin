@@ -141,6 +141,7 @@
 
 <script>
 import { escapeHtml } from '../escapeHtml'
+import { nameListHtml } from '../nameListHtml'
 
 export default {
   name: 'MeinBerlinDistrictsAdmin',
@@ -263,8 +264,8 @@ export default {
       if (isReset) {
         const { count: organisationCount, names } = row.assignedOrganisations
 
-        html.push(this.getNameList(
-          Translator.trans('mein.berlin.districts.reset.organisations.list', { count: organisationCount }),
+        html.push(nameListHtml(
+          Translator.trans('mein.berlin.districts.organisations.list', { count: organisationCount }),
           names,
           organisationCount
         ))
@@ -273,7 +274,7 @@ export default {
       if (hasProcedures) {
         const { count: procedureCount, names } = row.communicatedProcedures
 
-        html.push(this.getNameList(
+        html.push(nameListHtml(
           Translator.trans('mein.berlin.organisation.id.change.procedures', { count: procedureCount, names: '' }).trim(),
           names,
           procedureCount
@@ -281,16 +282,6 @@ export default {
       }
 
       return html.join('')
-    },
-
-    /**
-     * A bold heading and a list of at most the delivered names, "…" stands for the rest.
-     */
-    getNameList (heading, names, count) {
-      const items = [...names.map(escapeHtml), ...(count > names.length ? ['…'] : [])]
-
-      return `<p class="mb-2"><strong>${heading}</strong></p>`
-        + `<ul class="list-disc pl-4 mb-2">${items.map(item => `<li>${item}</li>`).join('')}</ul>`
     },
 
     isChanged (row) {
