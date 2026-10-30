@@ -99,6 +99,26 @@ class MeinBerlinAddonOrgaRelationRepository extends FluentRepository
             ->getResult();
     }
 
+    /**
+     * The names of the organisations that use the given meinBerlin organisation id. The limit is applied after
+     * ordering, so it returns the alphabetically first names.
+     *
+     * @return list<string>
+     */
+    public function getOrganisationNamesOfOrganisationId(string $meinBerlinOrganisationId, ?int $limit = null): array
+    {
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('orga.name')
+            ->from(MeinBerlinAddonOrgaRelation::class, 'relation')
+            ->join('relation.orga', 'orga')
+            ->where('relation.meinBerlinOrganisationId = :meinBerlinOrganisationId')
+            ->setParameter('meinBerlinOrganisationId', $meinBerlinOrganisationId)
+            ->orderBy('orga.name', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
     public function countProceduresOfOrganisationIdWithExistingBplanId(string $meinBerlinOrganisationId): int
     {
         return (int) $this->createCommunicatedProceduresOfOrganisationIdQueryBuilder($meinBerlinOrganisationId)

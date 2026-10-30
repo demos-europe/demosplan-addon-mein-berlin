@@ -85,7 +85,8 @@ class MeinBerlinOrganisationIdChangeHandler
     }
 
     /**
-     * @return array{count: int, names: list<string>} the organisations that use the organisation id, names sorted
+     * @return array{count: int, names: list<string>} the organisations that use the organisation id, the
+     *                                                alphabetically first names
      */
     public function getAssignedOrganisationsInfo(string $meinBerlinOrganisationId): array
     {
@@ -95,11 +96,10 @@ class MeinBerlinOrganisationIdChangeHandler
             return ['count' => 0, 'names' => []];
         }
 
-        $names = array_map(
-            static fn (MeinBerlinAddonOrgaRelation $orgaRelation): string => (string) $orgaRelation->getOrga()?->getName(),
-            $this->orgaRelationRepository->findBy($criteria, null, self::NAMES_LIMIT)
+        $names = $this->orgaRelationRepository->getOrganisationNamesOfOrganisationId(
+            $meinBerlinOrganisationId,
+            self::NAMES_LIMIT
         );
-        sort($names);
 
         return ['count' => $count, 'names' => $names];
     }

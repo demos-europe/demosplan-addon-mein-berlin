@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace DemosEurope\DemosplanAddon\DemosMeinBerlin\Tests;
 
-use DemosEurope\DemosplanAddon\Contracts\Entities\OrgaInterface;
 use DemosEurope\DemosplanAddon\Contracts\Entities\ProcedureInterface;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonEntity;
 use DemosEurope\DemosplanAddon\DemosMeinBerlin\Entity\MeinBerlinAddonOrgaRelation;
@@ -162,7 +161,7 @@ class MeinBerlinOrganisationIdChangeHandlerTest extends TestCase
 
     public function testChangeOrganisationIdOfOrganisationsChangesNothingWhenIdStaysTheSame(): void
     {
-        $this->repository->expects(self::never())->method('findBy');
+        $this->repository->expects(self::never())->method('getOrganisationNamesOfOrganisationId');
 
         $result = $this->sut->changeOrganisationIdOfOrganisations('25', '25');
 
@@ -192,17 +191,17 @@ class MeinBerlinOrganisationIdChangeHandlerTest extends TestCase
     public function testAssignedOrganisationsInfoSkipsNamesQueryWithoutOrganisations(): void
     {
         $this->repository->method('count')->with(['meinBerlinOrganisationId' => '25'])->willReturn(0);
-        $this->repository->expects(self::never())->method('findBy');
+        $this->repository->expects(self::never())->method('getOrganisationNamesOfOrganisationId');
 
         self::assertSame(['count' => 0, 'names' => []], $this->sut->getAssignedOrganisationsInfo('25'));
     }
 
-    public function testAssignedOrganisationsInfoReturnsCountAndLimitedSortedNames(): void
+    public function testAssignedOrganisationsInfoReturnsCountAndLimitedNames(): void
     {
         $this->repository->method('count')->with(['meinBerlinOrganisationId' => '25'])->willReturn(12);
-        $this->repository->expects(self::once())->method('findBy')
-            ->with(['meinBerlinOrganisationId' => '25'], null, 10)
-            ->willReturn([$this->createRelationOfOrga('25', 'Stadt Quickborn'), $this->createRelationOfOrga('25', 'Amt Nordwest')]);
+        $this->repository->expects(self::once())->method('getOrganisationNamesOfOrganisationId')
+            ->with('25', 10)
+            ->willReturn(['Amt Nordwest', 'Stadt Quickborn']);
 
         $info = $this->sut->getAssignedOrganisationsInfo('25');
 
@@ -213,16 +212,6 @@ class MeinBerlinOrganisationIdChangeHandlerTest extends TestCase
     {
         $relation = new MeinBerlinAddonOrgaRelation();
         $relation->setMeinBerlinOrganisationId($organisationId);
-
-        return $relation;
-    }
-
-    private function createRelationOfOrga(string $organisationId, string $orgaName): MeinBerlinAddonOrgaRelation
-    {
-        $orga = $this->createMock(OrgaInterface::class);
-        $orga->method('getName')->willReturn($orgaName);
-        $relation = $this->createRelation($organisationId);
-        $relation->setOrga($orga);
 
         return $relation;
     }
