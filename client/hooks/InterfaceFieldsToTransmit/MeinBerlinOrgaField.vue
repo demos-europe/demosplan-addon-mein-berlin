@@ -1,20 +1,38 @@
 <template>
-  <component
-    :is="demosplanUi.DpSelect"
-    id="interfaceFieldsToTransmit-orgSelect"
-    v-model="currentValue"
-    :data-cy="`${resourceType}:field`"
-    :label="{
-      text: label,
-      tooltip
-    }"
-    :options="options"
-    @select="onChange"
-  />
+  <div>
+    <component
+      :is="demosplanUi.DpSelect"
+      id="interfaceFieldsToTransmit-orgSelect"
+      v-model="currentValue"
+      :data-cy="`${resourceType}:field`"
+      :label="{
+        text: label,
+        tooltip
+      }"
+      :options="options"
+      :show-placeholder="!isValueRemovable"
+      @select="onChange"
+    />
+
+    <component
+      :is="demosplanUi.DpConfirmDialog"
+      :checkbox-text="confirmation.checkboxText"
+      :confirm-button-text="confirmation.confirmButtonText"
+      :decline-button-text="Translator.trans('back.to.edit')"
+      :header="confirmation.header"
+      :message="confirmation.message"
+      data-cy="MeinBerlinAddonOrganisation:confirm"
+      icon="warning"
+      allow-html
+      @vue:mounted="({ component }) => confirmDialog = component.proxy"
+    />
+  </div>
 </template>
 
 <script>
-import { fetchMeinBerlinOrganisationId } from './fetchMeinBerlinOrganisationId'
+import { nameListHtml } from '../nameListHtml'
+import { fetchDistricts } from '../fetchDistricts'
+import { shareRequest } from '../shareRequest'
 
 export default {
   name: 'MeinBerlinOrgaField',
@@ -31,6 +49,15 @@ export default {
     demosplanUi: {
       type: Object,
       required: true
+    },
+
+    /**
+     * Offers an empty entry, so the ID of the organisation can be removed
+     */
+    isValueRemovable: {
+      type: Boolean,
+      required: false,
+      default: false
     },
 
     relationshipId: {
@@ -64,41 +91,16 @@ export default {
       initValue: null,
       item: null,
       list: null,
-
-      // Organization / Authority ID on mein.berlin.de
-      options: [
-        { label: Translator.trans('mein.berlin.district.office.administration'), value: '14' },
-        { label: Translator.trans('mein.berlin.district.office.charlottenburg_wilmersdorf'), value: '27' },
-        { label: Translator.trans('mein.berlin.district.office.friedrichshain_kreuzberg'), value: '28' },
-        { label: Translator.trans('mein.berlin.district.office.lichtenberg'), value: '29' },
-        { label: Translator.trans('mein.berlin.district.office.marzahn_hellersdorf'), value: '25' },
-        { label: Translator.trans('mein.berlin.district.office.mitte'), value: '16' },
-        { label: Translator.trans('mein.berlin.district.office.neukoelln'), value: '30' },
-        { label: Translator.trans('mein.berlin.district.office.pankow'), value: '20' },
-        { label: Translator.trans('mein.berlin.district.office.reinickendorf'), value: '31' },
-        { label: Translator.trans('mein.berlin.district.office.spandau'), value: '26' },
-        { label: Translator.trans('mein.berlin.district.office.steglitz_zehlendorf'), value: '32' },
-        { label: Translator.trans('mein.berlin.district.office.tempelhof_schoeneberg'), value: '24' },
-        { label: Translator.trans('mein.berlin.district.office.treptow_koepenick'), value: '15' }
-      ]
+      districts: []
     }
   },
 
   computed: {
     addonPayload () {
-      const attributes = {}
-
-      // Only send a value if it's actually set
-      if (this.currentValue !== null && this.currentValue !== '') {
-        attributes.meinBerlinOrganisationId = this.currentValue.toString()
-      } else if (this.initValue !== null && this.initValue !== '') {
-        attributes.meinBerlinOrganisationId = this.initValue.toString()
-      } else {
-        attributes.meinBerlinOrganisationId = ''
-      }
-
       return {
-        attributes,
+        attributes: { meinBerlinOrganisationId: this.effectiveValue },
+        // Core awaits it before saving the organisation, false cancels the save
+        beforeSave: this.confirmChange,
         id: this.item ? this.item.id : '',
         initValue: this.item ? this.initValue : '',
         resourceType: this.resourceType,
@@ -107,8 +109,89 @@ export default {
       }
     },
 
+    /**
+     * The already communicated procedures of the organization, only known after refreshItem.
+     */
+    communicatedProcedures () {
+      return this.item?.attributes?.communicatedProcedures ?? { count: 0, names: [] }
+    },
+
+    /**
+     * The value that is currently chosen. The IDs themselves are changed on the page of the districts.
+     */
+    effectiveValue () {
+      return String(this.currentValue ?? this.savedValue)
+    },
+
+    /**
+     * Choosing another ID releases procedures that were already communicated, so the user has to confirm.
+     */
+    needsConfirmation () {
+      return this.communicatedProcedures.count > 0 && this.effectiveValue !== this.savedValue
+    },
+
+    savedValue () {
+      return String(this.initValue ?? '')
+    },
+
+    /**
+     * Same texts as the confirmation on the districts page. The message is rendered as HTML, so the names are escaped.
+     * Never without a header: DpModal decides once whether it has one.
+     */
+    confirmation () {
+      const { count, names } = this.communicatedProcedures
+      const isReset = this.effectiveValue === ''
+      const paragraphs = [
+        `<strong>${Translator.trans(isReset ? 'mein.berlin.organisation.id.reset.intro' : 'mein.berlin.organisation.id.change.intro')}</strong>`,
+        Translator.trans('mein.berlin.districts.change.warning', { count: 1 }),
+        isReset
+          ? Translator.trans('mein.berlin.districts.change.reset.consequence', { count: 1 })
+          : Translator.trans('mein.berlin.organisation.id.change.consequence')
+      ]
+      const procedureList = nameListHtml(
+        Translator.trans('mein.berlin.organisation.id.change.procedures', { count }),
+        names,
+        count
+      )
+
+      return {
+        checkboxText: Translator.trans('mein.berlin.districts.change.procedures.confirm'),
+        confirmButtonText: Translator.trans(isReset ? 'mein.berlin.districts.reset.button' : 'mein.berlin.districts.change.button'),
+        header: Translator.trans(isReset ? 'mein.berlin.districts.reset.confirm' : 'mein.berlin.districts.change.confirm'),
+        message: paragraphs.map(text => `<p class="mb-2">${text}</p>`).join('') + procedureList
+      }
+    },
+
     label () {
       return Translator.trans('mein.berlin.organisation.id')
+    },
+
+    /**
+     * One option per district that has a mein.berlin.de organisation ID, labelled with the ID in front and the name
+     * of the office, e.g. "29 – Bezirksamt Lichtenberg". The IDs are maintained in the district catalog.
+     */
+    options () {
+      const options = this.districts
+        .filter(({ meinBerlinOrganisationId }) => meinBerlinOrganisationId)
+        .map(({ meinBerlinOrganisationId, name, officeName }) => ({
+          displayName: officeName || name,
+          id: meinBerlinOrganisationId
+        }))
+        // Sorted by the displayed name, the office name differs from the district name (e.g. the Senatsverwaltung)
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'))
+        .map(({ displayName, id }) => ({ label: `${id} – ${displayName}`, value: id }))
+
+      // An ID saved for the organisation stays selectable even if no district has it (anymore)
+      const savedId = this.initValue
+      if (savedId && !options.some(option => option.value === savedId)) {
+        options.push({ label: savedId, value: savedId })
+      }
+
+      if (this.isValueRemovable) {
+        options.unshift({ label: Translator.trans('mein.berlin.districts.id.empty'), value: '' })
+      }
+
+      return options
     },
 
     resourceType () {
@@ -121,14 +204,14 @@ export default {
   },
 
   methods: {
-    async autoSelectOrga () {
+    autoSelectOrga () {
       let meinBerlinOrgId = this.userMeinBerlinOrgId
 
+      // The list holds the relations of all organizations, so it is not requested again
       if (!meinBerlinOrgId && this.userOrgaId) {
-        meinBerlinOrgId = await fetchMeinBerlinOrganisationId(
-          this.demosplanUi,
-          this.userOrgaId
-        )
+        meinBerlinOrgId = Object.values(this.list || []).find(
+          el => el.relationships?.[this.relationshipKey]?.data?.id === this.userOrgaId
+        )?.attributes?.meinBerlinOrganisationId || null
       }
 
       if (!meinBerlinOrgId) {
@@ -143,9 +226,16 @@ export default {
     },
 
     fetchResourceList () {
-      const url = Routing.generate('api_resource_list', { resourceType: this.resourceType })
+      // communicatedProcedures takes queries for each relation, so it is only read for the saved organization (refreshItem)
+      const url = Routing.generate('api_resource_list', {
+        resourceType: this.resourceType,
+        fields: {
+          [this.resourceType]: ['meinBerlinOrganisationId', this.relationshipKey].join()
+        },
+        include: this.relationshipKey
+      })
 
-      return this.demosplanUi.dpApi.get(url, { include: [this.relationshipKey].join() })
+      return shareRequest(url, () => this.demosplanUi.dpApi.get(url))
         .then(response => {
           this.list = response.data.data.map(item => {
             const { attributes, id, relationships } = item
@@ -184,20 +274,76 @@ export default {
       this.$nextTick(() => {
         const select = this.$el.querySelector('select')
 
-        if (select && this.currentValue !== null && this.currentValue !== '') {
-          select.value = this.currentValue
+        if (select) {
+          // Reset to the empty (placeholder) state if no value is chosen
+          select.value = (this.currentValue !== null && this.currentValue !== '') ? this.currentValue : ''
         }
       })
     },
 
     onChange (value) {
-      this.currentValue = value
-      this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
+      this.currentValue = String(value ?? '').trim()
+      this.emitSelected()
       this.syncNativeSelect()
+    },
+
+    /**
+     * The saved ID and the communicated procedures are read right before asking, they are not part of the list and may
+     * have changed, e.g. by an earlier save. Without them the warning can't be shown, so the save is canceled.
+     *
+     * @return {Promise<boolean>} whether the organization may be saved
+     */
+    async confirmChange () {
+      try {
+        await this.refreshItem()
+      } catch (error) {
+        console.error('[MeinBerlin] Failed to refresh the organisation:', error)
+        dplan.notify.notify('error', Translator.trans('error.api.generic'))
+
+        return false
+      }
+
+      // Core skips the addon request if the payload has neither a value nor a saved value, so it gets the reloaded saved value
+      this.emitSelected()
+
+      return this.needsConfirmation ? this.confirmDialog.open() : true
+    },
+
+    refreshItem () {
+      if (!this.item) {
+        return Promise.resolve()
+      }
+
+      const url = Routing.generate('api_resource_get', {
+        fields: {
+          [this.resourceType]: ['communicatedProcedures', 'meinBerlinOrganisationId'].join()
+        },
+        resourceId: this.item.id,
+        resourceType: this.resourceType
+      })
+
+      return this.demosplanUi.dpApi.get(url)
+        .then(response => {
+          const { attributes } = response.data.data
+
+          this.item = { ...this.item, attributes: { ...this.item.attributes, ...attributes } }
+          this.initValue = attributes.meinBerlinOrganisationId ?? null
+        })
+    },
+
+    emitSelected () {
+      this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
     }
   },
 
+  created () {
+    // Not reactive and not a $ref: refs of the addon's own Vue copy are not resolved by core's Vue
+    this.confirmDialog = null
+  },
+
   mounted() {
+    fetchDistricts(this.demosplanUi).then(districts => { this.districts = districts })
+
     const hasProvidedOptions = this.additionalFieldOptions.length > 0
     const hasNoCurrentValue =
       this.currentValue === null ||
