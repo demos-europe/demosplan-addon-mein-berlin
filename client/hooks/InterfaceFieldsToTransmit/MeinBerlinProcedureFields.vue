@@ -24,13 +24,16 @@
       @change="onCheckboxChange"
     />
 
+    <!-- Only rendered when the list and the districts are loaded, so the options never change under the selection -->
     <component
       :is="demosplanUi.DpSelect"
+      v-if="isReady"
       id="interfaceFieldsToTransmit-districtSelect"
-      v-model="currentValue"
+      :key="selectKey"
       :label="{ text: label, tooltip }"
       :options="districtOptions"
       :required="isInterfaceActivated"
+      :selected="selectedValue"
       @select="onChange"
     />
 
@@ -121,9 +124,13 @@ export default {
       hasBerlinOrgaId: false,
       initValue: null,
       isCheckingBerlinOrgaId: true,
+      isDistrictsLoaded: false,
       isInterfaceActivated: false,
+      isItemResolved: false,
       item: null,
       list: null,
+      // Changed to draw the select again, e.g. to take back a choice that was refused
+      selectKey: 0,
       districts: []
     }
   },
@@ -158,6 +165,14 @@ export default {
         .sort((a, b) => a.label.localeCompare(b.label, 'de'))
     },
 
+    /**
+     * The select is built once, when the data of the procedure and the districts are known. Its options would change
+     * when the districts arrive later, and the browser keeps the selected position, not the selected value.
+     */
+    isReady () {
+      return this.isDistrictsLoaded && this.isItemResolved
+    },
+
     isProcedureTransmitted () {
       const bplanId = this.item?.attributes?.bplanId
       return Boolean(bplanId)
@@ -165,6 +180,10 @@ export default {
 
     label () {
       return Translator.trans('mein.berlin.district.label')
+    },
+
+    selectedValue () {
+      return String(this.currentValue ?? '')
     },
 
     tooltip () {
@@ -262,9 +281,6 @@ export default {
         const storedValue = this.item.attributes.district
         this.currentValue = storedValue
         this.initValue = storedValue
-
-        // Make sure the underlying <select> reflects the restored value
-        this.syncNativeSelect()
       }
 
       // Load checkbox state
@@ -273,29 +289,18 @@ export default {
       }
     },
 
-    syncNativeSelect () {
-      this.$nextTick(() => {
-        const select = this.$el.querySelector('select')
-
-        if (select) {
-          // Set value if exists, otherwise reset to empty (placeholder)
-          select.value = (this.currentValue !== null && this.currentValue !== '') ? this.currentValue : ''
-        }
-      })
-    },
-
     onChange (value) {
       // Prevent selection if user doesn't have Berlin org ID
       if (!this.hasBerlinOrgaId) {
         dplan.notify.error(Translator.trans('mein.berlin.organisation.id.missing'))
         this.currentValue = null
-        this.$nextTick(() => this.syncNativeSelect())
+        // The choice is refused, so the select is drawn again without it
+        this.selectKey++
         return
       }
 
       this.currentValue = value
       this.$emit('addonEvent:emit', { name: 'selected', payload: this.addonPayload })
-      this.syncNativeSelect()
     },
 
     onCheckboxChange (value) {
@@ -306,12 +311,16 @@ export default {
 
   mounted () {
     // Only the preselection needs the districts, so they are loaded alongside the other requests
-    const districtsLoaded = fetchDistricts(this.demosplanUi).then(districts => { this.districts = districts })
+    const districtsLoaded = fetchDistricts(this.demosplanUi).then(districts => {
+      this.districts = districts
+      this.isDistrictsLoaded = true
+    })
 
     // Case: options are already provided → no need to fetch from backend
     if (this.additionalFieldOptions.length > 0) {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
+      this.isItemResolved = true
       this.checkBerlinOrgaId()
 
       if (!this.currentValue) {
@@ -333,6 +342,7 @@ export default {
       })
 
       this.getItemByRelationshipId()
+      this.isItemResolved = true
 
       if (!this.currentValue) {
         this.autoSelectDistrict()

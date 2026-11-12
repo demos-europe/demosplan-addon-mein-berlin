@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
+- Fix the organisation dropdown in "Organisation verwalten" and the district select in the basic settings of a procedure showing another district than the saved one after a reload: the selects are built only when their data and the districts are loaded, and the selected value is passed to the select directly; every organisation select has its own id (BEAA2-47)
 
 ## v0.36 (2026-11-03)
 - Add the table `addon_mein_berlin_district` with the mein.berlin.de organisation ID per Berlin district and a JSON:API resource `MeinBerlinAddonDistrict` for it (BEAA2-44)

@@ -1,15 +1,17 @@
 <template>
   <div>
+    <!-- Only rendered when the list and the districts are loaded, so the options never change under the selection -->
     <component
       :is="demosplanUi.DpSelect"
-      id="interfaceFieldsToTransmit-orgSelect"
-      v-model="currentValue"
+      v-if="isReady"
+      :id="selectId"
       :data-cy="`${resourceType}:field`"
       :label="{
         text: label,
         tooltip
       }"
       :options="options"
+      :selected="selectedValue"
       :show-placeholder="!isValueRemovable"
       @select="onChange"
     />
@@ -89,6 +91,8 @@ export default {
     return {
       currentValue: null,
       initValue: null,
+      isDistrictsLoaded: false,
+      isItemResolved: false,
       item: null,
       list: null,
       districts: []
@@ -162,6 +166,14 @@ export default {
       }
     },
 
+    /**
+     * The select is built once, when both the list of the organisations and the districts are known. Its options
+     * would change when the districts arrive later, and the browser keeps the selected position, not the selected value.
+     */
+    isReady () {
+      return this.isDistrictsLoaded && this.isItemResolved
+    },
+
     label () {
       return Translator.trans('mein.berlin.organisation.id')
     },
@@ -196,6 +208,17 @@ export default {
 
     resourceType () {
       return 'MeinBerlinAddonOrganisation'
+    },
+
+    /**
+     * Every organisation of the list has its own select, so the id has to be unique.
+     */
+    selectId () {
+      return `interfaceFieldsToTransmit-orgSelect-${this.relationshipId}`
+    },
+
+    selectedValue () {
+      return String(this.currentValue ?? '')
     },
 
     tooltip () {
@@ -264,27 +287,12 @@ export default {
         const storedValue = this.item.attributes.meinBerlinOrganisationId
         this.currentValue = storedValue
         this.initValue = storedValue
-
-        // Make sure the underlying <select> reflects the restored value
-        this.syncNativeSelect()
       }
-    },
-
-    syncNativeSelect () {
-      this.$nextTick(() => {
-        const select = this.$el.querySelector('select')
-
-        if (select) {
-          // Reset to the empty (placeholder) state if no value is chosen
-          select.value = (this.currentValue !== null && this.currentValue !== '') ? this.currentValue : ''
-        }
-      })
     },
 
     onChange (value) {
       this.currentValue = String(value ?? '').trim()
       this.emitSelected()
-      this.syncNativeSelect()
     },
 
     /**
@@ -342,7 +350,10 @@ export default {
   },
 
   mounted() {
-    fetchDistricts(this.demosplanUi).then(districts => { this.districts = districts })
+    fetchDistricts(this.demosplanUi).then(districts => {
+      this.districts = districts
+      this.isDistrictsLoaded = true
+    })
 
     const hasProvidedOptions = this.additionalFieldOptions.length > 0
     const hasNoCurrentValue =
@@ -353,6 +364,7 @@ export default {
     if (hasProvidedOptions) {
       this.list = this.additionalFieldOptions
       this.getItemByRelationshipId()
+      this.isItemResolved = true
 
       if (hasNoCurrentValue) {
         this.autoSelectOrga()
@@ -369,6 +381,7 @@ export default {
       })
 
       this.getItemByRelationshipId()
+      this.isItemResolved = true
 
       if (hasNoCurrentValue) {
         this.autoSelectOrga()
