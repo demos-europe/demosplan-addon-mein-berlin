@@ -5,7 +5,7 @@
   "repository": "git@github.com:demos-europe/demosplan-addon-mein-berlin",
   "license": "LicenseRef-LICENSE",
   "devDependencies": {
-    "@demos-europe/demosplan-addon-client-builder": "^0.0.13",
+    "@demos-europe/demosplan-addon-client-builder": "^0.0.14",
     "webpack": "5.107.2",
     "webpack-cli": "^5.1.4"
   },
